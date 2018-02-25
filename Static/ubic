@@ -2,7 +2,7 @@
 
 case "$1" in 
 start)
-   /usr/bin/ubic &
+   /usr/bin/ubicd &
    echo $!>/var/run/ubic.pid
    ;;
 stop)
