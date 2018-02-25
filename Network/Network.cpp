@@ -19,7 +19,7 @@ using namespace boost::asio;
  * Will return 10 random node ips collected from Github
  */
 std::vector<std::string> Network::getIpsFromGithub() {
-    return std::vector<std::string>();
+    //return std::vector<std::string>();
     std::vector<std::string> ipList;
     std::vector<std::string> ipList2;
     try {
