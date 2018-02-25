@@ -11,5 +11,5 @@ cp -R ./Static/genesis/votes.mdb /var/ubic/
 
 chmod 777 -R /var/ubic/
 
-cp ./ubic /usr/bin/
+cp ./ubicd /usr/bin/
 cp ./Static/init.d/ubic /etc/init.d/
