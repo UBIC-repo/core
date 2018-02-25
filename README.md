@@ -32,6 +32,8 @@ Install UBIC
 ```
 cd /usr/local/src
 git clone 
+cd core-master
+chmod 777 Static/install.sh
 cmake CMakeLists.txt
 make
 sudo make install
