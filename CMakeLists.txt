@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.3)
-project(ubic)
+project(ubicd)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -192,7 +192,6 @@ set(SOURCE_FILES
 
         endian.h
         Base64.cpp Base64.h)
-add_executable(ubic ${SOURCE_FILES})
+add_executable(ubicd ${SOURCE_FILES})
 
 install(CODE "execute_process(COMMAND Static/install.sh)")
-
