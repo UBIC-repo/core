@@ -1,0 +1,521 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="ubic"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/jan/ClionProjects/tx"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install/strip">
+				<Option working_dir="/home/jan/ClionProjects/tx"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 install/strip"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install/local">
+				<Option working_dir="/home/jan/ClionProjects/tx"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 install/local"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="ubic">
+				<Option output="/home/jan/ClionProjects/tx/ubic" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/jan/ClionProjects/tx"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/openssl"/>
+					<Add directory="/usr/include/PCSC"/>
+					<Add directory="/usr/include/leveldb"/>
+					<Add directory="/usr/include/c++/6"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/6"/>
+					<Add directory="/usr/include/c++/6/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 ubic"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="ubic/fast">
+				<Option output="/home/jan/ClionProjects/tx/ubic" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/jan/ClionProjects/tx"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/openssl"/>
+					<Add directory="/usr/include/PCSC"/>
+					<Add directory="/usr/include/leveldb"/>
+					<Add directory="/usr/include/c++/6"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/6"/>
+					<Add directory="/usr/include/c++/6/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 ubic/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="install">
+				<Option working_dir="/home/jan/ClionProjects/tx"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 install"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="list_install_components">
+				<Option working_dir="/home/jan/ClionProjects/tx"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 list_install_components"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/jan/ClionProjects/tx"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/jan/ClionProjects/tx"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/jan/ClionProjects/tx/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/jan/ClionProjects/tx/Address.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Address.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/AddressHelper.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/AddressStore.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/AddressStore.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/App.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Base58.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Base58.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Base64.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Base64.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Block.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Block.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/BlockCreator/Mint.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/BlockCreator/Mint.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/BlockHeader.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/BlockHeader.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/BlockStore.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/BlockStore.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/CertStore/Cert.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/CertStore/Cert.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/CertStore/CertStore.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/CertStore/CertStore.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Chain.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Chain.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/ChainParams.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Config.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Config.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Consensus/Delegate.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Consensus/Delegate.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Consensus/Vote.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Consensus/VoteStore.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Countries/Currency.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Crypto/CreateSignature.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Crypto/CreateSignature.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Crypto/ECCtools.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Crypto/ECCtools.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Crypto/Hash160.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Crypto/Hash160.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Crypto/Hash256.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Crypto/Hash256.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Crypto/PassportCrypto.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Crypto/PassportCrypto.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Crypto/Ripemd160.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Crypto/Ripemd160.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Crypto/Sha256.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Crypto/Sha256.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Crypto/VerifySignature.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Crypto/VerifySignature.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/DB/DB.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/DB/DB.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/DSCAttachedPassportCounter.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/DSCAttachedPassportCounter.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/FS/FS.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/FS/FS.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/JSON/Api.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/JSON/Api.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Loader.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Loader.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/MerkleTree.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/MerkleTree.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Network/BanList.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Network/BlockCache.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Network/Network.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Network/Network.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Network/NetworkCommands.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Network/NetworkMessage.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Network/NetworkMessageHandler.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Network/NetworkMessageHandler.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Network/Peers.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Network/Peers.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Network/Server.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/NtpEsk/NtpEsk.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/NtpEsk/NtpEsk.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/NtpEsk/NtpEskSignatureRequestObject.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/NtpEsk/NtpEskSignatureVerificationObject.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/NtpRsk/NtpRsk.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/NtpRsk/NtpRsk.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/NtpRsk/NtpRskSignatureRequestObject.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/NtpRsk/NtpRskSignatureVerificationObject.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/PassportReader/LDS/LDSParser.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/PassportReader/LDS/LDSParser.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/PassportReader/PKCS7/PKCS7Parser.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/PassportReader/PKCS7/PKCS7Parser.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/PassportReader/Reader/BacKeys.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/PassportReader/Reader/BacKeys.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/PassportReader/Reader/NFC.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/PassportReader/Reader/NFC.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/PassportReader/Reader/Reader.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/PassportReader/Reader/Reader.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/PassportReader/Reader/SessionKeys.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/PassportReader/Reader/SessionKeys.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/PathSum/PathSum.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/PathSum/PathSum.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/REST/ApiServer.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/REST/ApiServer.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Test/Test.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Test/Test.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Time.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Tools/Hexdump.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Tools/Hexdump.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Tools/Log.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Tools/Log.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Transaction/Transaction.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Transaction/Transaction.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Transaction/TransactionHelper.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Transaction/TransactionHelper.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Transaction/TxIn.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Transaction/TxIn.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Transaction/TxOut.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Transaction/TxOut.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/TxPool.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/TxPool.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/UAmount.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/UBICalculator.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/UBICalculator.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/UScript.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Wallet.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/Wallet.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/WebInterface/WebInterface.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/WebInterface/WebInterface.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/endian.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/main.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/prevector.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/serialize.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/streams.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/support/allocators/zeroafterfree.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/support/cleanse.h">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/support/clease.cpp">
+			<Option target="ubic"/>
+		</Unit>
+		<Unit filename="/home/jan/ClionProjects/tx/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>
