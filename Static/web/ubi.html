@@ -1,0 +1,1223 @@
+
+<!doctype html>
+<html lang="en">
+<style>
+.bg-blue {
+	background-color: #537285;
+}
+.bg-blue a {
+	color: #fefefe;
+}
+.hidden {
+	display: none;
+}
+.margin-top-70px {
+	margin-top: 70px;
+}
+.bg-dark {
+    background-color: #343a40!important;
+}
+.navbar {
+    padding:3px;
+    font-size: 15px;
+}
+.padding-left-20 {
+	padding-left:20px;
+}
+.modal-backdrop, .modal-backdrop.fade.in {
+	opacity: 0.7;
+	filter: alpha(opacity=70);
+	background: #fff;
+}
+.fade.in {
+opacity: .75;
+background-color: #000;
+}
+
+.panel-green {
+	color: #00cc00;
+}
+
+.panel-red {
+	color: #cc0000;
+}
+
+.panel-neutral {
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.font-size-22px {
+    font-size: 22px;
+}
+
+.toggled-up {
+	display: none;
+}
+
+.toggled-down {
+	display: block;
+}
+
+.tx-dropdown {
+	text-decoration:none !important;
+}
+
+</style>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>UBIC v0.1 Web Interface</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel='stylesheet' href='nprogress-master/nprogress.css'/>
+    <link rel='stylesheet' href='bootstrap-datepicker3.min.css'/>
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+  </head>
+
+  <body>
+
+    <nav class="bg-blue navbar navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#" onclick="return false;">UBIC</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+	  <li class="nav-item">
+            <a class="nav-link" id="home-link" href="#"><span class="glyphicon glyphicon-dashboard"></span> Overview</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="my-ubi-link" href="#"><span class="glyphicon glyphicon-equalizer"></span> My UBI</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="send-link" href="#"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Send</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="receive-link" href="#"><span class="glyphicon glyphicon-import" aria-hidden="true"></span> Receive</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="transactions-link" href="#"><span class="glyphicon glyphicon-transfer" aria-hidden="true"></span> Transactions</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="#"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Advanced <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+          <li class="nav-item">
+            <a class="nav-link" id="peers-link" href="#">Peers</a>
+          </li>
+<!--
+          <li class="nav-item">
+            <a class="nav-link" id="bans-link" href="#">Bans</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="certificates-link" href="#">Certificates</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="status-link" href="#">Status</a>
+          </li>
+-->
+          <li class="txpool-item">
+            <a class="nav-link" id="txpool-link" href="#">Tx pool</a>
+          </li>
+          <li class="generate-block-item">
+            <a class="nav-link" id="generate-block-link" href="#">Minting</a>
+          </li>
+          <li class="delegates-item">
+            <a class="nav-link" id="delegates-link" href="#">Delegates</a>
+          </li>
+</ul>
+</li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <main role="main" class="container margin-top-70px">
+
+<div id="alert-tab">
+</div>
+
+<div id="home" class="tab">
+      <div class="home-balance col-sm-4">
+        <h2>Balance</h2>
+        <p class="lead"></p>
+      </div>
+
+      <div class="col-sm-4">
+        <h2>Status</h2>
+        <p class="lead">
+		<div id="best-block-hash">Best&nbsp;block:<span></span></div>
+		<div id="blockchain-height">Blockchain height:<span></span></div>
+		<div id="blockchain-synced">Synced:<span></span></div>
+	</p>
+      </div>
+</div>
+
+<div id="my-ubi" class="tab hidden">
+	<div>
+		<button data-toggle="modal" class="btn btn-default" data-target="#registerPassportModal" type="button">Register Passport</button>
+	</div>
+	<div id="ubi-existing-identities">
+
+	</div>
+</div>
+
+<div id="send" class="tab hidden">
+	<form>
+		<div>
+			<label for="address">Address:</label>
+			<input id="address" type="text" class="form-control">
+		</div>
+
+		<div>
+			<div class="row">
+				<div class="col-lg-2"><label for="amount">Amount:</label></div>
+			</div>
+			<div class="row">
+			  <div class="col-lg-4">
+			    <div class="input-group">
+			      <span class="input-group-addon">
+				<select id="currency"><option value="" disabled selected>Currency</option>
+					<option value="1">UCH</option>
+					<option value="2">UDE</option>
+					<option value="3">UAT</option>
+					<option value="4">UUK</option>
+					<option value="5">UIE</option>
+					<option value="6">UUS</option>
+					<option value="7">UAU</option>
+					<option value="8">UCN</option>
+					<option value="9">USE</option>
+					<option value="10">UFR</option>
+					<option value="11">UCA</option>
+					<option value="12">UJP</option>
+					<option value="13">UTH</option>
+					<option value="14">UNZ</option>
+					<option value="15">UAE</option>
+					<option value="16">UFI</option>
+					<option value="17">ULU</option>
+					<option value="18">USG</option>
+					<option value="19">UHU</option>
+					<option value="20">UCZ</option>
+					<option value="21">UMY</option>
+					<option value="22">UUA</option>
+					<option value="23">UEE</option>
+					<option value="24">UMC</option>
+					<option value="25">ULI</option>
+
+				</select>
+			      </span>
+			      <input type="number" class="form-control" id="amount" aria-label="...">
+			    </div><!-- /input-group -->
+			  </div><!-- /.col-lg-6 -->
+<!--
+			  <div class="col-lg-4">
+				<input type="checkbox" checked=1 disabled=1 id="useSameForTxFee">
+				<label for="useSameForTxFee">Use same currency to pay TxFee</label>
+			  </div>
+-->
+			</div><!-- /.row -->
+		</div>
+
+		<div>
+			<button class="btn btn-default " type="button" id="pay-btn">Pay</button>
+		</div>
+	</form>
+</div>
+
+<div id="receive" class="tab hidden">
+	<div id="address-list">
+
+	</div>
+</div>
+
+<div id="transactions" class="tab hidden">
+	<div id="txlist">
+
+	</div>
+</div>
+
+<div id="peers" class="tab hidden">
+
+	<div>
+		<button data-toggle="modal" class="btn btn-default" data-target="#addPeerModal" type="button">Add peer</button>
+	</div>
+	<div id="peerlist">
+
+	</div>
+</div>
+
+<div id="status" class="tab hidden">
+</div>
+
+<div id="generate-block" class="tab hidden">
+		<div>
+			<button class="btn btn-default" type="button" id="start-minting-btn">Start minting</button>
+			<button class="btn btn-default" type="button" id="stop-minting-btn">Stop minting</button>
+		</div>
+
+		<div id="minting-status"> </div>
+</div>
+
+<div id="txpool" class="tab hidden">
+	<div id="txpool-txlist">
+
+	</div>
+</div>
+
+<div id="delegates" class="tab hidden">
+	<div>
+		<button data-toggle="modal" class="btn btn-default" data-target="#voteModal" type="button" id="vote-btn">Vote</button>
+		<button data-toggle="modal" class="btn btn-default" data-target="#unvoteModal" type="button" id="unvote-btn">Unvote</button>
+	</div>
+	<hr/>
+	<div id="delegate-list">
+
+	</div>
+</div>
+
+<div id="bans" class="tab hidden">
+	<div>
+		<button data-toggle="modal" class="btn btn-default" data-target="#banModal" type="button" id="vote-btn">Ban</button>
+	</div>
+	<hr/>
+	<div id="ban-list">
+
+	</div>
+</div>
+
+
+    </main>
+
+
+<!-- modals -->
+
+<div class="modal" id="voteModal">
+   <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <h4 class="modal-title">Vote for</h4>
+        </div>
+        <div class="modal-body">
+          	<label for="votePubKey">pubKey:</label>
+		<input id="votePubKey" placeholder="xxxxxxx" type="text" class="form-control">
+        </div>
+        <div class="modal-footer">
+          <a href="#" data-dismiss="modal" class="btn">Close</a>
+          <a href="#" class="btn btn-primary" id="vote-submit-btn">Vote</a>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal" id="unvoteModal">
+	<div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <h4 class="modal-title">Unvote</h4>
+        </div>
+        <div class="modal-body">
+          	<label for="unvotePubKey">pubKey:</label>
+		<input id="unvotePubKey" placeholder="xxxxxxx" type="text" class="form-control">
+        </div>
+        <div class="modal-footer">
+          <a href="#" data-dismiss="modal" class="btn">Close</a>
+          <a href="#" class="btn btn-primary" id="unvote-submit-btn">Unvote</a>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal" id="addPeerModal">
+	<div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <h4 class="modal-title">Add Peer</h4>
+        </div>
+        <div class="modal-body">
+          	<label for="address">IP:</label>
+		<input id="ip" placeholder="0.0.0.0" type="text" class="form-control">
+        </div>
+        <div class="modal-footer">
+          <a href="#" data-dismiss="modal" class="btn">Close</a>
+          <a href="#" class="btn btn-primary" id="add-peer-btn">Add Peer</a>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal" id="registerPassportModal">
+	<div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <h4 class="modal-title">Register Identity using the Passport's NFC chip</h4>
+        </div>
+	<div class="modal-body">
+		<form id="passportForm">
+			<div class="form-group">
+				<label for="passport-nbr">Passport Nbr:</label>
+				<input id="passport-nbr" data-error="Passport Nbr is 9 characters long and contains only numbers and upper case letters" class="form-control" type="text" pattern="^[0-9A-Z]{9}$" required>
+ 				<div class="help-block with-errors"></div>
+			</div>
+
+			<div class="form-group">
+				<label for="date-of-birth">Date of birth:</label>
+				<div class="input-group date">
+				  <input placeholder="01.01.1990" id="date-of-birth" type="text" class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label for="date-of-expiry">Date of expiry:</label>
+				<div class="input-group date">
+				  <input placeholder="01.01.2020" type="text" id="date-of-expiry" class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+				</div>
+			</div>
+		</form>
+	</div>
+        <div class="modal-footer">
+          <a href="#" data-dismiss="modal" class="btn">Close</a>
+          <a href="#" class="btn btn-primary" id="register-passport-btn">Register Passport</a>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal" id="missingApiKeyModal">
+	<div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Error</h4>
+        </div>
+        <div class="modal-body">
+          	Missing or Invalid Api key
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal" id="waitModal">
+	<div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Please wait</h4>
+        </div>
+        <div class="modal-body">
+          	Just some seconds left
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal" id="paymentConfirmationModal">
+	<div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Confirmation</h4>
+        </div>
+        <div class="modal-body">
+          	Are you sure to send this transaction with a fee of:<span class="txFee"></span>
+		<input type="hidden" id="base64TX">
+        </div>
+        <div class="modal-footer">
+          <a href="#" data-dismiss="modal" class="btn">Cancel</a>
+          <a href="#" class="btn btn-primary" id="pay-confirmation-btn">Confirm</a>
+        </div>
+      </div>
+    </div>
+</div>
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="jquery-3.2.1.js"></script>
+    <script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+    <script src="validator.js"></script>
+    <script src="bootstrap-datepicker.min.js"></script>
+    <script src="jquery.bootstrap-growl.min.js"></script>
+<script src='nprogress-master/nprogress.js'></script>
+<script>
+apiKey = window.location.hash.substr(1);
+incomingIds = [];
+protocol = "http://";
+host = "127.0.0.1:12303";
+subUnits = 100000;
+currencies = {
+	1 : "UCH",
+	2 : "UDE",
+	3 : "UAT",
+	4 : "UUK",
+	5 : "UIE",
+	6 : "UUS",
+	7 : "UAU",
+	8 : "UCN",
+	9 : "USE",
+	10 : "UFR",
+	11 : "UCA",
+	12 : "UJP",
+	13 : "UTH",
+	14 : "UNZ",
+	15 : "UAE",
+	16 : "UFI",
+	17 : "ULU",
+	18 : "USG",
+	19 : "UHU",
+	20 : "UCZ",
+	21 : "UMY",
+	22 : "UUA",
+	23 : "UEE",
+	24 : "UMC",
+	25 : "ULI"
+};
+
+scriptTypes = {
+	0 : "SCRIPT_EMPTY",
+	1 : "SCRIPT_LINK",
+	2 : "SCRIPT_PKH",
+	3 : "SCRIPT_ADD_CERTIFICATE",
+	4 : "SCRIPT_DEACTIVATE_CERTIFICATE",
+	5 : "SCRIPT_VOTE",
+	9 : "SCRIPT_REGISTER_PASSPORT"
+};
+
+networks = {
+	1 : "NET_MAIN",
+	2 : "NET_TEST"
+};
+
+wallet = {};
+
+function displayError(message) {
+	var html = '<div class="alert alert-danger alert-dismissable">'
+	html += '<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>';
+	html += message;
+	html += '</div>';
+
+	$("#alert-tab").append(html);
+}
+
+function displaySuccess(message) {
+	var html = '<div class="alert alert-success alert-dismissable">'
+	html += '<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>';
+	html += message;
+	html += '</div>';
+
+	$("#alert-tab").append(html);
+}
+
+function formatHex(hex) {
+	var newHex = "<pre style='white-space: pre-wrap;'>";
+	for(var i = 1; i <= hex.length; i++) {
+		newHex += hex.charAt(i - 1);
+		if(i%2 === 0) {
+			newHex += " ";
+		}
+
+		if(i%80 === 0) {
+			newHex += "<br/>";
+		}
+	}
+	newHex += "</pre>";
+	return newHex;
+}
+
+function uamountToHtml(uamount) {
+	var html = "";
+	for(var i in uamount) {
+		if(uamount[i] > 0) {
+			html += "<div>" + currencies[i] + " : " + uamount[i] / subUnits + "</div>";
+		}
+	}
+
+	return html;
+}
+
+function delegateToHtml(delegate, i) {
+	html = "<div class='panel panel-default'>";
+	html += "<div class='panel-heading'>";
+	html += "<h3 class='panel-title'>#" + i + " - " + delegate['pubKey'] + "</h3>";
+	html += "</div>";
+	html += "<div class='panel-body'>";
+	html += "<div>pubKey: " + delegate['pubKey'] + "</div>";
+	html += "<div>total votes: " + delegate['totalVote'] + "</div>";
+	html += "<div>unvotes: " + delegate['unVotes'] + "</div>";
+	html += "<div>lastVotedInBlock: " + delegate['lastVotedInBlock'] + "</div>";
+	html += "<div>isActive: " + delegate['isActive'] + "</div>";
+	html += "<div>isCurrent: " + delegate['isCurrent'] + "</div>";
+	html += "<div>isMe: " + delegate['isMe'] + "</div>";
+	html += "</div>";
+	html += "</div>";
+
+	return html;
+}
+
+function uamountAdd(uamount1, uamount2) {
+	var sum = JSON.parse(JSON.stringify(uamount2));
+	for(var i in uamount1) {
+		sum[i] = 1*sum[i] + 1*uamount1[i];
+	}
+
+	return sum;
+}
+
+function uamountSub(uamount1, uamount2) {
+	if(typeof uamount1 == "undefined" || uamount1.length == 0) {
+		uamount1 = {};
+	}
+
+	if(typeof uamount2 == "undefined" || uamount2.length == 0) {
+		uamount2 = {};
+	}
+
+	var sub = JSON.parse(JSON.stringify(uamount1));
+	for(var i in uamount2) {
+		if(typeof sub[i] == "undefined") {
+			sub[i] = -uamount2[i];
+		} else {
+			sub[i] -= uamount2[i];
+		}
+	}
+
+	return sub;
+}
+
+function panelTitle(transaction) {
+	var transactionType = 2;
+	if(transaction['txIn'].length == 1) {
+		transactionType = transaction['txIn'][0]['scriptType'];
+	}
+
+	if(transactionType == 5) return "VOTE";
+	if(transactionType == 9) return "REGISTER PASSPORT";
+	if(transactionType == 3) return "ADD CERTIFICATE";
+	if(transactionType == 4) return "DEACTIVATE CERTIFICATE";
+
+	// if payment ------------------------------------------------------------
+	var totalSub;
+	var totalPlus;
+	var txDiff;
+	for(var i in transaction['txIn']) {
+		if(transaction['txIn'][i]['isMine'] == "true") {
+			totalSub = uamountAdd(totalSub, transaction['txIn'][i]['amount']);
+		}
+	}
+
+	for(var i in transaction['txOut']) {
+		if(transaction['txOut'][i]['isMine'] == "true") {
+			totalPlus = uamountAdd(totalPlus, transaction['txOut'][i]['amount']);
+		}
+	}
+
+	console.log("total plus:");
+	console.log(totalPlus);
+	console.log("total sub:");
+	console.log(totalSub);
+
+	txDiff = uamountSub(totalPlus, totalSub);
+
+	var response = "";
+	var counter = 1;
+	for(var i in txDiff) {
+
+		if(txDiff[i] / subUnits == 0) {
+			response += "<span class='panel-neutral'> +" + txDiff[i] / subUnits;
+		}
+
+		if(txDiff[i] / subUnits > 0) {
+			response += "<span class='panel-green'> +" + txDiff[i] / subUnits;
+		}
+
+		if(txDiff[i] / subUnits < 0) {
+			response += "<span class='panel-red'>" + txDiff[i] / subUnits;
+		}
+
+		response += " " + currencies[i] + "</span>";
+		if(counter != Object.keys(txDiff).length) {
+			response += "; ";
+		}
+		counter++
+	}
+
+	return response;
+}
+
+function transactionToHtml(transaction) {
+	console.log(transaction);
+	html = "<div class='panel panel-default transaction'>";
+	html += "<a href='#' class='tx-dropdown'><div class='panel-heading'>";
+	html += "<h3 class='panel-title'> <span class='font-size-22px'>›</span> " + panelTitle(transaction) + "</h3>";
+	html += "</div></a>";
+	html += "<div class='panel-body toggled-up'>";
+	html += "<div>network: " + networks[transaction['network']] + "</div>";
+	html += "<div>txIns:";
+	for(var i in transaction['txIn']) {
+		html += "<div class='padding-left-20'>inAddress: " + transaction['txIn'][i]['inAddress'] + "</div>";
+		html += "<div class='padding-left-20'>scriptType: " + scriptTypes[transaction['txIn'][i]['scriptType']] + "</div>";
+		html += "<div class='padding-left-20'>script: " + formatHex(transaction['txIn'][i]['script']) + "</div>";
+		html += "<div class='padding-left-20'>nonce: " + transaction['txIn'][i]['nonce'] + "</div>";
+		html += "<div class='padding-left-20'>Amount: " + uamountToHtml(transaction['txIn'][i]['amount']) + "</div>";
+		html += "<div class='padding-left-20'><hr/></div>";
+	}
+	html += "</div>";
+
+	html += "<div>txOuts:";
+	for(var i in transaction['txOut']) {
+		html += "<div class='padding-left-20'>scriptType: " + scriptTypes[transaction['txOut'][i]['scriptType']] + "</div>";
+		html += "<div class='padding-left-20'>script: " + formatHex(transaction['txOut'][i]['script']) + "</div>";
+		html += "<div class='padding-left-20'>Amount: " + uamountToHtml(transaction['txOut'][i]['amount']) + "</div>";
+		html += "<div class='padding-left-20'><hr/></div>";
+	}
+	html += "</div>";
+	html += "</div>";
+	html += "</div>";
+	return html;
+}
+
+function updatePeers() {
+	$.ajax( {url:protocol + host + "/peers", headers: { 'apiKey': apiKey } })
+	  .done(function( data ) {
+		if(typeof data['peers'] != "undefined") {
+			var html = "";
+			var html = "<div class='panel panel-default'><div class='panel-heading'>Peers</div>";
+			html += "<table class='table'>";
+			html += "<thead><tr><th>#</th><th>IP</th><th>Block height</th><th>delete</th></tr></thead>";
+			html += "<tbody>";
+			for(var i in data['peers']) {
+				html += "<tr>";
+				html += "<th scope='row'>" + (i*1 + 1) + " </th>";
+				html += "<td>" + data['peers'][i]["ip"]  + "</td>";
+				html += "<td>" + data['peers'][i]["blockHeight"]  + "</td>";
+				html += "<td><a href='#' class='trash-peer' data-ip='" + data['peers'][i]["ip"] + "'><span class='glyphicon glyphicon-trash' aria-hidden='true'></span></a></td>";
+				html += "</tr>";
+			}
+			html += "</tbody>";
+			html += "</table>";
+			html += "</div>";
+			$("#peerlist").html(html);
+		}
+	  })
+	  .fail(function() {
+	  	console.log( "error: cannot get txpool" );
+	  });
+}
+
+function updateBans() {
+	$.ajax( {url:protocol + host + "/bans", headers: { 'apiKey': apiKey } })
+	  .done(function( data ) {
+		if(typeof data['bans'] != "undefined") {
+			var html = "";
+			var html = "<div class='panel panel-default'><div class='panel-heading'>Peers</div>";
+			html += "<table class='table'>";
+			html += "<thead><tr><th>#</th><th>IP</th><th>Score</th><th>Unban</th></tr></thead>";
+			html += "<tbody>";
+			for(var i in data['bans']) {
+				html += "<tr>";
+				html += "<th scope='row'>" + (i*1 + 1) + " </th>";
+				html += "<td>" + data['bans'][i]["ip"]  + "</td>";
+				html += "<td>" + data['bans'][i]["score"]  + "</td>";
+				html += "<td><a href='#' class='unban-peer' data-ip='" + data['bans'][i]["ip"] + "'><span class='glyphicon glyphicon-remove' aria-hidden='true'></span></a></td>";
+				html += "</tr>";
+			}
+			html += "</tbody>";
+			html += "</table>";
+			html += "</div>";
+			$("#peerlist").html(html);
+		}
+	  })
+	  .fail(function() {
+	  	console.log( "error: cannot get txpool" );
+	  });
+}
+
+
+function updateDelegates() {
+	$.ajax( {url:protocol + host + "/delegates", headers: { 'apiKey': apiKey } })
+	  .done(function( data ) {
+		if(typeof data['delegates'] != "undefined") {
+			var html = "";
+
+			for(var i in data['delegates']) {
+				html += delegateToHtml(data['delegates'][i], 1*i+1);
+			}
+			$("#delegate-list").html(html);
+		}
+	  })
+	  .fail(function() {
+	  	console.log( "error: cannot get delegates" );
+	  });
+}
+
+function updateMyUbi() {
+	$.ajax( {url:protocol + host + "/ubi", headers: { 'apiKey': apiKey } })
+	  .done(function( data ) {
+		$("#ubi-existing-identities").html('');
+		if(typeof data['ubis'] != "undefined") {
+			for(var i in data['ubis']) {
+				//console.log(i);
+				//console.log(data['ubis']);
+				var html = "";
+				html += "<div class='my-ubi-passport-info'>";
+				html += "<div>started at block height:" + data['ubis'][i]['startedAtBlockHeight'] + "</div>";
+				html += "<div>DSC Certificate ID: " + data['ubis'][i]['dscCertificateId'] + "</div>";
+				html += "<div>Issuer: <span id='myubi-issuer-" + i + "'>...</span>";
+				html += "<div>Expiration date: <span id='myubi-expiration-date-" + i + "'>loading</span>";
+				html += "<div>Total Amount received: " + uamountToHtml(data['ubis'][i]['totalUbiReceived']) + "</div>";
+				html += "</div>";
+				html += "<hr/>";
+				$("#ubi-existing-identities").append(html);
+				(function(i){
+						$.ajax( {url:protocol + host + "/certificates/dsc/" + data['ubis'][i]['dscCertificateId'], headers: { 'apiKey': apiKey } }).done(function( data ) {
+						console.log(i);
+						console.log(data);
+						if(data['issuer'] != undefined) {
+							$("#myubi-issuer-" + i).html(data['issuer']);
+						}
+
+						if(data['expirationDate'] != undefined) {
+							var expirationDate = new Date(data['expirationDate'] * 1000);
+							$("#myubi-expiration-date-" + i).html(expirationDate.toString());
+						}
+					});
+				})(i);
+			}
+			
+		}
+	  })
+	  .fail(function() {
+	  	console.log( "error: cannot get my UBI" );
+	  });
+}
+
+function updateTxPool() {
+	$.ajax( {url:protocol + host + "/txpool", headers: { 'apiKey': apiKey } })
+	  .done(function( data ) {
+		if(typeof data['transactions'] != "undefined") {
+			var html = "";
+			for(var i in data['transactions']) {
+				html += transactionToHtml(data['transactions'][i]);
+			}
+			$("#txpool-txlist").html(html);
+			if(html.length === 0) {
+				$("#txpool-txlist").html("Transaction pool is empty");
+			}
+		}
+	  })
+	  .fail(function() {
+	  	console.log( "error: cannot get txpool" );
+	  });
+}
+
+function updateTransactions() {
+	$.ajax( {url:protocol + host + "/wallet/transactions", headers: { 'apiKey': apiKey } })
+	  .done(function( data ) {
+		if(typeof data['transactions'] != "undefined") {
+			var html = "";
+			console.log(data);
+			for(var i in data['transactions']) {
+				html += transactionToHtml(data['transactions'][i]);
+			}
+			$("#txlist").html(html);
+			if(html.length === 0) {
+				$("#txlist").html("No transactions");
+			}
+		}
+	  })
+	  .fail(function() {
+	  	console.log( "error: cannot get txpool" );
+	  });
+}
+
+function updateStatus() {
+	$.ajax( {url:protocol + host, headers: { 'apiKey': apiKey } } )
+	  .done(function( data ) {
+		if(typeof data['bestBlock'] != "undefined" && typeof data['bestBlock']['hash'] != "undefined" && typeof data['bestBlock']['height'] != "undefined") {
+			$("#best-block-hash span").html(data['bestBlock']['hash']);
+			$("#blockchain-height span").html(data['bestBlock']['height']);
+			$("#blockchain-synced span").html(data['synced']);
+		}
+	  })
+	  .fail(function() {
+	  	console.log( "error: cannot get Status" );
+	  });
+}
+
+function updateMinting() {
+	NProgress.start();
+	$.ajax( {url:protocol + host + "/mint/status", headers: { 'apiKey': apiKey } } )
+	  .done(function( data ) {
+		if(typeof data['minting'] != "undefined") {
+			if(data['minting']) {
+				$('#stop-minting-btn').show();
+				$('#start-minting-btn').hide();
+				$("#minting-status").html("You are Minting");
+			} else {
+				$('#stop-minting-btn').hide();
+				$('#start-minting-btn').show();
+				$("#minting-status").html("You are not Minting");
+			}
+		}
+		NProgress.done();
+	  })
+	  .fail(function() {
+	  	console.log( "error: cannot get Status" );
+		NProgress.done();
+	  });
+}
+
+function updateWallet() {
+	$.ajax({ url:protocol + host + "/wallet", headers: { 'apiKey': apiKey } } )
+	  .done(function( data ) {
+		wallet = data; // update wallet
+		if(typeof data['total'] != "undefined") {
+			$(".home-balance .lead").html("");
+
+					$(".home-balance .lead").append("<pre> " + uamountToHtml(data['total']) + "</pre>");
+
+
+		}
+
+		if(typeof data['addresses'] != "undefined") {
+			var html = "<div class='panel panel-default'><div class='panel-heading'>Wallet addresses</div>";
+			html += "<table class='table'>";
+			html += "<thead><tr><th>#</th><th>Address</th><th>Balance</th></tr></thead>";
+			html += "<tbody>";
+			for(var i in data['addresses']) {
+				html += "<tr>";
+				html += "<th scope='row'>" + (i*1 + 1) + " </th>";
+				html += "<td>" + data['addresses'][i]["readable"]  + "</td>";
+				html += "<td>" + uamountToHtml(data['addresses'][i]["amount"])  + "</td>";
+				html += "</tr>";
+			}
+			html += "</tbody>";
+			html += "</table>";
+			html += "</div>";
+
+			$("#address-list").html(html);
+		}
+
+	  })
+	  .fail(function() {
+	  	console.log( "error: cannot get Wallet" );
+	  });
+}
+
+function toggle(to) {
+	$('.tab').addClass('hidden');
+	$('#' + to).removeClass('hidden');
+}
+
+$('#home-link').bind('click', function() { updateStatus(); toggle('home'); return false; });
+$('#my-ubi-link').bind('click', function() { updateMyUbi(); toggle('my-ubi'); return false; });
+$('#send-link').bind('click', function() { toggle('send'); return false; });
+$('#receive-link').bind('click', function() { updateWallet(); toggle('receive'); return false; });
+$('#transactions-link').bind('click', function() { updateTransactions(); toggle('transactions'); return false; });
+$('#peers-link').bind('click', function() { updatePeers(); toggle('peers'); return false; });
+$('#bans-link').bind('click', function() { updateBans(); toggle('bans'); return false; });
+$('#certificates-link').bind('click', function() { toggle('certificates'); return false; });
+$('#status-link').bind('click', function() { toggle('status'); return false; });
+$('#generate-block-link').bind('click', function() { updateMinting(); toggle('generate-block'); return false; });
+$('#txpool-link').bind('click', function() { updateTxPool(); toggle('txpool'); return false; });
+$('#delegates-link').bind('click', function() { updateDelegates(); toggle('delegates'); return false; });
+
+$(document).on('click', '.tx-dropdown', function(event) {
+	event.preventDefault();
+	var $closest = $(event.target).closest('.transaction').children('.panel-body');
+	console.log($closest);
+	if ($closest.is(':visible')) {
+		$closest.slideUp();
+	} else {
+		$closest.slideDown();
+	}
+	return false;
+});
+
+$('#start-minting-btn').bind('click', function() {
+	event.preventDefault();
+	NProgress.start();
+	$.ajax( {url:protocol + host + "/mint/start", headers: { 'apiKey': apiKey } }).done(function(data) {
+		updateMinting();
+	});
+});
+
+$('#vote-submit-btn').bind('click', function() {
+	event.preventDefault();
+	$('#vote-submit-btn').prop("disabled",true);
+	NProgress.start();
+	var payload = {};
+	payload['targetPubKey'] = $('#votePubKey').val();
+	$.ajax( {type: "POST", url:protocol + host + "/delegates/vote", data:{"json": JSON.stringify(payload)}, headers: { 'apiKey': apiKey }}).done(function(data) {
+		$('#vote-submit-btn').prop("disabled",false);
+		$('#voteModal').modal('hide');
+		updateDelegates();
+		NProgress.done();
+	}).fail(function() {
+		$('#vote-submit-btn').prop("disabled",false);
+		$('#voteModal').modal('hide');
+		NProgress.done();
+	});
+});
+
+$('#unvote-submit-btn').bind('click', function() {
+	event.preventDefault();
+	$('#unvote-submit-btn').prop("disabled",true);
+	NProgress.start();
+	var payload = {};
+	payload['targetPubKey'] = $('#unvotePubKey').val();
+	$.ajax( {type: "POST", url:protocol + host + "/delegates/unvote", data:{"json": JSON.stringify(payload)}, headers: { 'apiKey': apiKey }}).done(function(data) {
+		$('#unvote-submit-btn').prop("disabled",false);
+		$('#unvoteModal').modal('hide');
+		updateDelegates();
+		NProgress.done();
+	}).fail(function() {
+		$('#unvote-submit-btn').prop("disabled",false);
+		$('#unvoteModal').modal('hide');
+		NProgress.done();
+	});
+});
+
+$('#stop-minting-btn').bind('click', function() {
+	event.preventDefault();
+	NProgress.start();
+	$.ajax( {url:protocol + host + "/mint/stop", headers: { 'apiKey': apiKey } }).done(function(data) {
+		updateMinting();
+	});
+});
+
+
+$('#pay-confirmation-btn').bind('click', function() {
+	event.preventDefault();
+	NProgress.start();
+	var payload = {}
+	payload["base64"] = $("#base64TX").val();
+	$.ajax( {type: "POST", url:protocol + host + "/wallet/send", data:{"json": JSON.stringify(payload)}, headers: { 'apiKey': apiKey }} ).done(function(data) {
+		if(data["success"]) {
+			displaySuccess("Transaction was send");
+			$("#paymentConfirmationModal").modal("hide");
+			$('#address').val("");
+			$('#amount').val("");
+			NProgress.done();
+		} else {
+			$("#paymentConfirmationModal").modal("hide");
+			displayError("Something went wrong, the transaction wasn't send. Make aure you have enougth funds and that there isn't another transaction pendding");
+			NProgress.done();
+		}
+	}).fail(function() {
+		displayError("Something went wrong, the transaction wasn't send. Make aure you have enougth funds and that there isn't another transaction pendding");
+		NProgress.done();
+	});
+});
+
+$('#pay-btn').bind('click', function() {
+	event.preventDefault();
+	NProgress.start();
+	var payload = {}
+	payload[$('#address').val()] = {};
+	payload[$('#address').val()][$('#currency').val()] = {};
+	payload[$('#address').val()][$('#currency').val()] = Math.floor($('#amount').val() * subUnits);
+
+	if($('#address').val().length  == 0 || $('#currency').val()  == 0 || $('#amount').val().length == 0) {
+		displayError("Address, amout or currency can't be empty");
+		NProgress.done();
+		return;
+	}
+
+	$.ajax( {type: "POST", url:protocol + host + "/wallet/createTransaction", data:{"json": JSON.stringify(payload)}, headers: { 'apiKey': apiKey }} ).done(function(data) {
+		if(data["success"]) {
+			$("#base64TX").val(data["base64"]);
+			$("#paymentConfirmationModal").modal("show");
+			$("#paymentConfirmationModal .txFee").html(uamountToHtml(data["transaction"]["fee"]));
+		} else {
+			displayError("Something went wrong, the transaction wasn't send. Make sure you have enougth funds and that there isn't another transaction pendding");
+		}
+		NProgress.done();
+	}).fail(function() {
+		displayError("Something went wrong, the transaction wasn't send. Make aure you have enougth funds and that there isn't another transaction pendding");
+		NProgress.done();
+	});
+});
+
+$('#add-peer-btn').bind('click', function() {
+	event.preventDefault();
+	NProgress.start();
+	var payload = {}
+	payload['ip'] = $('#ip').val();
+
+	$.ajax( {type: "POST", url:protocol + host + "/peers/add", data:{"json": JSON.stringify(payload)}, headers: { 'apiKey': apiKey }} ).done(function(data) {
+		$('#addPeerModal').modal('hide');
+		setTimeout(function() {
+			updatePeers();
+			NProgress.done();
+		}, 700); // wait for the node to send it's blockheight
+	}).fail(function() {
+		NProgress.done();
+	});
+});
+
+$('#register-passport-btn').bind('click', function() {
+	event.preventDefault();
+	$('#passportForm').submit();
+});
+
+$(document).on('click', '.trash-peer', function() {
+	event.preventDefault();
+	if(confirm("Are you sure to remove this peer?")) {
+		var payload = {}
+		payload['ip'] = $(this).data("ip");
+		$.ajax( {type: "POST", url:protocol + host + "/peers/remove", data:{"json": JSON.stringify(payload)}, headers: { 'apiKey': apiKey }} ).done(function(data) {
+			updatePeers();
+			NProgress.done();
+		}).fail(function() {
+			NProgress.done();
+		});
+	}
+});
+
+$('#passportForm').validator().on('submit', function (e) {
+	event.preventDefault();
+	var dateOfExpiry = $('#date-of-expiry').val();
+	var dateOfBirth = $('#date-of-birth').val();
+	console.log(dateOfExpiry);
+	console.log(dateOfExpiry.length);
+	if(dateOfExpiry.length != 10) {
+		return false;
+	}
+
+	if(dateOfBirth.length != 10) {
+		return false;
+	}
+
+	var dateOfExpirySplit = dateOfExpiry.split(".");
+	dateOfExpiry = dateOfExpirySplit[2].substr(2, 2) + dateOfExpirySplit[1] + dateOfExpirySplit[0];
+
+
+	var dateOfBirthSplit = dateOfBirth.split(".");
+	dateOfBirth = dateOfBirthSplit[2].substr(2, 2) + dateOfBirthSplit[1] + dateOfBirthSplit[0];
+
+	if (e.isDefaultPrevented()) {
+	} else {
+		NProgress.start();
+
+		$('#register-passport-btn').prop("disabled",true);
+		var payload = {}
+		payload['documentNumber'] = $('#passport-nbr').val();
+		payload['dateOfBirth'] = dateOfBirth;
+		payload['dateOfExpiry'] = dateOfExpiry;
+
+		$.ajax( {type: "POST", url:protocol + host + "/ubi/register-passport", data:{"json": JSON.stringify(payload)}, headers: { 'apiKey': apiKey }} ).done(function(data) {
+			$('#register-passport-btn').prop("disabled",false);
+			NProgress.done();
+
+			if(typeof data['success'] != "undefined" && data['success']) {
+				displaySuccess("Your passport has been registered, you'll soon receive your UBI");
+			} else {
+				displayError("Please try again, Reading failed with message:" + data['error']);
+			}
+			$('#registerPassportModal').modal('hide');
+		}).fail(function() {
+			displayError("Something went wrong please try again in a minute or two");
+		  	$('#register-passport-btn').prop("disabled",false);
+			$('#registerPassportModal').modal('hide');
+			NProgress.done();
+		});
+	}
+	return false;
+});
+
+function updateIncoming() {
+
+   $.ajax( {url: protocol + host + "/incoming", headers: { 'apiKey': apiKey } })
+	  .done(function( data ) {
+		//console.log(data);
+		if(typeof data['transactions'] != "undefined") {
+		    for(var i in data['transactions']) {
+			    if(incomingIds[data['transactions'][i]['txId']] == undefined) {
+				var uamount;
+				for(var i2 in data['transactions'][i]['txOut']) {
+					uamount = uamountAdd(uamount, data['transactions'][i]['txOut'][i2]['amount']);
+				}
+				var txMessage = "You have an incoming transaction:<br/>";
+				txMessage += panelTitle(data['transactions'][i]);
+				$.bootstrapGrowl(txMessage,{
+				    type: 'success',
+				    delay: 15000,
+				});
+				console.log(txMessage);
+				console.log(uamount);
+				incomingIds[data['transactions'][i]['txId']] = true;
+			    }
+		    }
+		}
+    });
+}
+
+function regularUpdates() {
+	updateIncoming();
+}
+
+function unregularUpdates() {
+	updateStatus();
+	updateWallet();
+	updateMyUbi();
+}
+
+if(apiKey.length > 1) {
+
+	$('#waitModal').modal({backdrop: 'static', keyboard: false});
+	setTimeout(function(){
+	    $('#waitModal').modal('hide');
+	    unregularUpdates();
+	},1000);
+
+	regularUpdates();
+	unregularUpdates();
+
+	var updateInterval = setInterval(function () {
+		regularUpdates();
+	},2000);
+
+	var updateInterval2 = setInterval(function () {
+		unregularUpdates();
+	},60000);
+} else {
+	$('#missingApiKeyModal').modal({backdrop: 'static', keyboard: false});
+}
+
+$(document).ready(function() {
+	$('#passportForm').validator();
+	$('#date-of-birth').datepicker({
+	    container:'#registerPassportModal',
+	    format: "dd.mm.yyyy",
+	    startView: 2,
+	    startDate: "01/01/1900",
+	    endDate: "01/01/2020"
+	});
+	$('#date-of-expiry').datepicker({
+	    container:'#registerPassportModal',
+	    format: "dd.mm.yyyy",
+	    startView: 2,
+	    startDate: "01/01/2017",
+	    endDate: "01/01/2040"
+	});
+});
+
+</script>
+  </body>
+</html>
+

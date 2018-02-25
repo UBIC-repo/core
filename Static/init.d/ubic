@@ -1,0 +1,31 @@
+#!/bin/bash
+
+case "$1" in 
+start)
+if [ -e /var/ubic/ubic.pid ]; then
+   echo UBIC is already running
+else
+   /usr/bin/ubic
+fi
+   ;;
+stop)
+   kill `cat /var/ubic/ubic.pid`
+   rm /var/ubic/ubic.pid
+   ;;
+restart)
+   $0 stop
+   $0 start
+   ;;
+status)
+   if [ -e /var/ubic/ubic.pid ]; then
+      echo UBIC is running, PID:`cat /var/ubic/ubic.pid`
+   else
+      echo UBIC is NOT running
+      exit 1
+   fi
+   ;;
+*)
+   echo "Usage: $0 {start|stop|status|restart}"
+esac
+
+exit 0
