@@ -5,7 +5,7 @@ start)
 if [ -e /var/ubic/ubic.pid ]; then
    echo UBIC is already running
 else
-   /usr/bin/ubic
+   /usr/bin/ubicd
 fi
    ;;
 stop)
@@ -14,13 +14,14 @@ stop)
    ;;
 restart)
    $0 stop
+   sleep 4
    $0 start
    ;;
 status)
    if [ -e /var/ubic/ubic.pid ]; then
-      echo UBIC is running, PID:`cat /var/ubic/ubic.pid`
+      echo ubic is running, pid=`cat /var/ubic/ubic.pid`
    else
-      echo UBIC is NOT running
+      echo ubic is NOT running
       exit 1
    fi
    ;;
