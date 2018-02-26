@@ -59,3 +59,11 @@ You will find your api key in the ```~/ubic/config.ini``` file.
 
 /!\ Warning: For security reasons the web interface can not be opened remotly by typing <your server ip>:6789/#<apiKey>.
 If you want to open the web insterface of your sever do a port forwarding over SSH, and forward the ports 6789 and 12303 to the ports 6789 and 12303 on your local machine.
+
+Register a passport
+===
+To register a passport go to the "My UBI" tab and click "Register passport", then enter your passport number, date of birth and the date of expiry.
+Make sure your NFC reader is plugged and ready, put the passport on top of it. To help you on some readers a green light appears when it found a tag.
+Click "Register passport", if it doesnt work try again by turning your passport, opening it. If it still doesn't work open an issue on Github.
+
+Note that to work your node should ideally be synced.
