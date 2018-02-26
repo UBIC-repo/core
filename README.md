@@ -2,7 +2,7 @@ Installation
 ===
 ```
 sudo apt-get update
-sudo apt-get install cmake gcc make libleveldb1v5 libpcsclite1 libpcsclite-dev libleveldb-dev libboost-all-dev gcc g++ ntp
+sudo apt-get install git cmake gcc make libleveldb1v5 libpcsclite1 libpcsclite-dev libleveldb-dev libboost-all-dev gcc g++ ntp
 ```
 
 
@@ -31,9 +31,9 @@ Install UBIC
 ===
 ```
 cd /usr/local/src
-git clone https://github.com/UBIC-repo/core.git
-cd core-master
-chmod 777 Static/install.sh
+sudo git clone https://github.com/UBIC-repo/core.git
+sudo chmod 777 -R core
+cd core
 cmake CMakeLists.txt
 make
 sudo make install
