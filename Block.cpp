@@ -494,7 +494,16 @@ UAmount32 BlockHelper::calculateUbiReceiverCount(Block* block, BlockHeader* prev
         newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_NEW_ZEALAND, 0));
         newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_UNITED_ARAB_EMIRATES, 0));
         newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_FINLAND, 0));
-
+        newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_LUXEMBOURG, 0));
+        newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_SINGAPORE, 0));
+        newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_HUNGARY, 0));
+        newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_CZECH_REPUBLIC, 0));
+        newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_MALAYSIA, 0));
+        newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_UKRAINE, 0));
+        newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_ESTONIA, 0));
+        newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_MONACO, 0));
+        newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_LIECHTENSTEIN, 0));
+        
         return newUbiReceiverCount;
     }
 
