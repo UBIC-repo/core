@@ -31,7 +31,7 @@ Install UBIC
 ===
 ```
 cd /usr/local/src
-git clone 
+git clone https://github.com/UBIC-repo/core.git
 cd core-master
 chmod 777 Static/install.sh
 cmake CMakeLists.txt
