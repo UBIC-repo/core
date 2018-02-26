@@ -937,7 +937,6 @@ $('#txpool-link').bind('click', function() { updateTxPool(); toggle('txpool'); r
 $('#delegates-link').bind('click', function() { updateDelegates(); toggle('delegates'); return false; });
 
 $(document).on('click', '.tx-dropdown', function(event) {
-	event.preventDefault();
 	var $closest = $(event.target).closest('.transaction').children('.panel-body');
 	console.log($closest);
 	if ($closest.is(':visible')) {
@@ -949,15 +948,14 @@ $(document).on('click', '.tx-dropdown', function(event) {
 });
 
 $('#start-minting-btn').bind('click', function() {
-	event.preventDefault();
 	NProgress.start();
 	$.ajax( {url:protocol + host + "/mint/start", headers: { 'apiKey': apiKey } }).done(function(data) {
 		updateMinting();
 	});
+	return false;
 });
 
 $('#vote-submit-btn').bind('click', function() {
-	event.preventDefault();
 	$('#vote-submit-btn').prop("disabled",true);
 	NProgress.start();
 	var payload = {};
@@ -972,10 +970,10 @@ $('#vote-submit-btn').bind('click', function() {
 		$('#voteModal').modal('hide');
 		NProgress.done();
 	});
+	return false;
 });
 
 $('#unvote-submit-btn').bind('click', function() {
-	event.preventDefault();
 	$('#unvote-submit-btn').prop("disabled",true);
 	NProgress.start();
 	var payload = {};
@@ -990,19 +988,19 @@ $('#unvote-submit-btn').bind('click', function() {
 		$('#unvoteModal').modal('hide');
 		NProgress.done();
 	});
+	return false;
 });
 
 $('#stop-minting-btn').bind('click', function() {
-	event.preventDefault();
 	NProgress.start();
 	$.ajax( {url:protocol + host + "/mint/stop", headers: { 'apiKey': apiKey } }).done(function(data) {
 		updateMinting();
 	});
+	return false;
 });
 
 
 $('#pay-confirmation-btn').bind('click', function() {
-	event.preventDefault();
 	NProgress.start();
 	var payload = {}
 	payload["base64"] = $("#base64TX").val();
@@ -1022,10 +1020,10 @@ $('#pay-confirmation-btn').bind('click', function() {
 		displayError("Something went wrong, the transaction wasn't send. Make aure you have enougth funds and that there isn't another transaction pendding");
 		NProgress.done();
 	});
+	return false;
 });
 
 $('#pay-btn').bind('click', function() {
-	event.preventDefault();
 	NProgress.start();
 	var payload = {}
 	payload[$('#address').val()] = {};
@@ -1051,10 +1049,10 @@ $('#pay-btn').bind('click', function() {
 		displayError("Something went wrong, the transaction wasn't send. Make aure you have enougth funds and that there isn't another transaction pendding");
 		NProgress.done();
 	});
+	return false;
 });
 
 $('#add-peer-btn').bind('click', function() {
-	event.preventDefault();
 	NProgress.start();
 	var payload = {}
 	payload['ip'] = $('#ip').val();
@@ -1068,15 +1066,15 @@ $('#add-peer-btn').bind('click', function() {
 	}).fail(function() {
 		NProgress.done();
 	});
+	return false;
 });
 
 $('#register-passport-btn').bind('click', function() {
-	event.preventDefault();
 	$('#passportForm').submit();
+	return false;
 });
 
 $(document).on('click', '.trash-peer', function() {
-	event.preventDefault();
 	if(confirm("Are you sure to remove this peer?")) {
 		var payload = {}
 		payload['ip'] = $(this).data("ip");
@@ -1087,10 +1085,10 @@ $(document).on('click', '.trash-peer', function() {
 			NProgress.done();
 		});
 	}
+	return false;
 });
 
 $('#passportForm').validator().on('submit', function (e) {
-	event.preventDefault();
 	var dateOfExpiry = $('#date-of-expiry').val();
 	var dateOfBirth = $('#date-of-birth').val();
 	console.log(dateOfExpiry);
@@ -1220,4 +1218,3 @@ $(document).ready(function() {
 </script>
   </body>
 </html>
-
