@@ -5,6 +5,7 @@ cp ./Static/init.d/ubic /etc/init.d/
 if [ ! -d "/var/ubic/" ]; then
 	mkdir /var/ubic/
 else
+	cp -R ./Static/web /var/ubic/
 	exit 1
 fi
 
