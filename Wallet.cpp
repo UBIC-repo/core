@@ -37,42 +37,6 @@ std::vector<unsigned char> Wallet::generateSeed() {
 }
 
 bool Wallet::generateWallet() {
-
-    this->privateKeys.emplace_back(Hexdump::hexStringToVector("a51cee5309d072c0c3b0500d09b2ccc768ee859392a7787a18b8376e684a85e3"));
-    this->publicKeys.emplace_back(Hexdump::hexStringToVector("0313791962da5a4c8cd5deee3646fc6d507bbfc188813b395d0f6aa55b986a3c13"));
-    this->addressesScript.emplace_back(Hexdump::hexStringToVector("0966831dee5007f2a895c0c7cd4fa6f159b71fb2"));
-    this->addressesLink.emplace_back(Hexdump::hexStringToVector("72c3fcc0e329dc45c2aaed97ae3e18ca7251ef63"));
-
-    this->privateKeys.emplace_back(Hexdump::hexStringToVector("3b7287e2565d28e8da178c0b0942d3a37060d23a7197bb7232185cde402ed8f3"));
-    this->publicKeys.emplace_back(Hexdump::hexStringToVector("03bdf201fc6d2989074786c3494cb077cd1ec7709ae8c8a7e359e50eb2081ed24e"));
-    this->addressesScript.emplace_back(Hexdump::hexStringToVector("9794b4c564102fe11f56655d09e3011bbfb67f27"));
-    this->addressesLink.emplace_back(Hexdump::hexStringToVector("518a8eaf2ea95bc8569881e34979952a0856f843"));
-
-    this->privateKeys.emplace_back(Hexdump::hexStringToVector("e7c162ba3578825a17736c3b0c8ebd075462536507831fe74b3b5f0cb785b879"));
-    this->publicKeys.emplace_back(Hexdump::hexStringToVector("024f8285633d2366517ac60c63618f894dab924a9eb419d712a46f779b8edad24c"));
-    this->addressesScript.emplace_back(Hexdump::hexStringToVector("d3f3df19cc903998280d50076b8051e4b320ad3f"));
-    this->addressesLink.emplace_back(Hexdump::hexStringToVector("a90c68860eb3e619a039186c3907f7f01f314793"));
-
-    this->privateKeys.emplace_back(Hexdump::hexStringToVector("1df9b95dde6a4016392a1a24eb675decb55fdaa231dfd774f13a9d3bd86233f7"));
-    this->publicKeys.emplace_back(Hexdump::hexStringToVector("02584fd71f55fd8fa239e2b2d3183bd3a051979a2edb45184e153469f37a02c070"));
-    this->addressesScript.emplace_back(Hexdump::hexStringToVector("0694e97f6ee7551a4b9f94d93d3b01102369ac84"));
-    this->addressesLink.emplace_back(Hexdump::hexStringToVector("ca6571a4015fc74687efeba697e9498976873626"));
-
-    this->privateKeys.emplace_back(Hexdump::hexStringToVector("17c866be1639fb019bc74fe7005e00bb767466e8f4cbe90f6770841163051409"));
-    this->publicKeys.emplace_back(Hexdump::hexStringToVector("02963db30cd772ef55649a2fd2f29c28f6a92010401a4f9ecf676c3270c19e98ed"));
-    this->addressesScript.emplace_back(Hexdump::hexStringToVector("d49fc636dd9437574a000e29c1842a49970b3587"));
-    this->addressesLink.emplace_back(Hexdump::hexStringToVector("846bc1cf7455ba4bd2bcf8c5388520439b44f545"));
-
-    this->privateKeys.emplace_back(Hexdump::hexStringToVector("a2b685d8d48c78080cb6d7bba69afc1c0fc7a8e443e6e61d6b2e7b48c285a57a"));
-    this->publicKeys.emplace_back(Hexdump::hexStringToVector("03a6b836dcc0b9821f76fdf5f6c7ad4fe5f821c459229020893fe663a6c7b93106"));
-    this->addressesScript.emplace_back(Hexdump::hexStringToVector("4f60f973fa6433f498b995694bda20078ebbb850"));
-    this->addressesLink.emplace_back(Hexdump::hexStringToVector("8d28eb61b099ebd01d39a3686d822102894c1ff8"));
-
-    this->privateKeys.emplace_back(Hexdump::hexStringToVector("762484bcc2349a44fa52781671bbadf03cf71e98d59d16f788b7c3b7230953ab"));
-    this->publicKeys.emplace_back(Hexdump::hexStringToVector("0327382aa165da98965ab95db301b5b7657ffd1429b3e4252af8af0c0ff3641cee"));
-    this->addressesScript.emplace_back(Hexdump::hexStringToVector("4f9519751c37a3f21d17093aae01b52f8a2cc4fe"));
-    this->addressesLink.emplace_back(Hexdump::hexStringToVector("ef1440450d15d4d61e1e5ea9b5eefb5554dbc644"));
-
     if(!this->loadSeedFromFS()) {
         this->seed = Wallet::generateSeed();
         Log(LOG_LEVEL_INFO) << "Generated new Seed";
