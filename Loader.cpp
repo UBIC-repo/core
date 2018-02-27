@@ -200,7 +200,7 @@ bool Loader::loadPathSum() {
     pathSum.appendValue(zeroBlockAmount); // Block zero doesn't exist so we assign empty value
     for(std::map<uint64_t, UAmount>::iterator it = pathSumList.begin(); it != pathSumList.end(); ++it) {
         pathSum.appendValue(it->second);
-        Log(LOG_LEVEL_INFO) << "Inserted Payout: " << it->second;
+        //Log(LOG_LEVEL_INFO) << "Inserted Payout: " << it->second;
     }
 
     return true;
