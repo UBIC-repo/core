@@ -186,7 +186,7 @@ bool Loader::loadPathSum() {
     // first we insert values in a temporary variable as we start with last block and pathSum requires
     // a chronological order
     while(true) {
-        Log(LOG_LEVEL_INFO) << "previousHeaderHash: " << previousHeaderHash;
+        //Log(LOG_LEVEL_INFO) << "previousHeaderHash: " << previousHeaderHash;
         BlockHeader* found = chain.getBlockHeader(previousHeaderHash);
         if(found == nullptr) {
             break;
