@@ -29,6 +29,13 @@ std::map<ip_t, PeerInterfacePtr> Peers::getPeers() {
     return this->peers;
 }
 
+bool Peers::isPeerAlreadyInList(ip_t ip) {
+    auto found = this->peers.find(ip);
+
+    // Peer is already in peer list
+    return found != this->peers.end();
+}
+
 bool Peers::appendPeer(PeerInterfacePtr peer) {
     //@TODO: return false for IPs 127.xx.xx.xx
     BanList& banList = BanList::Instance();
@@ -40,10 +47,8 @@ bool Peers::appendPeer(PeerInterfacePtr peer) {
         return false;
     }
 
-    auto found = this->peers.find(peer->getIp());
-
     // Peer is already in peer list
-    if(found != this->peers.end()) {
+    if(isPeerAlreadyInList(peer->getIp())) {
         Log(LOG_LEVEL_ERROR) << "Cannot appendPeer peer:" << peer->getIp() << " peer is already in peerlist";
         peer = nullptr;
         return false;
@@ -95,7 +100,7 @@ void PeerServer::do_read_header()
                                             do_read_body();
                                         }
                                     } else {
-                                        Log(LOG_LEVEL_ERROR) << "Peer: " << ip << " terminated with error: " << ec.message();
+                                        Log(LOG_LEVEL_ERROR) << "PeerServer::do_read_header() " << ip << " terminated with error: " << ec.message();
                                         Peers &peers = Peers::Instance();
                                         peers.disconnect(ip);
                                     }
@@ -142,7 +147,7 @@ void PeerServer::do_read_body()
                                     }
                                     else
                                     {
-                                        Log(LOG_LEVEL_ERROR) << "Peer: " << ip << " terminated with error: " << ec.message();
+                                        Log(LOG_LEVEL_ERROR) << "PeerServer::do_read_body() " << ip << " terminated with error: " << ec.message();
                                         Peers &peers = Peers::Instance();
                                         peers.disconnect(ip);
                                     }
@@ -194,7 +199,7 @@ void PeerServer::do_write()
                                      }
                                      else
                                      {
-                                         Log(LOG_LEVEL_ERROR) << "Peer: " << ip << " terminated with error: " << ec.message();
+                                         Log(LOG_LEVEL_ERROR) << "PeerServer::do_write() " << ip << " terminated with error: " << ec.message();
                                          Peers &peers = Peers::Instance();
                                          peers.disconnect(ip);
                                      }
@@ -215,7 +220,11 @@ void PeerServer::start()
 void PeerServer::close()
 {
     disconnected = true;
-    socket_.close();
+    try {
+        socket_.close();
+    } catch (const std::exception& e) {
+        Log(LOG_LEVEL_ERROR) << "socket_.close() failed with exception: " << e.what();
+    }
 }
 
 void PeerServer::deliver(NetworkMessage msg)
