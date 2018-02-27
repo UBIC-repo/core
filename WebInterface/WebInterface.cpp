@@ -89,11 +89,12 @@ void WebInterface::run() {
         {
             tcp::socket socket(io_service);
             acceptor.accept(socket);
+	    boost::system::error_code ec;
 
             char* buffer = (char*)malloc(65048 * sizeof(char));
-            std::size_t bufferSize = socket.read_some(boost::asio::buffer(buffer, 65048));
+            std::size_t bufferSize = socket.read_some(boost::asio::buffer(buffer, 65048), ec);
             if(socket.available() > 0) {
-                bufferSize += socket.read_some(boost::asio::buffer(buffer + bufferSize, 65048 - bufferSize));
+                bufferSize += socket.read_some(boost::asio::buffer(buffer + bufferSize, 65048 - bufferSize), ec);
             }
 
 #if defined(_WIN32)
