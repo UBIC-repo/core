@@ -8,6 +8,7 @@
 #include "Network/BanList.h"
 #include "Network/BlockCache.h"
 #include "App.h"
+#include "Network/Network.h"
 
 std::mutex Chain::connectBlockMutex;
 
@@ -279,6 +280,9 @@ bool Chain::connectBlock(Block* block, bool isRecursion) {
                         << " to the chain";
 
     connectBlockMutex.unlock();
+    
+    Network& network = Network::Instance();
+    network.broadCastNewBlockHeight(header->getBlockHeight(), header->getHeaderHash());
 
     return true;
 }
