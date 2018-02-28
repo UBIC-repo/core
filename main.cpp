@@ -16,6 +16,7 @@
 #include "WebInterface/WebInterface.h"
 #include "Config.h"
 #include "App.h"
+#include "Network/Network.h"
 
 void startSync() {
     Network &network = Network::Instance();
