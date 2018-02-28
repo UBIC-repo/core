@@ -17,6 +17,11 @@
 #include "Config.h"
 #include "App.h"
 
+void startSync() {
+    Network &network = Network::Instance();
+    network.syncBlockchain();
+}
+
 void startMinting() {
     Mint& mint = Mint::Instance();
     mint.stopMinting();
@@ -144,10 +149,12 @@ int main() {
     std::thread t2(&startServer);
     std::thread t3(&startWebInterface);
     std::thread t4(&startMinting);
+    std::thread t5(&startSync);
     t1.join();
     t2.join();
     t3.join();
     t4.join();
+    t5.join();
 
     return 0;
 }
