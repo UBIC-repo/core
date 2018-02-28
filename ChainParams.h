@@ -142,7 +142,7 @@
 #define DB_MY_TRANSACTIONS 5
 #define DB_VOTES 6
 
-#define BLOCK_FILES_MAX_SIZE 1800 * 1000 * 1000 /* in bytes */
+#define BLOCK_FILES_MAX_SIZE (1800 * 1000 * 1000) /* in bytes */
 
 #define SERIALIZATION_VERSION 1
 #define BLOCK_SIZE_MAX 1900000
@@ -153,7 +153,7 @@
 
 #define TRANSACTION_SIZE_MAX 20000
 
-#define CSCA_MATURATION_TIME_IN_BLOCKS 60*24*14
+#define CSCA_MATURATION_TIME_IN_BLOCKS (60*24*14)
 #define CSCA_MATURATION_SUSPENSIONTIME_IN_BLOCKS 100 /* during the first 100 blocks maturation is ignored */
 #define TXFEE_FACTOR 1
 
