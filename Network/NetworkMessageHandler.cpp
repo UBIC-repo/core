@@ -335,10 +335,6 @@ void NetworkMessageHandler::handleTransmitBlocks(TransmitBlock *transmitBlocks, 
     }
 
     blockCache.appendBlock(recipient, &block);
-
-    if(chain.getBestBlockHeader() == nullptr || block.getHeader()->getHeaderHash() == chain.getBestBlockHeader()->getHeaderHash()) {
-        network.broadCastNewBlockHeight(block.getHeader()->getBlockHeight(), block.getHeader()->getHeaderHash());
-    }
 }
 
 void NetworkMessageHandler::handleTransmitPeers(TransmitPeers *transmitPeers, PeerInterfacePtr recipient) {
