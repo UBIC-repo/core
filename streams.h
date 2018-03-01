@@ -438,14 +438,6 @@ public:
 };
 
 
-
-
-
-
-
-
-
-
 /** Non-refcounted RAII wrapper for FILE*
  *
  * Will automatically close the file when it goes out of scope if not null.
@@ -553,6 +545,45 @@ public:
         ::Unserialize(*this, obj);
         return (*this);
     }
+
+    bool isEmpty() {
+        this->jumpToEof();
+        bool isEmpty = ftell(file) == 0;
+        this->jumpToBof();
+
+        return isEmpty;
+    }
+
+    bool jumpToEof() {
+        fflush(file);
+        fseek(file, 0, SEEK_END);
+        uint64_t nPos = (uint64_t)ftell(file);
+        return true;
+    }
+
+    bool jumpToBof() {
+        fflush(file);
+        fseek(file, 0, SEEK_SET);
+        uint64_t nPos = (uint64_t)ftell(file);
+        return true;
+    }
+
+
+    bool Seek(uint64_t nPos) {
+        long nLongPos = (long)nPos;
+        if (fseek(file, nLongPos, SEEK_SET))
+            return false;
+        return true;
+    }
+
+    uint64_t GetPos() {
+        return (uint64_t)ftell(file);
+    }
+
+    bool eof() {
+        return feof(file);
+    }
+
 };
 
 /** Non-refcounted RAII wrapper around a FILE* that implements a ring buffer to
