@@ -12,7 +12,9 @@ bool FS::overwriteFile(std::vector<unsigned char> path, std::vector<unsigned cha
 }
 
 bool FS::overwriteFile(std::vector<unsigned char> path, uint64_t startPosition, std::vector<unsigned char> content) {
-    std::fstream fout((char*)path.data(), std::fstream::in | std::fstream::out | std::fstream::binary );
+    char cPath[512];
+    FS::charPathFromVectorPath(cPath, path);
+    std::fstream fout(cPath, std::fstream::in | std::fstream::out | std::fstream::binary );
     fout.seekp( startPosition );
     fout.write( (char*)content.data() , content.size() );
     fout.close();
