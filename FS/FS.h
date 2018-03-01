@@ -31,7 +31,8 @@ public:
         memcpy(pData + path.size(), "\0", 1);
 
         FILE *file = fopen(pData, "rb");
-        CBufferedFile filein(file, bufferSize, 0, SER_DISK, SERIALIZATION_VERSION);
+        CAutoFile filein(file, SER_DISK, SERIALIZATION_VERSION);
+        //CBufferedFile filein(file, bufferSize, 0, SER_DISK, SERIALIZATION_VERSION);
 
         if (filein.IsNull() || filein.isEmpty()) {
             Log(LOG_LEVEL_ERROR) << "failed to open file " << pData;
@@ -50,30 +51,7 @@ public:
     }
 
     template < class Serializable >
-    static bool serializeToFile(std::vector<unsigned char> path, uint64_t pos, Serializable& data) {
-        char pData[512];
-        memcpy(pData, (char*)path.data(), path.size());
-        memcpy(pData + path.size(), "\0", 1);
-
-        FILE *file = fopen(pData, "rb+");
-        CBufferedFile fileout(file, BLOCK_SIZE_MAX,BLOCK_SIZE_MAX, SER_DISK, SERIALIZATION_VERSION);
-
-        if (fileout.IsNull()) {
-            Log(LOG_LEVEL_ERROR) << "failed to open file " << pData;
-            fileout.fclose();
-            return false;
-        }
-
-        fileout.Seek(pos);
-        fileout << data;
-        fileout.fclose();
-
-        return true;
-    }
-
-    template < class Serializable >
     static bool serializeToFile(std::vector<unsigned char> path, Serializable& data) {
-
         FS::touchFile(path);
 
         char pData[512];
@@ -81,7 +59,9 @@ public:
         memcpy(pData + path.size(), "\0", 1);
 
         FILE *file = fopen(pData, "rb+");
-        CBufferedFile fileout(file, BLOCK_SIZE_MAX, BLOCK_SIZE_MAX, SER_DISK, SERIALIZATION_VERSION);
+        //CBufferedFile fileout(file, BLOCK_SIZE_MAX, BLOCK_SIZE_MAX, SER_DISK, SERIALIZATION_VERSION);
+
+        CAutoFile fileout(file, SER_DISK, SERIALIZATION_VERSION);
 
         if (fileout.IsNull()) {
             Log(LOG_LEVEL_ERROR) << "failed to open file " << pData;
@@ -89,40 +69,7 @@ public:
             return false;
         }
 
-
-        if(!fileout.jumpToEof()) {
-            //Log(LOG_LEVEL_ERROR) << "Failed to jump to the end of the file " << pData;
-            //return false;
-        }
-
-        fileout << data;
-        fileout.fclose();
-
-        return true;
-    }
-
-
-    template < class Serializable >
-    static bool serializeToFileWithOverwritting(std::vector<unsigned char> path, Serializable& data) {
-        char pData[512];
-        memcpy(pData, (char*)path.data(), path.size());
-        memcpy(pData + path.size(), "\0", 1);
-
-        FILE *file = fopen(pData, "wb+");
-        CBufferedFile fileout(file, BLOCK_SIZE_MAX, BLOCK_SIZE_MAX, SER_DISK, SERIALIZATION_VERSION);
-
-        if (fileout.IsNull()) {
-            Log(LOG_LEVEL_ERROR) << "failed to open file " << pData;
-            fileout.fclose();
-            return false;
-        }
-
-
-        if(!fileout.jumpToEof()) {
-            //Log(LOG_LEVEL_ERROR) << "Failed to jump to the end of the file " << pData;
-            //return false;
-        }
-
+        fileout.jumpToEof();
         fileout << data;
         fileout.fclose();
 
