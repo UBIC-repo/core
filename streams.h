@@ -581,7 +581,10 @@ public:
     }
 
     bool eof() {
-        return feof(file);
+        uint64_t pos = ftell(file);
+        bool eof = fgetc(file) == EOF;
+        Seek(pos);
+        return eof;
     }
 
 };
