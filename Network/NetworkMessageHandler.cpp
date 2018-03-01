@@ -271,6 +271,9 @@ void NetworkMessageHandler::handleAskForBlockchainHeight(PeerInterfacePtr recipi
 
     TransmitBlockchainHeight* transmitBlockchainHeight = new TransmitBlockchainHeight();
     transmitBlockchainHeight->height = chain.getCurrentBlockchainHeight();
+    if(chain.getBestBlockHeader() != nullptr) {
+        transmitBlockchainHeight->bestHeaderHash = chain.getBestBlockHeader()->getHeaderHash();
+    }
 
     recipient->deliver(NetworkMessageHelper::serializeToNetworkMessage(*transmitBlockchainHeight));
 }
