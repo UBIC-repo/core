@@ -161,7 +161,7 @@ struct TransmitPeers {
 
 struct TransmitBlockchainHeight {
     uint8_t command = TRANSMIT_BLOCKCHAIN_HEIGHT_COMMAND;
-    uint64_t height;
+    uint32_t height;
     std::vector<unsigned char> bestHeaderHash;
 
     ADD_SERIALIZE_METHODS;
