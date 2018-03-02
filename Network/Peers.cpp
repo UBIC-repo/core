@@ -92,17 +92,22 @@ void PeerServer::do_read_header()
         boost::asio::async_read(socket_,
                                 boost::asio::buffer(read_msg_.data(), NetworkMessage::header_length),
                                 [this](boost::system::error_code ec, std::size_t /*length*/) {
-                                    std::cout << "do_read_header() ec message: " << ec.message() << std::endl;
-                                    std::cout << "do_read_header() ec value: " << ec.value() << std::endl;
+                                    Log(LOG_LEVEL_INFO) << "do_read_header() ec message: " << ec.message();
+                                    Log(LOG_LEVEL_INFO) << "do_read_header() ec value: " << ec.value();
 
                                     if (!ec) {
                                         if(read_msg_.decode_header()) {
                                             do_read_body();
                                         }
                                     } else {
-                                        Log(LOG_LEVEL_ERROR) << "PeerServer::do_read_header() " << ip << " terminated with error: " << ec.message();
-                                        Peers &peers = Peers::Instance();
-                                        peers.disconnect(ip);
+                                        if(ec == boost::asio::error::eof) {
+                                            do_read_header();
+                                        } else {
+                                            Log(LOG_LEVEL_ERROR) << "PeerServer::do_read_header() " << ip
+                                                                 << " terminated with error: " << ec.message();
+                                            Peers &peers = Peers::Instance();
+                                            peers.disconnect(ip);
+                                        }
                                     }
                                 });
     } catch (const std::exception& e) {
@@ -121,8 +126,8 @@ void PeerServer::do_read_body()
                                 [this](boost::system::error_code ec, std::size_t /*length*/)
                                 {
 
-                                    std::cout << "do_read_body() ec message: " << ec.message() << std::endl;
-                                    std::cout << "do_read_body() ec value: " << ec.value() << std::endl;
+                                    Log(LOG_LEVEL_INFO) << "do_read_body() ec message: " << ec.message();
+                                    Log(LOG_LEVEL_INFO) << "do_read_body() ec value: " << ec.value();
 
                                     if (!ec)
                                     {
@@ -147,9 +152,14 @@ void PeerServer::do_read_body()
                                     }
                                     else
                                     {
-                                        Log(LOG_LEVEL_ERROR) << "PeerServer::do_read_body() " << ip << " terminated with error: " << ec.message();
-                                        Peers &peers = Peers::Instance();
-                                        peers.disconnect(ip);
+                                        if(ec == boost::asio::error::eof) {
+                                            do_read_header();
+                                        } else {
+                                            Log(LOG_LEVEL_ERROR) << "PeerServer::do_read_body() " << ip
+                                                                 << " terminated with error: " << ec.message();
+                                            Peers &peers = Peers::Instance();
+                                            peers.disconnect(ip);
+                                        }
                                     }
                                 });
     } catch (const std::exception& e) {
@@ -336,7 +346,13 @@ void PeerClient::do_read_header()
                                 }
                                 else
                                 {
-                                    this->disconnect();
+                                    Log(LOG_LEVEL_ERROR) << "PeerClient::do_read_header() " << ip
+                                                         << " terminated with error: " << ec.message();
+                                    if(ec == boost::asio::error::eof) {
+                                        do_read_header();
+                                    } else {
+                                        this->disconnect();
+                                    }
                                 }
                             });
 }
@@ -373,7 +389,11 @@ void PeerClient::do_read_body()
                                 }
                                 else
                                 {
-                                    this->disconnect();
+                                    if(ec == boost::asio::error::eof) {
+                                        do_read_header();
+                                    } else {
+                                        this->disconnect();
+                                    }
                                 }
                             });
 }
