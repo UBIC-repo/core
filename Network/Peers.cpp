@@ -57,7 +57,7 @@ bool Peers::appendPeer(PeerInterfacePtr peer) {
     Chain &chain = Chain::Instance();
 
     this->peers.insert(std::make_pair(peer->getIp(), peer));
-    Log(LOG_LEVEL_INFO) << "appended Peer, new peers list size : " << this->peers.size();
+    Log(LOG_LEVEL_INFO) << "appended Peer, new peers list size : " << (uint64_t)this->peers.size();
 
     return true;
 }
@@ -101,7 +101,7 @@ void PeerServer::do_read_header()
                                         }
                                     } else {
                                         if(ec == boost::asio::error::eof) {
-                                            do_read_header();
+                                            do_connect();
                                         } else {
                                             Log(LOG_LEVEL_ERROR) << "PeerServer::do_read_header() " << ip
                                                                  << " terminated with error: " << ec.message();
@@ -141,7 +141,7 @@ void PeerServer::do_read_body()
                                             std::memcpy(msg2->data(), read_msg_.data(), read_msg_.length());
                                             msg2->decode_header();
 
-                                            Log(LOG_LEVEL_INFO) << "read_msg_: size:" << msg2->length();
+                                            Log(LOG_LEVEL_INFO) << "read_msg_: size:" << (uint64_t)msg2->length();
                                             std::thread t(&NetworkMessageHandler::handleNetworkMessage, msg2, peer);
                                             t.detach();
 
@@ -153,7 +153,7 @@ void PeerServer::do_read_body()
                                     else
                                     {
                                         if(ec == boost::asio::error::eof) {
-                                            do_read_header();
+                                            do_connect();
                                         } else {
                                             Log(LOG_LEVEL_ERROR) << "PeerServer::do_read_body() " << ip
                                                                  << " terminated with error: " << ec.message();
@@ -327,6 +327,8 @@ void PeerClient::do_connect()
                                    {
                                        do_read_header();
                                    } else {
+                                       Log(LOG_LEVEL_INFO) << "PeerClient::do_connect() ec value:" << ec.value();
+                                       Log(LOG_LEVEL_INFO) << "PeerClient::do_connect() ec message:" << ec.message();
                                        disconnected = true;
                                        this->disconnect();
                                    }
@@ -349,7 +351,7 @@ void PeerClient::do_read_header()
                                     Log(LOG_LEVEL_ERROR) << "PeerClient::do_read_header() " << ip
                                                          << " terminated with error: " << ec.message();
                                     if(ec == boost::asio::error::eof) {
-                                        do_read_header();
+                                        do_connect();
                                     } else {
                                         this->disconnect();
                                     }
@@ -367,8 +369,6 @@ void PeerClient::do_read_body()
                             {
                                 if (!ec)
                                 {
-                                    std::cout << "do_read_body() ec message: " << ec.message() << std::endl;
-                                    std::cout << "do_read_body() ec value: " << ec.value() << std::endl;
 
                                     std::string ip = socket_.remote_endpoint().address().to_string();
                                     Peers &peers = Peers::Instance();
@@ -379,7 +379,7 @@ void PeerClient::do_read_body()
                                         std::memcpy(msg2->data(), read_msg_.data(), read_msg_.length());
                                         msg2->decode_header();
 
-                                        Log(LOG_LEVEL_INFO) << "read_msg_: size:" << msg2->length();
+                                        Log(LOG_LEVEL_INFO) << "read_msg_: size:" << (uint64_t)msg2->length();
                                         std::thread t(&NetworkMessageHandler::handleNetworkMessage, msg2, peer);
                                         t.detach();
                                         do_read_header();
@@ -389,8 +389,10 @@ void PeerClient::do_read_body()
                                 }
                                 else
                                 {
+                                    Log(LOG_LEVEL_INFO) << "PeerClient::do_read_body() ec value:" << ec.value();
+                                    Log(LOG_LEVEL_INFO) << "PeerClient::do_read_body() ec message:" << ec.message();
                                     if(ec == boost::asio::error::eof) {
-                                        do_read_header();
+                                        do_connect();
                                     } else {
                                         this->disconnect();
                                     }
@@ -402,7 +404,7 @@ void PeerClient::do_read_body()
 void PeerClient::do_write()
 {
     if(PeerClient::write_msgs_.empty()) {
-	    Log(LOG_LEVEL_INFO) << "write_msgs_.empty()";
+        Log(LOG_LEVEL_INFO) << "write_msgs_.empty()";
         deliverMutex.unlock();
         return;
     }
@@ -422,29 +424,29 @@ void PeerClient::do_write()
 
     try {
         boost::asio::async_write(socket_,
-                             boost::asio::buffer(write_msgs_.front().data(),
-                                                 write_msgs_.front().length()),
-                             [this](boost::system::error_code ec, std::size_t /*length*/)
-                             {
-                                 std::cout << "do_write() ec message: " << ec.message() << std::endl;
-                                 std::cout << "do_write() ec value: " << ec.value() << std::endl;
-                                 if (!ec)
+                                 boost::asio::buffer(write_msgs_.front().data(),
+                                                     write_msgs_.front().length()),
+                                 [this](boost::system::error_code ec, std::size_t /*length*/)
                                  {
-                                     write_msgs_.pop_front();
-                                     if (!write_msgs_.empty())
+                                     if (!ec)
                                      {
-                                         std::cout << "Server write: " << std::endl;
-                                         do_write();
-                                     } else {
-                                         deliverMutex.unlock();
+                                         write_msgs_.pop_front();
+                                         if (!write_msgs_.empty())
+                                         {
+                                             std::cout << "Server write: " << std::endl;
+                                             do_write();
+                                         } else {
+                                             deliverMutex.unlock();
+                                         }
                                      }
-                                 }
-                                 else
-                                 {
-                                     this->disconnect();
-                                     //deliverMutex.unlock();
-                                 }
-                             });
+                                     else
+                                     {
+                                         Log(LOG_LEVEL_INFO) << "PeerClient::do_write() ec value:" << ec.value();
+                                         Log(LOG_LEVEL_INFO) << "PeerClient::do_write() ec message:" << ec.message();
+                                         this->disconnect();
+                                         //deliverMutex.unlock();
+                                     }
+                                 });
     } catch (const std::exception& e) {
         Log(LOG_LEVEL_ERROR) << "Peer: " << ip << " terminated with exception: " << e.what();
         disconnect();
