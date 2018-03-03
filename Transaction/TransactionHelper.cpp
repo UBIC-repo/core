@@ -216,6 +216,7 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
         switch(txOut->getScript().getScriptType()) {
             case SCRIPT_LINK: {
                 //@TODO verify LINK exists
+                Log(LOG_LEVEL_ERROR) << "SCRIPT_LINK deactivated for now";
                 return false;
             }
             case SCRIPT_VOTE: {
@@ -255,6 +256,8 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                     return false;
                 }
 
+                Log(LOG_LEVEL_ERROR) << "SCRIPT_LINK deactivated for now";
+                return false;
                 break;
             }
             case SCRIPT_PKH: {
