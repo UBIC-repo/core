@@ -58,7 +58,7 @@ void AddressStore::creditAddressToStore(AddressForStore* address, bool isUndo) {
                             << addressKey;
     }
 
-    if(address->getScript().getScript().empty()) {
+    if(currentAddress.getScript().getScript().empty()) {
         currentAddress.setScript(address->getScript());
     }
 
