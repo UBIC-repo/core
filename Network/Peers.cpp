@@ -210,15 +210,9 @@ void PeerServer::do_write()
                                      }
                                      else
                                      {
-
-                                         if(ec == boost::asio::error::eof) {
-                                             do_connect();
-                                             deliverMutex.unlock();
-                                         } else {
-                                             Log(LOG_LEVEL_ERROR) << "PeerServer::do_write() " << ip << " terminated with error: " << ec.message();
-                                             Peers &peers = Peers::Instance();
-                                             peers.disconnect(ip);
-                                         }
+                                         Log(LOG_LEVEL_ERROR) << "PeerServer::do_write() " << ip << " terminated with error: " << ec.message();
+                                         Peers &peers = Peers::Instance();
+                                         peers.disconnect(ip);
                                      }
                                  });
     } catch (const std::exception& e) {
@@ -326,6 +320,10 @@ void PeerServer::setDonationAddress(std::string donationAddress) {
 
 void PeerClient::do_connect()
 {
+    if(connectionRetries > 10) {
+        return;
+    }
+    connectionRetries++;
     Log(LOG_LEVEL_INFO) << "PeerClient::do_connect()";
     boost::asio::async_connect(socket_, endpoint_iterator_,
                                [this](boost::system::error_code ec, tcp::resolver::iterator)
