@@ -202,9 +202,6 @@ void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
     Peers &peers = Peers::Instance();
     BlockCache &blockCache = BlockCache::Instance();
     uint8_t peerBatch = 10;
-
-    std::vector<PeerInterfacePtr> peerList = peers.getRandomPeers(6);
-
     bool done = false;
     uint32_t i = 0;
     uint32_t blocksReceived = 0;
@@ -212,6 +209,8 @@ void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
     while(!done) {
 
         uint32_t unbusyPeerNbr = 0;
+        
+        std::vector<PeerInterfacePtr> peerList = peers.getRandomPeers(6);
 
         for(PeerInterfacePtr peer : peerList) {
             bool skip = false;
