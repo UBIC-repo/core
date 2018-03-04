@@ -30,27 +30,28 @@ private:
                                        Log(LOG_LEVEL_INFO) << "Incoming connection from: " << ip;
                                        Peers &peers = Peers::Instance();
 
-                                       if(!peers.isPeerAlreadyInList(ip)) {
-                                           BanList &banList = BanList::Instance();
-                                           if (!banList.isBanned(ip)) {
-                                               shared_ptr<PeerServer> peer(new PeerServer(std::move(socket_)));
-                                               peer->start();
-                                               peer->setIp(ip);
+                                       if(peers.isPeerAlreadyInList(ip)) {
+                                           Log(LOG_LEVEL_INFO) << "Incoming connection from: "
+                                                               << ip
+                                                               << " this ip is already in the peer list";
+                                           peers.disconnect(ip);
+                                           Log(LOG_LEVEL_INFO) << "Reconnecting to: "
+                                                               << ip;
+                                       }
 
+                                       BanList &banList = BanList::Instance();
+                                       if (!banList.isBanned(ip)) {
+                                           shared_ptr<PeerServer> peer(new PeerServer(std::move(socket_)));
+                                           peer->start();
+                                           peer->setIp(ip);
 
-                                               if (!peers.appendPeer(peer->get())) {
-                                                   peer->close();
-                                               }
-                                           } else {
-                                               Log(LOG_LEVEL_INFO) << "cannot accept incoming connection from: "
-                                                                   << ip
-                                                                   << " because this ip is banned";
-                                               socket_.close();
+                                           if (!peers.appendPeer(peer->get())) {
+                                               peer->close();
                                            }
                                        } else {
                                            Log(LOG_LEVEL_INFO) << "cannot accept incoming connection from: "
                                                                << ip
-                                                               << " because this ip is already in the peer list";
+                                                               << " because this ip is banned";
                                            socket_.close();
                                        }
                                    }
