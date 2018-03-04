@@ -99,6 +99,7 @@ class PeerClient: public PeerInterface,
                   public std::enable_shared_from_this<PeerClient> {
 private:
     bool disconnected = false;
+    uint8_t connectionRetries = 0;
     ip_t ip;
     uint16_t port;
     std::vector<unsigned char> name;
