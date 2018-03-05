@@ -9,10 +9,8 @@ sudo apt-get install git cmake gcc make libleveldb1v5 libpcsclite1 libpcsclite-d
 Use ntp
 ===
 ```
-sudo service ntp stop
-sudo apt-get install ntpdate  
-sudo ntpdate pool.ntp.org
-sudo service ntp start
+sudo apt-get install ntp
+sudo systemctl enable ntp
 ```
 
 Install OpenSSL 1.1
