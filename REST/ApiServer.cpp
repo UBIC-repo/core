@@ -239,7 +239,7 @@ void ApiServer::run() {
                 }
 
                 std::string bufferStr(buffer, bufferSize);
-                Log(LOG_LEVEL_INFO) << "API Incoming:" << bufferStr;
+                //Log(LOG_LEVEL_INFO) << "API Incoming:" << bufferStr;
                 std::vector<std::string> urlParts = getUrlParts(bufferStr);
 
 
