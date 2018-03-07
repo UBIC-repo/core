@@ -164,6 +164,7 @@ void Network::syncBlockchain() {
     Peers &peers = Peers::Instance();
     Log(LOG_LEVEL_INFO) << "Network::syncBlockchain()";
     if (isSyncing) {
+        Log(LOG_LEVEL_INFO) << "Network::syncBlockchain() is already syncing";
         //already syncing
         return;
     }
