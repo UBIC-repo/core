@@ -6,11 +6,13 @@
 #include "Peers.h"
 #include "BlockCache.h"
 #include "NetworkCommands.h"
+#include "../Time.h"
 #include <boost/asio/ssl.hpp>
 #include <regex>
 
 bool Network::synced = false;
 bool Network::isSyncing = false;
+uint64_t Network::lastPeerLookup = 0;
 
 using namespace boost::asio;
 
@@ -47,7 +49,7 @@ std::vector<std::string> Network::getIpsFromGithub() {
             totalBytesTransfered += bytes_transferred;
             response.append(buffer);
 
-            Log(LOG_LEVEL_INFO) <<  "bytes_transferred rom Github: '" << bytes_transferred;
+            Log(LOG_LEVEL_INFO) <<  "bytes_transferred rom Github: '" << (uint64_t)bytes_transferred;
         } while(!ec);
 
         Log(LOG_LEVEL_INFO) <<  "Response received from Github: '" << response;
@@ -164,12 +166,12 @@ void Network::syncBlockchain() {
     Peers &peers = Peers::Instance();
     Log(LOG_LEVEL_INFO) << "Network::syncBlockchain()";
     if (isSyncing) {
-        Log(LOG_LEVEL_INFO) << "Network::syncBlockchain() is already syncing";
         //already syncing
         return;
     }
 
-    if(peers.getPeers().size() < 10) {
+    if(peers.getPeers().size() < 10 && Time::getCurrentTimestamp() - lastPeerLookup > 3600 ) {
+        lastPeerLookup = Time::getCurrentTimestamp();
         lookForPeers();
     }
 
@@ -378,7 +380,7 @@ void Network::broadCastNewBlockHeight(uint64_t height, std::vector<unsigned char
 
     Peers &peers = Peers::Instance();
     std::vector<PeerInterfacePtr> peerList = peers.getRandomPeers(50);
-    Log(LOG_LEVEL_INFO) << "peerList.size(): " << peerList.size();
+    Log(LOG_LEVEL_INFO) << "peerList.size(): " << (uint64_t)peerList.size();
 
     for (auto &peer : peerList) {
         peer->deliver(
