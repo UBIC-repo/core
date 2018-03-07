@@ -379,7 +379,7 @@ void Network::broadCastNewBlockHeight(uint64_t height, std::vector<unsigned char
     transmitBlockchainHeight.bestHeaderHash = bestHeaderHash;
 
     Peers &peers = Peers::Instance();
-    std::vector<PeerInterfacePtr> peerList = peers.getRandomPeers(50);
+    std::vector<PeerInterfacePtr> peerList = peers.getRandomPeers(12);
     Log(LOG_LEVEL_INFO) << "peerList.size(): " << (uint64_t)peerList.size();
 
     for (auto &peer : peerList) {
