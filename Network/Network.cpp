@@ -25,7 +25,7 @@ std::vector<std::string> Network::getIpsFromGithub() {
     try {
         boost::system::error_code ec;
         io_service svc;
-        ssl::context ctx(svc, ssl::context::method::sslv23_client);
+        ssl::context ctx(ssl::context::method::sslv23_client);
         ssl::stream<ip::tcp::socket> ssock(svc, ctx);
 
         ip::tcp::resolver resolver(svc);
