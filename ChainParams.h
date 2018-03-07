@@ -163,7 +163,7 @@
 
 #if defined(__APPLE__)
 #define BASE_PATH "/Applications/UBIC/"
-#define BASE_WEB_PATH "/Applications/UBIC-WEB/"
+#define BASE_WEB_PATH "/Applications/UBIC/web/"
 #define CONFIG_BASE_PATH "ubic/"
 #define CONFIG_PATH "config.ini"
 #endif
