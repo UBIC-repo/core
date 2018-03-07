@@ -11,6 +11,7 @@ private:
 public:
     static bool synced;
     static bool isSyncing;
+    static uint64_t lastPeerLookup;
     static Network& Instance(){
         static Network instance;
         return instance;
