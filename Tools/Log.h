@@ -37,13 +37,8 @@ public:
     Log& operator<<(const unsigned char* obj);
     Log& operator<<(std::string obj);
     Log& operator<<(uint32_t obj);
-#if defined(_WIN32) || defined(__APPLE__)
     Log& operator<<(uint64_t obj);
-#endif
     Log& operator<<(float obj);
-#if defined(__linux__)
-    Log& operator<<(size_t obj);
-#endif
     Log& operator<<(int obj);
     Log& operator<<(bool obj);
     Log& operator<<(UAmount obj);
