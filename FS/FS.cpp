@@ -80,7 +80,7 @@ std::vector<unsigned char> FS::readFile(std::vector<unsigned char> path) {
     long int size = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    char* pch = (char*)malloc((uint32_t)size);
+    char* pch = (char*)malloc(sizeof(char) * size);
     fread(pch, 1, (size_t)size, file);
     fclose(file);
 
@@ -96,7 +96,7 @@ std::vector<unsigned char> FS::readFile(std::vector<unsigned char> path, uint64_
     }
     fseek(file, startPosition, SEEK_SET);
 
-    char pch[size];
+    char* pch = (char*)malloc(sizeof(char) * size);
     fread(pch, 1, size, file);
     fclose(file);
 
@@ -192,9 +192,9 @@ std::vector<unsigned char> FS::getBlockDatPath() {
 
         std::string currentBlkFileNbrS2;
 
-        char* currentBlkFileNbrS = (char*)malloc(32);
+        char* currentBlkFileNbrS = (char*)malloc(sizeof(char) * 32);
         sprintf(currentBlkFileNbrS, "%d", currentBlkFileNbrI + 1);
-        char* prefix = (char*)malloc(32);
+        char* prefix = (char*)malloc(sizeof(char) * 32);
         sprintf(prefix, "0");
 
         Log(LOG_LEVEL_INFO) << "currentBlkFileNbrS: " << currentBlkFileNbrS;
