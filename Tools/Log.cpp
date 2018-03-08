@@ -129,14 +129,12 @@ Log& Log::operator<<(uint32_t obj)
     return *this;
 }
 
-#if defined(_WIN32) || defined(__APPLE__)
 Log& Log::operator<<(uint64_t obj)
 {
     std::cout << obj;
     *currentStream << obj;
     return *this;
 }
-#endif
 
 Log& Log::operator<<(float obj)
 {
@@ -144,15 +142,6 @@ Log& Log::operator<<(float obj)
     *currentStream << obj;
     return *this;
 }
-
-#if defined(__linux__)
-Log& Log::operator<<(size_t obj)
-{
-    std::cout << obj;
-    *currentStream << obj;
-    return *this;
-}
-#endif
 
 Log& Log::operator<<(int obj)
 {
