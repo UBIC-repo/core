@@ -170,6 +170,8 @@ void Network::syncBlockchain() {
         //already syncing
         return;
     }
+    
+    isSyncing = true;
 
     if(peers.getPeers().size() < 10 && Time::getCurrentTimestamp() - lastPeerLookup > 3600 ) {
         lastPeerLookup = Time::getCurrentTimestamp();
@@ -177,9 +179,8 @@ void Network::syncBlockchain() {
     }
 
     Log(LOG_LEVEL_INFO) << "Network start syncing";
-    isSyncing = true;
-    Chain &chain = Chain::Instance();
 
+    Chain &chain = Chain::Instance();
     uint32_t currentBlockHeight;
     uint16_t batchSize = 500;
 
