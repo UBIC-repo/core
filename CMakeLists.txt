@@ -194,4 +194,30 @@ set(SOURCE_FILES
         Base64.cpp Base64.h)
 add_executable(ubicd ${SOURCE_FILES})
 
-install(CODE "execute_process(COMMAND Static/install.sh)")
+set(SOURCE_FILES_CLI
+        cli/main.cpp
+        cli/HttpClient.cpp
+        cli/HttpClient.h
+        cli/ApiKey.cpp
+        cli/ApiKey.h
+        cli/FS/FS.h
+	    cli/FS/FS.cpp
+        )
+
+add_executable(ubic ${SOURCE_FILES_CLI})
+
+if(UNIX AND NOT APPLE)
+	set(SOURCE_FILES_CLI
+		cli/main.cpp
+		cli/HttpClient.cpp
+		cli/HttpClient.h
+		cli/ApiKey.cpp
+		cli/ApiKey.h
+		cli/FS/FS.h
+		cli/FS/FS.cpp
+		)
+
+	add_executable(ubic ${SOURCE_FILES_CLI})
+
+	install(CODE "execute_process(COMMAND Static/install.sh)")
+endif()
