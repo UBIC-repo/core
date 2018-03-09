@@ -204,8 +204,6 @@ set(SOURCE_FILES_CLI
 	    cli/FS/FS.cpp
         )
 
-add_executable(ubic ${SOURCE_FILES_CLI})
-
 if(UNIX AND NOT APPLE)
 	set(SOURCE_FILES_CLI
 		cli/main.cpp
