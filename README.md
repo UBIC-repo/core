@@ -1,5 +1,5 @@
 # Resources
- - [Whitepaper](https://raw.githubusercontent.com/UBIC-repo/Whitepaper/master/README.md)
+ - [Whitepaper](https://github.com/UBIC-repo/Whitepaper/blob/master/README.md)
  - [Reddit](https://www.reddit.com/r/UBIC/)
  - [Bitcointalk announcement](https://bitcointalk.org/index.php?topic=3021063.0)
  - [Installation on Linux](#installation-on-linux)
