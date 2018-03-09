@@ -85,7 +85,7 @@ std::vector<std::string> Network::getIpsFromGithub() {
 void Network::lookForPeers() {
     Peers &peers = Peers::Instance();
     // Step 1 get some nodes from Github
-    auto ipList = this->getIpsFromGithub();
+    auto ipList = Network::getIpsFromGithub();
 
     for(auto ip : ipList) {
         auto io_service = std::make_shared<boost::asio::io_service>();
@@ -173,9 +173,10 @@ void Network::syncBlockchain() {
     
     isSyncing = true;
 
-    if(peers.getPeers().size() < 10 && Time::getCurrentTimestamp() - lastPeerLookup > 3600 ) {
+    if(peers.getPeers().size() < 10 && Time::getCurrentTimestamp() - lastPeerLookup > (3600*24) ) {
         lastPeerLookup = Time::getCurrentTimestamp();
-        lookForPeers();
+        std::thread t(&lookForPeers);
+        t.detach();
     }
 
     Log(LOG_LEVEL_INFO) << "Network start syncing";
