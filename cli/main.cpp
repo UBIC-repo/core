@@ -16,6 +16,9 @@ int main(int argc, char *argv[]) {
     // --- Status
     if (strcmp(argv[1], "status") == 0) {
         response = client->get("/", ApiKey::getApiKey());
+	if(response.empty()) {
+		return 0;
+	}
 
         std::stringstream ss(response);
         boost::property_tree::ptree pt;
@@ -50,6 +53,9 @@ int main(int argc, char *argv[]) {
     // --- Stop minting
     if (strcmp(argv[1], "stop-minting") == 0) {
         response = client->get("/mint/stop", ApiKey::getApiKey());
+	if(response.empty()) {
+		return 0;
+	}
 
         std::stringstream ss(response);
         boost::property_tree::ptree pt;
@@ -66,6 +72,9 @@ int main(int argc, char *argv[]) {
     // --- Start minting
     if (strcmp(argv[1], "stop-minting") == 0) {
         response = client->get("/mint/start", ApiKey::getApiKey());
+	if(response.empty()) {
+		return 0;
+	}
 
         std::stringstream ss(response);
         boost::property_tree::ptree pt;
