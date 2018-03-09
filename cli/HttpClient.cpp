@@ -84,7 +84,7 @@ std::string HttpClient::get(std::string url, std::string apiKey) {
     }
     catch (std::exception& e)
     {
-        std::cout << "Exception: " << e.what() << "\n";
+        std::cout << "Exception: " << e.what() << ", verify that ubicd is running or try /etc/init.d/ubic restart\n";
     }
     return "";
 }
