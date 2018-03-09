@@ -41,7 +41,6 @@ sudo make install
 ```
 
 #### Run the server
-===
 ```
 /etc/init.d/ubic start
 ```
