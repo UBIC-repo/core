@@ -17,8 +17,8 @@ public:
         return instance;
     }
 
-    std::vector<std::string> getIpsFromGithub();
-    void lookForPeers();
+    static std::vector<std::string> getIpsFromGithub();
+    static void lookForPeers();
     void syncBlockchain();
     void getBlocks(uint32_t from, uint16_t count, bool &synced);
     void getBlock(std::vector<unsigned char> blockHeaderHash, uint64_t height);
