@@ -1,5 +1,6 @@
 echo "Running install.sh"
 cp ./ubicd /usr/bin/
+cp ./ubic /usr/bin/
 cp ./Static/init.d/ubic /etc/init.d/
 
 if [ ! -d "/var/ubic/" ]; then
