@@ -67,9 +67,20 @@ Note that to work your node should ideally be synced.
 
 # Command line interface
 
-If you run ```ubic status``` you will get your current node status
+If you run ```ubic web``` you will get the URL for accessing the web interface.
+```
+Web interface: http://127.0.01:6789#839073d84f8ee9dbe98d02b3
+```
+
+If you run ```ubic status``` you will get your current node status.
 ```
 Synced: true
 Blockchain height: 4114
 Best block hash: 0b9751f604582ddb405e1dfa1cbf202ecbd0621b3b7f9d70ba21456675a017c8
 ```
+
+If you run ```ubic add-peer <ip address>``` you will add a new node to your node list.
+```
+Adding peer succeeded
+```
+
