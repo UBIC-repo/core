@@ -4,6 +4,8 @@
 #include "HttpClient.h"
 #include "ApiKey.h"
 
+using boost::property_tree::ptree;
+
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         std::cout << "Missing parameter, options are: status, start-minting, stop-minting" << std::endl;
@@ -13,12 +15,17 @@ int main(int argc, char *argv[]) {
     HttpClient *client = new HttpClient();
     std::string response;
 
+    // --- Web interface
+    if (strcmp(argv[1], "web") == 0) {
+        std::cout << "Web interface: http://127.0.01:6789#" << ApiKey::getApiKey() << std::endl;
+    }
+
     // --- Status
     if (strcmp(argv[1], "status") == 0) {
         response = client->get("/", ApiKey::getApiKey());
-	if(response.empty()) {
-		return 0;
-	}
+        if(response.empty()) {
+            return 0;
+        }
 
         std::stringstream ss(response);
         boost::property_tree::ptree pt;
@@ -53,16 +60,16 @@ int main(int argc, char *argv[]) {
     // --- Stop minting
     if (strcmp(argv[1], "stop-minting") == 0) {
         response = client->get("/mint/stop", ApiKey::getApiKey());
-	if(response.empty()) {
-		return 0;
-	}
+        if(response.empty()) {
+            return 0;
+        }
 
         std::stringstream ss(response);
         boost::property_tree::ptree pt;
         boost::property_tree::read_json(ss, pt);
 
         for (boost::property_tree::ptree::value_type &v : pt) {
-            if (strcmp(v.first.data(), "done") == 0 && strcmp(v.first.data(), "done") == 0) {
+            if (strcmp(v.first.data(), "done") == 0) {
                 std::cout << "Stopped minting" << std::endl;
             }
         }
@@ -72,17 +79,47 @@ int main(int argc, char *argv[]) {
     // --- Start minting
     if (strcmp(argv[1], "stop-minting") == 0) {
         response = client->get("/mint/start", ApiKey::getApiKey());
-	if(response.empty()) {
-		return 0;
-	}
+        if(response.empty()) {
+            return 0;
+        }
 
         std::stringstream ss(response);
         boost::property_tree::ptree pt;
         boost::property_tree::read_json(ss, pt);
 
         for (boost::property_tree::ptree::value_type &v : pt) {
-            if (strcmp(v.first.data(), "done") == 0 && strcmp(v.first.data(), "done") == 0) {
+            if (strcmp(v.first.data(), "done") == 0) {
                 std::cout << "Started minting" << std::endl;
+            }
+        }
+    }
+
+    // --- add peer
+    if (strcmp(argv[1], "add-peer") == 0) {
+        if(argc < 3) {
+            std::cout << "Missing IP parameter" << std::endl;
+        }
+        std::stringstream ss;
+        ss << "{\"ip\":\"" << argv[2] << "\"}";
+
+        response = client->post("/peers/add", ApiKey::getApiKey(), HttpClient::url_encode(ss.str()));
+        if(response.empty()) {
+            return 0;
+        }
+
+        std::stringstream ss2(response);
+        boost::property_tree::ptree pt;
+        boost::property_tree::read_json(ss2, pt);
+
+        for (boost::property_tree::ptree::value_type &v : pt) {
+            if (strcmp(v.first.data(), "success") == 0) {
+                if(strcmp(v.second.data().c_str(), "false") == 0) {
+                    std::cout << "Adding peer failed" << std::endl;
+                    return 0;
+                } else {
+                    std::cout << "Adding peer succeeded" << std::endl;
+                    return 0;
+                }
             }
         }
     }
