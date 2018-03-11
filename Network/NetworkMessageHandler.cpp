@@ -348,6 +348,11 @@ void NetworkMessageHandler::handleTransmitPeers(TransmitPeers *transmitPeers, Pe
     }
 
     for(std::string ip : transmitPeers->ipList) {
+        if(ip == Network::myIP) {
+            Log(LOG_LEVEL_INFO) << "Cannot add ip: " << ip << " because it is your own IP";
+            continue;
+        }
+        
         auto io_service = std::make_shared<boost::asio::io_service>();
         tcp::resolver resolver(*io_service);
 
