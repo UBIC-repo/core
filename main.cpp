@@ -29,6 +29,10 @@ void startMinting() {
     mint.startMintingService();
 }
 
+void getMyIP() {
+    Network::getMyIP();
+}
+
 void startServer() {
     Log(LOG_LEVEL_INFO) << "Start Server";
     try
@@ -145,12 +149,14 @@ int main() {
     Wallet& wallet = Wallet::Instance();
 
     Log(LOG_LEVEL_INFO) << "Final balance : " << wallet.getBalance();
-
+    
+    std::thread t0(&getMyIP);
     std::thread t1(&startApiServer);
     std::thread t2(&startServer);
     std::thread t3(&startWebInterface);
     std::thread t4(&startMinting);
     std::thread t5(&startSync);
+    t0.join();
     t1.join();
     t2.join();
     t3.join();
