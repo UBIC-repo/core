@@ -12,6 +12,7 @@
 
 bool Network::synced = false;
 bool Network::isSyncing = false;
+ip_t Network::myIP = "";
 uint64_t Network::lastPeerLookup = 0;
 
 using namespace boost::asio;
@@ -88,6 +89,12 @@ void Network::lookForPeers() {
     auto ipList = Network::getIpsFromGithub();
 
     for(auto ip : ipList) {
+
+        if(ip == Network::myIP) {
+            Log(LOG_LEVEL_INFO) << "Cannot add ip: " << ip << " because it is your own IP";
+            continue;
+        }
+
         auto io_service = std::make_shared<boost::asio::io_service>();
         tcp::resolver resolver(*io_service);
         auto work = std::make_shared<boost::asio::io_service::work>(*io_service);
@@ -162,15 +169,85 @@ void Network::lookForPeers() {
 #endif
 }
 
+void Network::getMyIP() {
+    try {
+        boost::asio::io_service io_service;
+
+        tcp::resolver resolver(io_service);
+        tcp::resolver::query query("api.ipify.org", "80");
+        tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+
+        tcp::socket socket(io_service);
+        boost::asio::connect(socket, endpoint_iterator);
+
+        boost::asio::streambuf request;
+        std::ostream request_stream(&request);
+        request_stream << "GET / HTTP/1.0\r\n";
+        request_stream << "Host: api.ipify.org\r\n";
+        request_stream << "Accept: */*\r\n";
+        request_stream << "Connection: close\r\n\r\n";
+
+        boost::asio::write(socket, request);
+        boost::asio::streambuf response;
+        boost::asio::read_until(socket, response, "\r\n");
+
+        // Check that response is OK.
+        std::istream response_stream(&response);
+        std::string http_version;
+        response_stream >> http_version;
+        unsigned int status_code;
+        response_stream >> status_code;
+        std::string status_message;
+        std::getline(response_stream, status_message);
+        if (!response_stream || http_version.substr(0, 5) != "HTTP/")
+        {
+            std::cout << "get my ip: Invalid response\n";
+        }
+        if (status_code != 200)
+        {
+            std::cout << "get my ip: Response returned with error code " << status_code << "\n";
+        }
+
+        // Read the response headers, which are terminated by a blank line.
+        boost::asio::read_until(socket, response, "\r\n\r\n");
+
+        // Process the response headers.
+        std::string header;
+        while (std::getline(response_stream, header) && header != "\r") {
+            //std::cout << header << "\n";
+        }
+
+        std::ostringstream ss;
+        ss << &response;
+
+
+        // Read until EOF, writing data to output as we go.
+        boost::system::error_code error;
+        while (boost::asio::read(socket, response,
+                                 boost::asio::transfer_at_least(1), error))
+            ss << &response;
+
+        if (error != boost::asio::error::eof)
+            throw boost::system::system_error(error);
+
+        Network::myIP = ss.str();
+        Log(LOG_LEVEL_INFO) << "My IP is: " << Network::myIP;
+    }
+    catch (std::exception& e)
+    {
+        std::cout << "Exception: " << e.what() << ", verify that ubicd is running or try /etc/init.d/ubic restart\n";
+    }
+}
+
 void Network::syncBlockchain() {
     Peers &peers = Peers::Instance();
     Log(LOG_LEVEL_INFO) << "Network::syncBlockchain()";
     if (isSyncing) {
-        Log(LOG_LEVEL_INFO) << "Network::syncBlockchain() is already syncing";
+        Log(LOG_LEVEL_INFO) << "Network::syncBlockchain(), already syncing";
         //already syncing
         return;
     }
-    
+
     isSyncing = true;
 
     if(peers.getPeers().size() < 10 && Time::getCurrentTimestamp() - lastPeerLookup > (3600*24) ) {
@@ -180,8 +257,8 @@ void Network::syncBlockchain() {
     }
 
     Log(LOG_LEVEL_INFO) << "Network start syncing";
-
     Chain &chain = Chain::Instance();
+
     uint32_t currentBlockHeight;
     uint16_t batchSize = 500;
 
@@ -208,6 +285,7 @@ void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
     Peers &peers = Peers::Instance();
     BlockCache &blockCache = BlockCache::Instance();
     uint8_t peerBatch = 10;
+
     bool done = false;
     uint32_t i = 0;
     uint32_t blocksReceived = 0;
@@ -215,7 +293,7 @@ void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
     while(!done) {
 
         uint32_t unbusyPeerNbr = 0;
-        
+
         std::vector<PeerInterfacePtr> peerList = peers.getRandomPeers(6);
 
         for(PeerInterfacePtr peer : peerList) {
