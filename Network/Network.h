@@ -12,6 +12,7 @@ class Network {
 private:
 public:
     static bool synced;
+    static uint64_t lastPeerLookup;
     static bool isSyncing;
     static ip_t myIP;
 
