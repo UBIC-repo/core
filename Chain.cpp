@@ -178,7 +178,7 @@ bool Chain::connectBlock(Block* block, bool isRecursion) {
                 }
             }
 
-            Log(LOG_LEVEL_INFO) << "Need to disconnect " << toUndo.size() << " blocks";
+            Log(LOG_LEVEL_INFO) << "Need to disconnect " << (uint64_t)toUndo.size() << " blocks";
 
             // disconnect all blocks until last common block
             for (std::vector<std::vector<unsigned char>>::iterator it = toUndo.begin(); it != toUndo.end(); it++) {
@@ -193,7 +193,7 @@ bool Chain::connectBlock(Block* block, bool isRecursion) {
             this->bestBlockHeight = commonBlock.getBlockHeight();
 
             Log(LOG_LEVEL_INFO) << "Blocks are now disconnected";
-            Log(LOG_LEVEL_INFO) << "Will apply " << toDo.size() << " new blocks";
+            Log(LOG_LEVEL_INFO) << "Will apply " << (uint64_t)toDo.size() << " new blocks";
 
             std::vector<std::vector<unsigned char> > appliedTodos;
 
