@@ -227,7 +227,7 @@ void ApiServer::run() {
 #else
                 usleep(200);
 #endif
-                Log(LOG_LEVEL_INFO) << "socket.available():" << socket.available();
+                Log(LOG_LEVEL_INFO) << "socket.available():" << (uint64_t)socket.available();
 
                 if (!config.getAllowFrom().empty() &&
                     config.getAllowFrom() != socket.remote_endpoint().address().to_string()) {
