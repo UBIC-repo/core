@@ -22,6 +22,7 @@ using namespace boost::asio;
  * Will return 10 random node ips collected from Github
  */
 std::vector<std::string> Network::getIpsFromGithub() {
+    Log(LOG_LEVEL_INFO) <<  "Network::getIpsFromGithub()";
     //return std::vector<std::string>();
     std::vector<std::string> ipList;
     std::vector<std::string> ipList2;
@@ -251,6 +252,7 @@ void Network::syncBlockchain() {
     isSyncing = true;
 
     if(peers.getPeers().size() < 10 && Time::getCurrentTimestamp() - lastPeerLookup > (3600*24) ) {
+        Log(LOG_LEVEL_INFO) << "Going to look for peers";
         lastPeerLookup = Time::getCurrentTimestamp();
         std::thread t(&lookForPeers);
         t.detach();
@@ -260,7 +262,7 @@ void Network::syncBlockchain() {
     Chain &chain = Chain::Instance();
 
     uint32_t currentBlockHeight;
-    uint16_t batchSize = 500;
+    uint16_t batchSize = 100;
 
     while(!synced) {
         currentBlockHeight = chain.getCurrentBlockchainHeight() + 1;
@@ -269,6 +271,19 @@ void Network::syncBlockchain() {
     Log(LOG_LEVEL_INFO) << "Node is synced";
 
     isSyncing = false;
+}
+
+void Network::askForBlocks(PeerInterfacePtr peer, AskForBlocks askForBlocks) {
+    peer->deliver(NetworkMessageHelper::serializeToNetworkMessage(askForBlocks));
+}
+
+void Network::askForBlock(PeerInterfacePtr peer, AskForBlock askForBlock) {
+    peer->deliver(NetworkMessageHelper::serializeToNetworkMessage(askForBlock));
+}
+
+void Network::askForBlockchainHeight(PeerInterfacePtr peer) {
+    AskForBlockchainHeight askForBlockchainHeight;
+    peer->deliver(NetworkMessageHelper::serializeToNetworkMessage(askForBlockchainHeight));
 }
 
 void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
@@ -296,6 +311,13 @@ void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
 
         std::vector<PeerInterfacePtr> peerList = peers.getRandomPeers(6);
 
+        if(peers.getPeers().size() == 0 && Time::getCurrentTimestamp() - lastPeerLookup > 5 ) {
+            Log(LOG_LEVEL_INFO) << "Second look for peers";
+            lastPeerLookup = Time::getCurrentTimestamp();
+            std::thread t(&lookForPeers);
+            t.detach();
+        }
+
         for(PeerInterfacePtr peer : peerList) {
             bool skip = false;
             Log(LOG_LEVEL_INFO) << "P1 :" << peer->getIp();
@@ -317,6 +339,7 @@ void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
                     previousBlockHeight = blockHeight;
 
                     if(batchCandidateSize + 1 >= peerBatch) {
+
                         if(unbusyPeerNbr == batchNbr) {
                             AskForBlocks askForBlocks;
                             if(blockHeight < peerBatch) {
@@ -327,10 +350,10 @@ void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
                             askForBlocks.count = peerBatch;
 
                             if(peer->getBlockHeight() >= askForBlocks.startBlockHeight + askForBlocks.count) {
-                                peer->deliver(
-                                        NetworkMessageHelper::serializeToNetworkMessage(askForBlocks)
-                                );
+                                std::thread t0(&Network::askForBlocks, peer, askForBlocks);
+                                t0.detach();
                                 std::vector<uint32_t> blockHeightVector;
+
                                 for (uint32_t z = 0; z < peerBatch; z++) {
                                     blockHeightVector.emplace_back((uint32_t) (askForBlocks.startBlockHeight + z));
                                 }
@@ -357,12 +380,8 @@ void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
                             AskForBlocks askForBlocks;
                             askForBlocks.startBlockHeight = blockHeight;
                             askForBlocks.count = 1;
-                            NetworkMessage networkMessage = NetworkMessageHelper::serializeToNetworkMessage(
-                                    askForBlocks
-                            );
-                            peer->deliver(
-                                    networkMessage
-                            );
+                            std::thread t1(&Network::askForBlocks, peer, askForBlocks);
+                            t1.detach();
                             std::vector<uint32_t> blockHeightVector;
                             blockHeightVector.emplace_back(blockHeight);
                             blockCache.insertInBlockHeightAskedMap(peer->getIp(), blockHeightVector);
@@ -377,8 +396,8 @@ void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
                 }
 
                 // Ask peer for it's new block height
-                AskForBlockchainHeight askForBlockchainHeight;
-                peer->deliver(NetworkMessageHelper::serializeToNetworkMessage(askForBlockchainHeight));
+                std::thread t2(&Network::askForBlockchainHeight, peer);
+                t2.detach();
 
                 if(!skip) {
                     // check for missing blocks by hash
@@ -387,9 +406,8 @@ void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
                         if (unbusyPeerNbr == blockNbr) {
                             AskForBlock askForBlock;
                             askForBlock.blockHeaderHash = blockHeaderHash;
-                            peer->deliver(
-                                    NetworkMessageHelper::serializeToNetworkMessage(askForBlock)
-                            );
+                            std::thread t3(&Network::askForBlock, peer, askForBlock);
+                            t3.detach();
                             blockCache.insertInBlockHashAskedMap(peer->getIp(), blockHeaderHash);
                             neededBlockHashList.emplace_back(blockHeaderHash);
 
@@ -435,7 +453,6 @@ void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
         }
 
         i++;
-
         if(i % 20 == 0) {
             Log(LOG_LEVEL_INFO) << " i:" << i << " blocksReceived:" << blocksReceived;
             // if less than 4 blocks received within the last minute we are probably synced
