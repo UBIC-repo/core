@@ -494,7 +494,7 @@ std::vector<TransactionForStore> Wallet::getMyTransactions() {
         response.emplace_back(transaction);
     }
 
-    Log(LOG_LEVEL_INFO) << "My transactions count: " << response.size();
+    Log(LOG_LEVEL_INFO) << "My transactions count: " << (uint64_t)response.size();
 
     return response;
 }
