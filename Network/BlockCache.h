@@ -143,7 +143,7 @@ public:
         }
         cacheMutex.unlock();
 
-        Log(LOG_LEVEL_INFO) << "missingBlockHashList size: " << missing.size();
+        Log(LOG_LEVEL_INFO) << "missingBlockHashList size: " << (uint64_t)missing.size();
 
         return missing;
     }
