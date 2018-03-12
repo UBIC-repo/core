@@ -144,7 +144,7 @@ bool Cert::isMature(uint32_t blockHeight) {
 
     Log(LOG_LEVEL_INFO) << "maturation for blockheight:" << blockHeight;
 
-    if(blockHeight <= CSCA_MATURATION_SUSPENSIONTIME_IN_BLOCKS) {
+    if(blockHeight <= CSCA_MATURATION_SUSPENSIONTIME_IN_BLOCKS || this->statusList.back().first <= CSCA_MATURATION_SUSPENSIONTIME_IN_BLOCKS) {
         return true;
     }
 
