@@ -5,6 +5,7 @@
 #include "Transaction/TransactionHelper.h"
 #include "Network/NetworkMessage.h"
 #include "Chain.h"
+#include "Network/Network.h"
 
 bool TxPool::isTxInputPresent(TxIn txIn) {
     if(txIn.getInAddress().empty()) {
@@ -81,6 +82,9 @@ bool TxPool::appendTransaction(Transaction transaction) {
             this->txInputs.insert(std::make_pair(Hexdump::vectorToHexString(txIn.getInAddress()), txIn));
         }
     }
+
+    Network &network = Network::Instance();
+    network.broadCastTransaction(transaction);
 
     return true;
 }
