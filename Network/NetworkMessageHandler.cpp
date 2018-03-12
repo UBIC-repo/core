@@ -319,7 +319,7 @@ void NetworkMessageHandler::handleTransmitBlocks(TransmitBlock *transmitBlocks, 
     } catch (const std::exception& e) {
         Log(LOG_LEVEL_ERROR) << "Error while deserializing block from peer: " << recipient->getIp()
                              << ", terminated with exception: " << e.what()
-                             << ", transmitted block size:" << transmitBlocks->block.size()
+                             << ", transmitted block size:" << (uint64_t)transmitBlocks->block.size()
                              << ", content:"
                              << transmitBlocks->block;
         BanList& banList = BanList::Instance();
