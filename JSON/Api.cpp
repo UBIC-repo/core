@@ -780,7 +780,18 @@ std::string Api::readPassport(std::string json) {
         if(TransactionHelper::verifyTx(registerPassportTx, IS_NOT_IN_HEADER, chain.getBestBlockHeader())) {
             Log(LOG_LEVEL_INFO) << "Passport transaction verified";
         } else {
-            return "{\"success\": false, \"error\" : \"couldn't verify Passport transaction\"}";
+
+            char pData[512];
+            FS::charPathFromVectorPath(pData, FS::concatPaths(FS::getConfigBasePath(), "extractedDSC.cert"));
+            FILE* fileDSC = fopen (pData , "w");
+
+            if(fileDSC != nullptr) {
+                Log(LOG_LEVEL_INFO) << "wrote to extractedDSC.cert file";
+                i2d_X509_fp(fileDSC, pkcsCert->getX509());
+                fclose(fileDSC);
+            }
+
+           return "{\"success\": false, \"error\" : \"couldn't verify Passport transaction\"}";
         }
 
         CDataStream spTx(SER_DISK, 1);
