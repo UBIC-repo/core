@@ -154,7 +154,7 @@ bool Loader::loadBestBlockHeaders() {
     }
 
     chain.setBestBlockHeaders(bestBlockHeaders);
-    Log(LOG_LEVEL_INFO) << "Loaded " << bestBlockHeaders.size() << " best block header(s)";
+    Log(LOG_LEVEL_INFO) << "Loaded " << (uint64_t)bestBlockHeaders.size() << " best block header(s)";
 
     return true;
 }
