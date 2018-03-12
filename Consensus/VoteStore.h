@@ -66,7 +66,7 @@ public:
             this->allDelegates.insert(std::make_pair(delegate->getPublicKey(), *delegate));
         }
 
-        Log(LOG_LEVEL_INFO) << "this->allDelegates.size(): " << this->allDelegates.size();
+        Log(LOG_LEVEL_INFO) << "this->allDelegates.size(): " << (uint64_t)this->allDelegates.size();
 
         std::map<std::vector<unsigned char>, Delegate> delegateCandidates;
         for(auto delegate1 : this->allDelegates) {
@@ -102,7 +102,7 @@ public:
             this->activeDelegates = delegates;
         }
 
-        Log(LOG_LEVEL_INFO) << "this->activeDelegates.size(): " << this->activeDelegates.size();
+        Log(LOG_LEVEL_INFO) << "this->activeDelegates.size(): " << (uint64_t)this->activeDelegates.size();
 
         return true;
     }
