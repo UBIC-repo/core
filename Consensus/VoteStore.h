@@ -290,7 +290,7 @@ public:
             return std::vector<unsigned char>();
         }
         uint64_t delegateNbr = ((uint64_t)(timestamp / BLOCK_INTERVAL_IN_SECONDS) % this->activeDelegates.size());
-        Log(LOG_LEVEL_INFO) << "this->activeDelegates.size(): " << this->activeDelegates.size();
+        Log(LOG_LEVEL_INFO) << "this->activeDelegates.size(): " << (uint64_t)this->activeDelegates.size();
         Log(LOG_LEVEL_INFO) << "current delegateNbr: " << delegateNbr;
         uint32_t i = 0;
         for(auto activeDelegate : this->activeDelegates) {
