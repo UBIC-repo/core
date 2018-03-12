@@ -5,6 +5,8 @@
 #include <vector>
 #include "../Transaction/Transaction.h"
 #include "../Block.h"
+#include "Peers.h"
+#include "NetworkCommands.h"
 
 typedef std::string ip_t;
 
@@ -25,6 +27,9 @@ public:
     static void lookForPeers();
     static void getMyIP();
     void syncBlockchain();
+    static void askForBlocks(PeerInterfacePtr peer, AskForBlocks askForBlocks);
+    static void askForBlock(PeerInterfacePtr peer, AskForBlock askForBlock);
+    static void askForBlockchainHeight(PeerInterfacePtr peer);
     void getBlocks(uint32_t from, uint16_t count, bool &synced);
     void getBlock(std::vector<unsigned char> blockHeaderHash, uint64_t height);
     void broadCastNewBlockHeight(uint64_t height, std::vector<unsigned char> bestHeaderHash);
