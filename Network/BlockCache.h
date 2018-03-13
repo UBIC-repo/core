@@ -28,8 +28,7 @@ private:
         BanList& banList = BanList::Instance();
         Chain &chain = Chain::Instance();
         uint64_t currentBlockchainHeight = chain.getCurrentBlockchainHeight();
-
-        cacheMutex.lock();
+        
         bool continueAppending = true;
         while(continueAppending) {
             continueAppending = false;
@@ -44,26 +43,31 @@ private:
                         && chain.doesBlockExist(block->getHeader()->getBlockHeight())) {
                         Log(LOG_LEVEL_INFO) << "remove block:" << block->getHeader()->getHeaderHash()
                                             << " from cache because it is already in our chain";
+                        cacheMutex.lock();                        
                         blockIt = cache.erase(blockIt);
+                        cacheMutex.unlock();
                     } else if (chain.connectBlock(block)) {
                         Log(LOG_LEVEL_INFO) << "remove block:" << block->getHeader()->getHeaderHash()
                                             << " from cache";
 
                         continueAppending = true; // continue try appending, may be after connecting this block another from the cache can be connected to
+                        cacheMutex.lock();                        
                         blockIt = cache.erase(blockIt);
+                        cacheMutex.unlock();
                     } else {
                         // Failed to connect block
                         Log(LOG_LEVEL_INFO) << "remove invalid block:" << block->getHeader()->getHeaderHash()
                                             << " from cache and add ban";
                         banList.appendBan(blockIt->second.first, BAN_INC_FOR_INVALID_BLOCK);
+                        cacheMutex.lock();                        
                         blockIt = cache.erase(blockIt);
+                        cacheMutex.unlock();
                     }
                 } else {
                     blockIt++;
                 }
             }
         }
-        cacheMutex.unlock();
 
         Log(LOG_LEVEL_INFO) << "tryToAppendBlocksToChain() done";
     }
