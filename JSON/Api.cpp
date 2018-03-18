@@ -510,7 +510,8 @@ std::string Api::getAddress(std::vector<unsigned char> address) {
     addressTree.put("nonce", addressForStore.getNonce());
     addressTree.put("scriptType", addressForStore.getScript().getScriptType());
     addressTree.put("script", Hexdump::vectorToHexString(addressForStore.getScript().getScript()));
-    addressTree.push_back(std::make_pair("amount", uamountToPtree(addressForStore.getAmount())));
+    addressTree.push_back(std::make_pair("amountWithUBI", uamountToPtree(AddressHelper::getAmountWithUBI(&addressForStore))));
+    addressTree.push_back(std::make_pair("amountWithoutUBI", uamountToPtree(addressForStore.getAmount())));
     addressTree.push_back(std::make_pair("UBIdebit", uamountToPtree(addressForStore.getUBIdebit())));
     addressTree.put("DscCertificate", Hexdump::vectorToHexString(addressForStore.getDscCertificate()));
     addressTree.put("DSCLinkedAtHeight", addressForStore.getDSCLinkedAtHeight());
@@ -1062,7 +1063,8 @@ std::string Api::getWallet() {
         address->setScript(addressUScript);
 
         addressTree.put("readable", Wallet::readableAddressFromAddress(*address));
-        addressTree.put("hex", Hexdump::vectorToHexString(addressScript));
+        addressTree.put("addressLink", Hexdump::vectorToHexString(addressLink));
+        addressTree.put("hexscript", Hexdump::vectorToHexString(addressScript));
         addressTree.put("pubKey", Hexdump::vectorToHexString(wallet.getPublicKeyFromAddressLink(addressLink)));
         addressTree.push_back(std::make_pair("amount", uamountToPtree(addressBalance)));
         addressesTree.push_back(std::make_pair("", addressTree));
