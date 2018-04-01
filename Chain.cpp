@@ -281,8 +281,8 @@ bool Chain::connectBlock(Block* block, bool isRecursion) {
 
     connectBlockMutex.unlock();
     
-    Network& network = Network::Instance();
-    network.broadCastNewBlockHeight(header->getBlockHeight(), header->getHeaderHash());
+    std::thread t1(&Network::broadCastNewBlockHeight, header->getBlockHeight(), header->getHeaderHash());
+    t1.detach();
 
     return true;
 }
