@@ -32,7 +32,7 @@ public:
     static void askForBlockchainHeight(PeerInterfacePtr peer);
     void getBlocks(uint32_t from, uint16_t count, bool &synced);
     void getBlock(std::vector<unsigned char> blockHeaderHash, uint64_t height);
-    void broadCastNewBlockHeight(uint64_t height, std::vector<unsigned char> bestHeaderHash);
+    static void broadCastNewBlockHeight(uint64_t height, std::vector<unsigned char> bestHeaderHash);
     void broadCastTransaction(Transaction tx);
 
     static bool isSynced();
