@@ -189,8 +189,7 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
             Log(LOG_LEVEL_ERROR) << "Received networkMessage with unknown commandType: " << commandType;
             break;
     }
-
-    free(networkMessage->data());
+    
     free(networkMessage);
 }
 
