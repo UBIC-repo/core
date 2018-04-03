@@ -34,6 +34,7 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleAskForBlocks(askForBlocks, recipient);
+            free(askForBlocks);
             break;
         }
         case ASK_FOR_BLOCK_COMMAND: {
@@ -46,6 +47,8 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleAskForBlock(askForBlock, recipient);
+            free(askForBlock->blockHeaderHash.data());
+            free(askForBlock);
             break;
         }
         case ASK_FOR_PEERS_COMMAND: {
@@ -102,6 +105,8 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleTransmitBlocks(transmitBlocks, recipient);
+            free(transmitBlocks->block.data());
+            free(transmitBlocks);
             break;
         }
         case TRANSMIT_PEERS_COMMAND: {
@@ -185,6 +190,8 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
             break;
     }
 
+    free(networkMessage->data());
+    free(networkMessage);
 }
 
 void NetworkMessageHandler::handleAskForBlocks(AskForBlocks *askForBlocks, PeerInterfacePtr recipient) {
