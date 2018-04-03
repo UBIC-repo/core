@@ -335,9 +335,8 @@ bool Chain::doesBlockExist(uint64_t height) {
 
 bool Chain::doesBlockExist(std::vector<unsigned char> blockHeaderHash) {
     DB &db = DB::Instance();
-    BlockHeader* blockHeader = new BlockHeader();
-
-    return db.deserializeFromDb(DB_BLOCK_HEADERS, blockHeaderHash, *blockHeader);
+    
+    return db.isInDB(DB_BLOCK_HEADERS, blockHeaderHash);
 }
 
 uint32_t Chain::getCurrentBlockchainHeight() {
