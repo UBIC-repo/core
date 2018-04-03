@@ -25,7 +25,7 @@ public:
 
     ~NetworkMessage()
     {
-        //free(data_);
+        free(data_);
     }
 
     char* data()
