@@ -7,6 +7,7 @@
 #include <cstring>
 #include <boost/asio/ip/tcp.hpp>
 #include "../streams.h"
+#include "../Tools/Hexdump.h"
 
 using boost::asio::ip::tcp;
 
@@ -14,6 +15,15 @@ typedef std::string ip_t; // ip type
 
 class NetworkMessage {
 public:
+    NetworkMessage(const NetworkMessage &other) {
+            this->data_ = (char*)malloc(header_length + max_body_length);
+            this->body_length_ = other.body_length_;
+            std::memcpy(this->data_, other.data_, header_length + max_body_length);
+    };
+
+    uint32_t body_length_;
+    uint8_t from = 65;
+    char* data_;
     const static uint8_t header_length = 4;
     const static uint32_t max_body_length = 2000000;
 
@@ -25,7 +35,8 @@ public:
 
     ~NetworkMessage()
     {
-        //free(data_);
+        free(data_);
+        data_ = nullptr;
     }
 
     char* data()
@@ -79,9 +90,6 @@ public:
         std::memcpy(data_, s.data(), header_length);
     }
 
-private:
-    char* data_;
-    uint32_t body_length_;
 };
 
 class NetworkMessageHelper {
