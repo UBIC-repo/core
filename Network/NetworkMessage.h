@@ -32,6 +32,12 @@ public:
     {
         data_ = (char*)malloc(header_length + max_body_length);
     }
+    
+    NetworkMessage(size_t dataSize)
+            : body_length_(0)
+    {
+        data_ = (char*)malloc(dataSize);
+    }
 
     ~NetworkMessage()
     {
