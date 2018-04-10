@@ -16,7 +16,7 @@ typedef std::string ip_t; // ip type
 class NetworkMessage {
 public:
     NetworkMessage(const NetworkMessage &other) {
-            this->data_ = (char*)malloc(header_length + max_body_length);
+            this->data_ = (char*)malloc(header_length + other.body_length_);
             this->body_length_ = other.body_length_;
             std::memcpy(this->data_, other.data_, header_length + other.body_length_);
     };
