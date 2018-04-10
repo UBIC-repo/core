@@ -102,16 +102,18 @@ class NetworkMessageHelper {
 public:
     template < typename Serializable >
     static NetworkMessage serializeToNetworkMessage(Serializable data) {
-        NetworkMessage msg;
 
         CDataStream s(SER_DISK, 1);
         s << data;
 
-        msg.body_length(s.size());
-        std::memcpy(msg.body(), s.data(), msg.body_length());
-        msg.encode_header();
+        NetworkMessage* msg = new NetworkMessage(s.size() + NetworkMessage::header_length);
 
-        return msg;
+        msg->body_length(s.size());
+        std::memcpy(msg->body(), s.data(), msg->body_length());
+        msg->encode_header();
+        s.clear();
+
+        return *msg;
     }
 };
 
