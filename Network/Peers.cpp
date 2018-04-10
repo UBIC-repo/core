@@ -380,7 +380,7 @@ void PeerClient::do_read_body()
                                     PeerInterfacePtr peer = peers.getPeer(ip);
 
                                     if(peer != nullptr) {
-                                        NetworkMessage* msg2 = new NetworkMessage();
+                                        NetworkMessage* msg2 = new NetworkMessage(read_msg_.length());
                                         std::memcpy(msg2->data(), read_msg_.data(), read_msg_.length());
                                         msg2->decode_header();
 
