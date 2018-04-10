@@ -105,8 +105,7 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleTransmitBlocks(transmitBlocks, recipient);
-            free(transmitBlocks->block.data());
-            free(transmitBlocks);
+            delete transmitBlocks;
             break;
         }
         case TRANSMIT_PEERS_COMMAND: {
@@ -190,7 +189,8 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
             break;
     }
     
-    free(networkMessage);
+    s.clear();
+    delete networkMessage;
 }
 
 void NetworkMessageHandler::handleAskForBlocks(AskForBlocks *askForBlocks, PeerInterfacePtr recipient) {
@@ -219,7 +219,8 @@ void NetworkMessageHandler::handleAskForBlocks(AskForBlocks *askForBlocks, PeerI
 
             NetworkMessage msg;
             msg.body_length(s.size());
-            std::memcpy(msg.body(), s.data(), msg.body_length());
+            std::memcpy(msg.body(), s.data(), msg.size());
+            s.clear();
             msg.encode_header();
 
             recipient->deliver(msg);
