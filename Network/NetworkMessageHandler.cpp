@@ -219,7 +219,7 @@ void NetworkMessageHandler::handleAskForBlocks(AskForBlocks *askForBlocks, PeerI
 
             NetworkMessage msg;
             msg.body_length(s.size());
-            std::memcpy(msg.body(), s.data(), msg.size());
+            std::memcpy(msg.body(), s.data(), s.size());
             s.clear();
             msg.encode_header();
 
