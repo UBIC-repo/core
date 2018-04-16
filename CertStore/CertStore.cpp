@@ -583,10 +583,11 @@ std::map<std::vector<unsigned char>, Cert> CertStore::getRootList() {
     return RootList;
 }
 
-std::map<std::vector<unsigned char>, Cert> CertStore::getCSCAList() {
-    return CSCAList;
+std::map<std::vector<unsigned char>, Cert>* CertStore::getCSCAList() {
+    return &CSCAList;
 }
 
-std::unordered_map<std::string, Cert> CertStore::getDSCList() {
-    return DSCList;
+std::unordered_map<std::string, Cert>* CertStore::getDSCList() {
+    return &DSCList;
 }
+
