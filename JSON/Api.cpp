@@ -1236,9 +1236,9 @@ std::string Api::getCSCACertificates() {
 
     ptree baseTree;
 
-    std::map<std::vector<unsigned char>, Cert> cscaList = certStore.getCSCAList();
+    std::map<std::vector<unsigned char>, Cert>* cscaList = certStore.getCSCAList();
 
-    for(std::map<std::vector<unsigned char>, Cert>::iterator it = cscaList.begin(); it != cscaList.end(); it++) {
+    for(std::map<std::vector<unsigned char>, Cert>::iterator it = cscaList->begin(); it != cscaList->end(); it++) {
         ptree cert;
         cert.put("active", it->second.isCertAtive());
         cert.put("currency", it->second.getCurrencyId());
