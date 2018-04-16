@@ -285,12 +285,12 @@ bool BlockHelper::applyBlock(Block* block) {
     Chain &chain = Chain::Instance();
     BlockHeader* previousBlockHeader = chain.getBlockHeader(block->getHeader()->getPreviousHeaderHash());
     CertStore& certStore = CertStore::Instance();
-    std::unordered_map<std::string, Cert> dscList = certStore.getDSCList();
+    std::unordered_map<std::string, Cert>* dscList = certStore.getDSCList();
 
     if(previousBlockHeader != nullptr) {
         // go through all DSCs to find out if one has been deactivated between previous and current block
         // @TODO this is not the most performant solution, find something better
-        for(std::unordered_map<std::string, Cert>::iterator it = dscList.begin(); it != dscList.end(); ++it) {
+        for(std::unordered_map<std::string, Cert>::iterator it = dscList->begin(); it != dscList->end(); ++it) {
             if(it->second.getExpirationDate() > previousBlockHeader->getTimestamp()
                && it->second.getExpirationDate() <= block->getHeader()->getTimestamp()) {
 
@@ -358,13 +358,13 @@ bool BlockHelper::undoBlock(Block* block) {
     Chain &chain = Chain::Instance();
     BlockHeader* previousBlockHeader = chain.getBlockHeader(block->getHeader()->getPreviousHeaderHash());
     CertStore& certStore = CertStore::Instance();
-    std::unordered_map<std::string, Cert> dscList = certStore.getDSCList();
-    std::unordered_map<std::string, Cert> cscaList = certStore.getDSCList();
+    std::unordered_map<std::string, Cert> dscList* = certStore.getDSCList();
+    std::unordered_map<std::string, Cert> cscaList* = certStore.getDSCList();
 
     if(previousBlockHeader != nullptr) {
         // go through all DSCs to find out if one has been deactivated between previous and current block
         // @TODO this is not the most performant solution, find something better
-        for (std::unordered_map<std::string, Cert>::iterator it = dscList.begin(); it != dscList.end(); ++it) {
+        for (std::unordered_map<std::string, Cert>::iterator it = dscList->begin(); it != dscList->end(); ++it) {
             if (it->second.getExpirationDate() > previousBlockHeader->getTimestamp()
                 && it->second.getExpirationDate() <= block->getHeader()->getTimestamp()) {
 
@@ -377,7 +377,7 @@ bool BlockHelper::undoBlock(Block* block) {
         }
 
         // same with CSCAs
-        for (std::unordered_map<std::string, Cert>::iterator it = cscaList.begin(); it != cscaList.end(); ++it) {
+        for (std::unordered_map<std::string, Cert>::iterator it = cscaList->begin(); it != cscaList->end(); ++it) {
             if (it->second.getExpirationDate() > previousBlockHeader->getTimestamp()
                 && it->second.getExpirationDate() <= block->getHeader()->getTimestamp()) {
 
@@ -510,7 +510,7 @@ UAmount32 BlockHelper::calculateUbiReceiverCount(Block* block, BlockHeader* prev
     UAmount32 newUbiReceiverCount = previousBlockHeader->getUbiReceiverCount();
 
     CertStore& certStore = CertStore::Instance();
-    std::unordered_map<std::string, Cert> dscList = certStore.getDSCList();
+    std::unordered_map<std::string, Cert>* dscList = certStore.getDSCList();
 
     //go through all transactions and check for new subscriptions/certificate addition or removal
     for(Transaction transaction: block->getTransactions()) {
@@ -576,7 +576,7 @@ UAmount32 BlockHelper::calculateUbiReceiverCount(Block* block, BlockHeader* prev
 
     // go through all DSCs to find out if one has been deactivated between previous and current block
     // @TODO this is not the most performant solution, find something better
-    for(std::unordered_map<std::string, Cert>::iterator it = dscList.begin(); it != dscList.end(); ++it) {
+    for(std::unordered_map<std::string, Cert>::iterator it = dscList->begin(); it != dscList->end(); ++it) {
         if(it->second.getExpirationDate() > previousBlockHeader->getTimestamp()
            && it->second.getExpirationDate() <= block->getHeader()->getTimestamp()) {
             UAmount32 toSubstract;
