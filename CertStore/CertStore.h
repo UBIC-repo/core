@@ -52,8 +52,8 @@ public:
     static Cert* certFromFile(char* path);
     static X509 *createX509(const unsigned char* c, const unsigned char* cn1, const unsigned char* cn2, X509* signer,EVP_PKEY *pkey);
     std::map<std::vector<unsigned char>, Cert> getRootList();
-    std::map<std::vector<unsigned char>, Cert> getCSCAList();
-    std::unordered_map<std::string, Cert> getDSCList();
+    std::map<std::vector<unsigned char>, Cert>* getCSCAList();
+    std::unordered_map<std::string, Cert>* getDSCList();
 };
 
 #endif //PASSPORTREADER_CERTSTORE_H
