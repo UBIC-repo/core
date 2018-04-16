@@ -1294,9 +1294,9 @@ std::string Api::getDSCCertificates() {
 
     ptree baseTree;
 
-    std::unordered_map<std::string, Cert> dscList = certStore.getDSCList();
+    std::unordered_map<std::string, Cert>* dscList = certStore.getDSCList();
 
-    for(std::unordered_map<std::string, Cert>::iterator it = dscList.begin(); it != dscList.end(); it++) {
+    for(std::unordered_map<std::string, Cert>::iterator it = dscList->begin(); it != dscList->end(); it++) {
         ptree cert;
         cert.push_back(std::make_pair("statusList", statusListToPtree(it->second.getStatusList())));
         cert.put("active", it->second.isCertAtive());
