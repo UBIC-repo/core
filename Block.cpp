@@ -358,8 +358,8 @@ bool BlockHelper::undoBlock(Block* block) {
     Chain &chain = Chain::Instance();
     BlockHeader* previousBlockHeader = chain.getBlockHeader(block->getHeader()->getPreviousHeaderHash());
     CertStore& certStore = CertStore::Instance();
-    std::unordered_map<std::string, Cert> dscList* = certStore.getDSCList();
-    std::unordered_map<std::string, Cert> cscaList* = certStore.getDSCList();
+    std::unordered_map<std::string, Cert>* dscList = certStore.getDSCList();
+    std::unordered_map<std::string, Cert>* cscaList = certStore.getDSCList();
 
     if(previousBlockHeader != nullptr) {
         // go through all DSCs to find out if one has been deactivated between previous and current block
