@@ -218,10 +218,9 @@ void Mint::mintBlockAndBroadcast() {
     Network& network = Network::Instance();
     if(!block.getHeader()->getHeaderHash().empty()) {
         Log(LOG_LEVEL_INFO) << "Broadcasting new blockchain height:" << block.getHeader()->getBlockHeight();
-        network.broadCastNewBlockHeight(
-                block.getHeader()->getBlockHeight(),
-                block.getHeader()->getHeaderHash()
-        );
+        
+        std::thread t1(&Network::broadCastNewBlockHeight, block.getHeader()->getBlockHeight(), block.getHeader()->getHeaderHash());
+        t1.detach();
     }
 }
 
