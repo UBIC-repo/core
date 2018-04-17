@@ -102,6 +102,11 @@ Log& Log::operator<<(std::vector<unsigned char> obj)
 
 Log& Log::operator<<(const char* obj)
 {
+    if(obj == nullptr) {
+        std::cout << "(NULL)";
+        *currentStream << "(NULL)";
+        return *this;
+    }
     std::cout << obj;
     *currentStream << obj;
     return *this;
@@ -109,6 +114,11 @@ Log& Log::operator<<(const char* obj)
 
 Log& Log::operator<<(const unsigned char* obj)
 {
+    if(obj == nullptr) {
+        std::cout << "(NULL)";
+        *currentStream << "(NULL)";
+        return *this;
+    }
     std::cout << obj;
     *currentStream << obj;
     return *this;
