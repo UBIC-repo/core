@@ -47,6 +47,7 @@ void startServer() {
     catch (std::exception& e)
     {
         Log(LOG_LEVEL_ERROR) << "Server Exception: " << e.what();
+        startServer();
     }
 }
 
