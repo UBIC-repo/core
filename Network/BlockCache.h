@@ -158,7 +158,7 @@ public:
             cacheMutex.unlock();
             return false;
         }
-        for(auto block : this->cache) {
+        for(auto& block : this->cache) {
             if(block.second.second.getHeader()->getBlockHeight() == height) {
                 cacheMutex.unlock();
                 return true;
