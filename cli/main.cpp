@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
         std::cout << "Synced: " << synced << std::endl;
         std::cout << "Blockchain height: " << height << std::endl;
         std::cout << "Best block hash: " << hash << std::endl;
-        std::cout << "Connected to " << peersCount << " peers" << std::endl;
+        std::cout << "Connected to " << peersCount << " peer(s)" << std::endl;
     }
 
     // --- Stop minting
