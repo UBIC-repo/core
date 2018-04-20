@@ -31,9 +31,10 @@ int main(int argc, char *argv[]) {
         boost::property_tree::ptree pt;
         boost::property_tree::read_json(ss, pt);
 
-        std::string height;
-        std::string hash;
-        std::string synced;
+        std::string height = "?";
+        std::string hash = "?";
+        std::string synced = "?";
+        std::string peersCount = "?";
 
         for (boost::property_tree::ptree::value_type &v : pt) {
             if (strcmp(v.first.data(), "bestBlock") == 0) {
@@ -50,11 +51,15 @@ int main(int argc, char *argv[]) {
             if (strcmp(v.first.data(), "synced") == 0) {
                 synced = v.second.data();
             }
+            if (strcmp(v.first.data(), "peersCount") == 0) {
+                peersCount = v.second.data();
+            }
         }
 
         std::cout << "Synced: " << synced << std::endl;
         std::cout << "Blockchain height: " << height << std::endl;
         std::cout << "Best block hash: " << hash << std::endl;
+        std::cout << "Connected to " << peersCount << " peers" << std::endl;
     }
 
     // --- Stop minting
