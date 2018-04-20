@@ -1189,6 +1189,7 @@ std::string Api::getBlock(std::vector<unsigned char> blockHeaderHash) {
 std::string Api::getIndex() {
     Chain& chain = Chain::Instance();
     Network& network = Network::Instance();
+    Peers& peers = Peers::Instance();
 
     ptree baseTree;
     ptree bestBlock;
@@ -1203,6 +1204,7 @@ std::string Api::getIndex() {
 
     baseTree.add_child("bestBlock", bestBlock);
     baseTree.put("synced", network.synced);
+    baseTree.put("peersCount", peers.getPeers().size());
 
     std::stringstream ss;
     boost::property_tree::json_parser::write_json(ss, baseTree);
