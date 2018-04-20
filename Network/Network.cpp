@@ -368,6 +368,7 @@ void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
                             }
                         }
                         batchCandidateSize = 0;
+                        batchNbr++;
                     }
                 }
 
