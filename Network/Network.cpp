@@ -323,8 +323,8 @@ void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
             Log(LOG_LEVEL_INFO) << "P1 :" << peer->getIp();
 
             // get a peer that isn't busy
-            if(!blockCache.hasWork(peer->getIp())) {
-
+            if(peer->getLastAsked() + 30 < Time::getCurrentTimestamp() || !blockCache.hasWork(peer->getIp())) {
+                peer->setLastAsked(Time::getCurrentTimestamp());
                 Log(LOG_LEVEL_INFO) << "unbusy :" << peer->getIp() << " with blockHeight: " << peer->getBlockHeight();
 
                 // if there is a missing batch, take it
@@ -454,9 +454,9 @@ void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
         }
 
         i++;
-        if(i % 20 == 0) {
+        if(i % 120 == 0) {
             Log(LOG_LEVEL_INFO) << " i:" << i << " blocksReceived:" << blocksReceived;
-            // if less than 4 blocks received within the last minute we are probably synced
+            // if less than 4 blocks received within the last two minute we are probably synced
             if(blocksReceived < 4) {
                 synced = true;
                 return;
