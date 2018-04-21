@@ -127,6 +127,8 @@ public:
     virtual void do_connect() = 0;
     virtual std::string getDonationAddress() = 0;
     virtual void setDonationAddress(std::string donationAddress) = 0;
+    virtual uint64_t getLastAsked() = 0;
+    virtual void setLastAsked(uint64_t lastAsked) = 0;
 };
 
 
