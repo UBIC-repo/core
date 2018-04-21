@@ -456,8 +456,8 @@ void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
         i++;
         if(i % 120 == 0) {
             Log(LOG_LEVEL_INFO) << " i:" << i << " blocksReceived:" << blocksReceived;
-            // if less than 4 blocks received within the last two minute we are probably synced
-            if(blocksReceived < 4) {
+            // if less than 5 blocks received within the last two minute we are probably synced
+            if(blocksReceived < 5) {
                 synced = true;
                 return;
             }
