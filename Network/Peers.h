@@ -52,6 +52,7 @@ private:
     std::mutex deliverMutex;
     bool disconnected = false;
     std::string donationAddress;
+    uint64_t lastAsked = 0;
 
     void do_read_header();
     void do_read_body();
@@ -117,6 +118,7 @@ private:
     uint64_t clock;
     std::mutex deliverMutex;
     std::string donationAddress;
+    uint64_t lastAsked = 0;
 
     void do_read_header();
     void do_read_body();
