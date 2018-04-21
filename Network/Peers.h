@@ -73,6 +73,14 @@ public:
     }
 
     void do_connect() {};
+                      
+    uint64_t getLastAsked() {
+        return lastAsked;
+    }
+
+    void setLastAsked(uint64_t lastAsked) {
+        this->lastAsked = lastAsked;
+    }
 
     void start();
     void close();
@@ -137,6 +145,14 @@ public:
 
     std::shared_ptr<PeerClient> get() {
         return shared_from_this();
+    }
+                      
+    uint64_t getLastAsked() {
+        return lastAsked;
+    }
+
+    void setLastAsked(uint64_t lastAsked) {
+        this->lastAsked = lastAsked;
     }
 
     void deliver(NetworkMessage msg);
