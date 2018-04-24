@@ -154,9 +154,8 @@ int main(int argc, char *argv[]) {
                         if (strcmp(v3.first.data(), "blockHeight") == 0) {
                             blockHeight = v3.second.data();
                         }
-
-                        std::cout << ip << ", blockheight: " << blockHeight << std::endl;
                     }
+                    std::cout << ip << ", blockheight: " << blockHeight << std::endl;
                 }
             }
         }
