@@ -4,7 +4,8 @@
  - [Bitcointalk announcement](https://bitcointalk.org/index.php?topic=3021063.0)
  - [Installation on Linux](#installation-on-linux)
  - [Command line interface](#command-line-interface)
-
+ - [Development environment](#development-environment)
+ 
 # Installation on Linux
 
 #### Install dependencies
@@ -85,7 +86,10 @@ Best block hash: 0b9751f604582ddb405e1dfa1cbf202ecbd0621b3b7f9d70ba21456675a017c
 Adding peer succeeded
 ```
 
-```ubic peers``` will return the peers you are connected to
+```ubic peers``` will return the peers you are connected to.
 ```
 <ip>, blockheight: <height>
 ```
+
+# Development environment
+UBIC was developed using CLion. If you want to work on the source code it is recommended that you use the same IDE.
