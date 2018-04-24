@@ -128,6 +128,40 @@ int main(int argc, char *argv[]) {
             }
         }
     }
+    
+    // --- Peers
+    if (strcmp(argv[1], "peers") == 0) {
+        response = client->get("/peers", ApiKey::getApiKey());
+        if(response.empty()) {
+            return 0;
+        }
+
+        std::stringstream ss(response);
+        boost::property_tree::ptree pt;
+        boost::property_tree::read_json(ss, pt);
+
+        std::string ip;
+        std::string blockHeight;
+
+        for (boost::property_tree::ptree::value_type &v : pt) {
+            if (strcmp(v.first.data(), "peers") == 0) {
+                for (boost::property_tree::ptree::value_type &v2 : v.second) {
+                    for (boost::property_tree::ptree::value_type &v3 : v2.second) {
+                        if (strcmp(v3.first.data(), "ip") == 0) {
+                            ip = v3.second.data();
+                        }
+
+                        if (strcmp(v3.first.data(), "blockHeight") == 0) {
+                            blockHeight = v3.second.data();
+                        }
+
+                        std::cout << ip << ", blockheight: " << blockHeight << std::endl;
+                    }
+                }
+            }
+        }
+
+    }
 
     // --- Balance
 /*
