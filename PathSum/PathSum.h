@@ -1,8 +1,7 @@
 /**
  *
  * With UBIC the UBI reward is distributed every block to a large amount of addresses. This is why
- * The PathSum Class is there to drastically reduce the amount of computation required the UBI received
- * by an Address.
+ * The PathSum Class is there to drastically reduce the amount of computation required for every payout.
  *
  * Example:
  *
