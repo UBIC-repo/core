@@ -6,11 +6,11 @@
  * Example:
  *
  *                                          158
- *
+ *                                           /\
  *                  87                                            71
- *
+ *                  /\                                            /\
  *        45                    42                      30                   41
- *
+ *        /\                    /\                      /\                   /\
  * 5 5 5 5 5 4 4 4 4 4 | 5 5 5 5 5 5 3 3 3 3 | 3 3 3 3 3 3 3 3 3 3 | 4 5 4 4 4 4 4 4 4 4
  *
  * In this example without the PathSum it would take 22 computational steps to calculate
