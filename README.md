@@ -29,6 +29,10 @@ sudo make
 sudo make install
 
 openssl version # make sure it is version 1.1
+
+#additional steps might be required:
+sudo cp /usr/local/lib/libcrypto.so.1.1 /usr/lib
+sudo cp /usr/local/lib/libssl.so.1.1 /usr/lib
 ```
 
 #### Install UBIC
