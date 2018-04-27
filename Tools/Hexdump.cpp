@@ -57,6 +57,15 @@ std::vector<unsigned char> Hexdump::vectorToHexVector(std::vector<unsigned char>
 }
 
 std::string Hexdump::ucharToHexString(unsigned char* charArray, uint32_t charArrayLength) {
+    
+    if(charArray == nullptr) {
+        return "nullptr";
+    }
+
+    if(charArrayLength > 65536) {
+        return "charArrayLength overflow";
+    }
+    
     constexpr char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7',
                                '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
