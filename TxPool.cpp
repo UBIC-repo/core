@@ -44,9 +44,20 @@ void TxPool::setTransactionList(std::unordered_map<std::string, Transaction> tra
 void TxPool::popTransaction(std::vector<unsigned char> txId) {
     std::unordered_map<std::string, Transaction>::iterator txIt = this->transactionList.find(Hexdump::vectorToHexString(txId));
     if(txIt != this->transactionList.end()) {
-        for(TxIn txIn: txIt->second.getTxIns()) {
-            auto found = this->txInputs.find(Hexdump::vectorToHexString(txIn.getInAddress()));
-            this->txInputs.erase(found);
+        if(TransactionHelper::isRegisterPassport(&txIt->second)) {
+            std::vector<unsigned char> passportHash = TransactionHelper::getPassportHash(&txIt->second);
+
+            auto found = this->txInputs.find(Hexdump::vectorToHexString(passportHash));
+            if (found != this->txInputs.end()) {
+                this->txInputs.erase(found);
+            }
+        } else {
+            for (TxIn txIn: txIt->second.getTxIns()) {
+                auto found = this->txInputs.find(Hexdump::vectorToHexString(txIn.getInAddress()));
+                if (found != this->txInputs.end()) {
+                    this->txInputs.erase(found);
+                }
+            }
         }
 
         this->transactionList.erase(Hexdump::vectorToHexString(txId));
