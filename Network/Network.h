@@ -33,7 +33,7 @@ public:
     void getBlocks(uint32_t from, uint16_t count, bool &synced);
     void getBlock(std::vector<unsigned char> blockHeaderHash, uint64_t height);
     static void broadCastNewBlockHeight(uint64_t height, std::vector<unsigned char> bestHeaderHash);
-    void broadCastTransaction(Transaction tx);
+    static void broadCastTransaction(Transaction tx);
 
     static bool isSynced();
 
