@@ -94,8 +94,8 @@ bool TxPool::appendTransaction(Transaction transaction) {
         }
     }
 
-    Network &network = Network::Instance();
-    network.broadCastTransaction(transaction);
+    std::thread t1(&Network::broadCastTransaction, transaction);
+    t1.detach();
 
     return true;
 }
