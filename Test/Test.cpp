@@ -130,7 +130,7 @@ time_t Test::ASN1_GetTimeT(ASN1_TIME* time)
     return mktime(&t);
 }
 
-void Test::importCACerts(BlockHeader* header) {
+void Test::importCACerts() {
 
     std::vector<unsigned char> privKey = Hexdump::hexStringToVector(UBIC_ROOT_PRIVATE_KEY);
 
@@ -170,7 +170,6 @@ void Test::importCACerts(BlockHeader* header) {
 
     Cert* ubiCa = new Cert();
     ubiCa->setX509(ubicCert);
-    certStore.addUBICrootCert(ubiCa, header->getBlockHeight());
 
     std::vector<unsigned char> path = FS::getImportDirectoryPath();
     path = FS::concatPaths(path, "csca/");
@@ -200,6 +199,10 @@ void Test::importCACerts(BlockHeader* header) {
             ASN1_STRING *countryData = X509_NAME_ENTRY_get_data(country);
             const unsigned char *countryStr = ASN1_STRING_get0_data(countryData);
             Log(LOG_LEVEL_INFO) << "Country code: " << countryStr;
+
+            if(getCurrencyIdFromIso2Code((char*)countryStr) == 0) {
+                continue;
+            }
 
             time_t notAfterTime = Test::ASN1_GetTimeT(notAfter);
 
@@ -271,7 +274,7 @@ void Test::importCACerts(BlockHeader* header) {
     Log(LOG_LEVEL_INFO) << "added: " << cscaCounter << " csca certificates";
 }
 
-void Test::importDSCCerts(BlockHeader *header) {
+void Test::importDSCCerts() {
 
     std::vector<unsigned char> privKey = Hexdump::hexStringToVector(UBIC_ROOT_PRIVATE_KEY);
     BIGNUM* keyBn = BN_bin2bn(privKey.data(), (int)privKey.size(), NULL);
@@ -309,6 +312,10 @@ void Test::importDSCCerts(BlockHeader *header) {
             const unsigned char *countryStr = ASN1_STRING_get0_data(countryData);
 
             Log(LOG_LEVEL_INFO) << "Country code: " << countryStr;
+
+            if(getCurrencyIdFromIso2Code((char*)countryStr) == 0) {
+                continue;
+            }
 
             Log(LOG_LEVEL_INFO) << "notAfter: " << notAfter->data;
             Log(LOG_LEVEL_INFO) << "notBefore: " << notBefore->data;
@@ -437,9 +444,10 @@ void Test::importDSCCerts(BlockHeader *header) {
             tx->setNetwork(NET_CURRENT);
             tx->setTxIns(txIns);
 
-            txPool.appendTransaction(*tx);
+            if(txPool.appendTransaction(*tx)) {
+                Log(LOG_LEVEL_INFO) << "appended ADD Certificate to transactions";
+            }
             dscCounter++;
-            //certStore.addDSC(dsc, header);
         }
     }
     Log(LOG_LEVEL_INFO) << "added: " << dscCounter << " csca certificates";
