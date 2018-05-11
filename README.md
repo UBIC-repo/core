@@ -80,7 +80,7 @@ Note that to work your node should ideally be synced.
 
 # Command line interface
 
-```ubic web``` will get the URL for accessing the web interface.
+```ubic web``` will display the URL for accessing the web interface.
 ```
 Web interface: http://127.0.01:6789#839073d84f8ee9dbe98d02b3
 ```
