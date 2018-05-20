@@ -1036,6 +1036,14 @@ bool TransactionHelper::undoTransaction(Transaction* tx, BlockHeader* blockHeade
  * @return UAmount
  */
 UAmount TransactionHelper::calculateMinimumFee(Transaction* transaction, BlockHeader* header) {
+
+    CDataStream s(SER_DISK, 1);
+    s << *transaction;
+
+    return calculateMinimumFee(s.size(), header);
+}
+
+UAmount TransactionHelper::calculateMinimumFee(size_t txSize, BlockHeader* header) {
     //@TODO: check
     UAmount rAmount;
     if(header == nullptr) {
@@ -1057,11 +1065,8 @@ UAmount TransactionHelper::calculateMinimumFee(Transaction* transaction, BlockHe
         }
     }
 
-    CDataStream s(SER_DISK, 1);
-    s << *transaction;
-
     for (std::map<uint8_t, CAmount>::const_iterator it(totalPayout.map.begin()); it != totalPayout.map.end(); ++it) {
-        rAmount.map[it->first] = it->second * s.size() * TXFEE_FACTOR;
+        rAmount.map[it->first] = it->second * txSize * TXFEE_FACTOR;
     }
 
     return rAmount;
