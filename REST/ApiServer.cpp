@@ -134,6 +134,8 @@ std::string ApiServer::route(std::vector<std::string> urlParts, std::string json
                 }
             }
             return Api::getUbi();
+        } else if(urlParts.at(0) == "fees") {
+            return Api::getFees();
         } else if(urlParts.at(0) == "txpool") {
             return Api::getTxPool();
         } else if(urlParts.at(0) == "incoming") {
