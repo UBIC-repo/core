@@ -24,6 +24,7 @@ public:
     static bool applyTransaction(Transaction* tx, BlockHeader* blockHeader);
     static bool undoTransaction(Transaction* tx, BlockHeader* blockHeader);
     static UAmount calculateMinimumFee(Transaction* transaction, BlockHeader* header);
+    static UAmount calculateMinimumFee(size_t txSize, BlockHeader* header);
 };
 
 
