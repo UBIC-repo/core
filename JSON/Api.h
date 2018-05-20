@@ -32,6 +32,7 @@ public:
     static std::string getUbi();
     static std::string getWallet();
     static std::string getTxPool();
+    static std::string getFees();
     static std::string getIncomingTx();
     static std::string getBlock(uint32_t blockHeight);
     static std::string getBlock(std::vector<unsigned char> blockHeaderHash);
