@@ -1100,6 +1100,22 @@ std::string Api::getTxPool() {
     return ss.str();
 }
 
+
+std::string Api::getFees() {
+    Chain& chain = Chain::Instance();
+
+    UAmount feeFor1000bytes = TransactionHelper::calculateMinimumFee(1000, chain.getBestBlockHeader());
+
+    ptree baseTree;
+    baseTree.put("description", "Fees for 1MB (1000 bytes)");
+    baseTree.push_back(std::make_pair("fees", uamountToPtree(feeFor1000bytes)));
+
+    std::stringstream ss;
+    boost::property_tree::json_parser::write_json(ss, baseTree);
+
+    return ss.str();
+}
+
 std::string Api::getIncomingTx() {
     TxPool &txPool = TxPool::Instance();
     Wallet& wallet = Wallet::Instance();
