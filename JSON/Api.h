@@ -24,6 +24,7 @@ public:
     static std::string myTransactions();
     static std::string readPassport(std::string json);
     static std::string pay(std::string json);
+    static std::string kyc(std::string json);
     static std::string createTransaction(std::string json);
     static std::string sendTransaction(std::string json);
     static std::string startMint();
