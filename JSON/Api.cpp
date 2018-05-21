@@ -941,6 +941,7 @@ std::string Api::kyc(std::string json) {
             baseTree.put("dscID", Hexdump::vectorToHexString(dscCert->getId()));
             baseTree.put("currencyID", dscCert->getCurrencyId());
             baseTree.put("expiration", dscCert->getExpirationDate());
+            baseTree.put("passportHash", Hexdump::vectorToHexString(krs.getPassportHash()));
 
             switch (krs.getMode()) {
                 case KYC_MODE_ANONYMOUS: {
