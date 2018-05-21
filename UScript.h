@@ -7,6 +7,10 @@
 #define TYPE_CSCA 0
 #define TYPE_DSC 1
 
+#define KYC_MODE_ANONYMOUS 0
+#define KYC_MODE_DG1 1
+#define KYC_MODE_DG1_AND_DG2 2
+
 struct UScript {
     // 0x01 link to an existing txoutput
     // 0x02 for PKH
