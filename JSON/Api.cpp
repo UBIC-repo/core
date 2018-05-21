@@ -879,6 +879,91 @@ std::string Api::pay(std::string json) {
     return "{\"success\": false}";
 }
 
+std::string Api::kyc(std::string json) {
+
+    if (json.empty()) {
+        return "{\"error\": \"empty json\"}";
+    }
+
+    std::stringstream ss(json);
+    boost::property_tree::ptree pt;
+    boost::property_tree::read_json(ss, pt);
+
+    for (boost::property_tree::ptree::value_type &v : pt) {
+        if (strcmp(v.first.data(), "base64") == 0) {
+            CDataStream s(SER_DISK, 1);
+            std::string b64String = base64_decode(v.second.data());
+            s.write(b64String.c_str(), b64String.length());
+
+            KycRequestScript krs;
+            try {
+                s >> krs;
+            } catch (const std::exception& e) {
+                Log(LOG_LEVEL_ERROR) << "Cannot deserialize base64 encoded kyc request";
+                return "{\"success\": false, \"error\":\"Cannot deserialize base64 encoded kyc request\"}";
+            }
+
+            DB& db = DB::Instance();
+
+            std::vector<unsigned char> ntpskResultVector = db.getFromDB(DB_NTPSK_ALREADY_USED, krs.getPassportHash());
+
+            if(ntpskResultVector.empty()) {
+                Log(LOG_LEVEL_ERROR) << "No DB_NTPSK_ALREADY_USED entry";
+                return "{\"success\": false, \"error\":\"No DB_NTPSK_ALREADY_USED entry\"}";
+            }
+
+            s.clear();
+            s.write((const char*)ntpskResultVector.data(), ntpskResultVector.size());
+            NtpskAlreadyUsedScript nauScript;
+            try {
+                s >> nauScript;
+            } catch (const std::exception& e) {
+                Log(LOG_LEVEL_ERROR) << "Cannot deserialize NtpskAlreadyUsedScript";
+                return "{\"success\": false, \"error\":\"Cannot deserialize NtpskAlreadyUsedScript\"}";
+            }
+
+            if(nauScript.getAddress() != Wallet::addressFromPublicKey(krs.getAddressPublicKey()).getScript().getScript()) {
+                Log(LOG_LEVEL_ERROR) << "Address and public key don't match";
+                return "{\"success\": false, \"error\":\"Address and public key don't match\"}";
+            }
+
+            if(!VerifySignature::verify(krs.getChallenge(), krs.getChallengeSignature(), krs.getAddressPublicKey())) {
+                Log(LOG_LEVEL_ERROR) << "Signature verification failed";
+                return "{\"success\": false, \"error\":\"Signature verification failed\"}";
+            }
+
+            CertStore& certStore = CertStore::Instance();
+            Cert* dscCert = certStore.getDscCertWithCertId(nauScript.getDscID());
+
+            ptree baseTree;
+
+            baseTree.put("success", true);
+            baseTree.put("dscID", Hexdump::vectorToHexString(dscCert->getId()));
+            baseTree.put("currencyID", dscCert->getCurrencyId());
+            baseTree.put("expiration", dscCert->getExpirationDate());
+
+            switch (krs.getMode()) {
+                case KYC_MODE_ANONYMOUS: {
+                    std::stringstream ss;
+                    boost::property_tree::json_parser::write_json(ss, baseTree);
+
+                    return ss.str();
+                }
+                case KYC_MODE_DG1: {
+
+                }
+                case KYC_MODE_DG1_AND_DG2: {
+
+                }
+            }
+
+            return "{\"success\": false, \"error\": \"invalid mode\"}";
+
+        }
+    }
+    return "{\"success\": false, \"error\": \"missing base64 parameter\"}";
+}
+
 std::string Api::createTransaction(std::string json) {
     Wallet &wallet = Wallet::Instance();
 
@@ -962,7 +1047,7 @@ std::string Api::sendTransaction(std::string json) {
                 s >> tx;
             } catch (const std::exception& e) {
                 Log(LOG_LEVEL_ERROR) << "Cannot deserialize base64 encoded transaction";
-                return "{\"success\": false}";
+                return "{\"success\": false, \"error\":\"Cannot deserialize base64 encoded transaction\"}";
             }
 
             TxPool &txPool = TxPool::Instance();
