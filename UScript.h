@@ -177,4 +177,84 @@ struct NtpskAlreadyUsedScript {
 
 };
 
+struct KycRequestScript {
+    std::vector<unsigned char> passportHash;
+    std::vector<unsigned char> addressPublicKey;
+    std::vector<unsigned char> challenge;
+    std::vector<unsigned char> challengeSignature;
+    std::vector<unsigned char> ldsHashes;
+    std::vector<unsigned char> dg1; // written information
+    std::vector<unsigned char> dg2; // facial image
+
+    const std::vector<unsigned char> &getPassportHash() const {
+        return passportHash;
+    }
+
+    void setPassportHash(const std::vector<unsigned char> &passportHash) {
+        KycRequestScript::passportHash = passportHash;
+    }
+
+    const std::vector<unsigned char> &getAddressPublicKey() const {
+        return addressPublicKey;
+    }
+
+    void setAddressPublicKey(const std::vector<unsigned char> &addressPublicKey) {
+        KycRequestScript::addressPublicKey = addressPublicKey;
+    }
+
+    const std::vector<unsigned char> &getChallenge() const {
+        return challenge;
+    }
+
+    void setChallenge(const std::vector<unsigned char> &challenge) {
+        KycRequestScript::challenge = challenge;
+    }
+
+    const std::vector<unsigned char> &getChallengeSignature() const {
+        return challengeSignature;
+    }
+
+    void setChallengeSignature(const std::vector<unsigned char> &challengeSignature) {
+        KycRequestScript::challengeSignature = challengeSignature;
+    }
+
+    const std::vector<unsigned char> &getLdsHashes() const {
+        return ldsHashes;
+    }
+
+    void setLdsHashes(const std::vector<unsigned char> &ldsHashes) {
+        KycRequestScript::ldsHashes = ldsHashes;
+    }
+
+    const std::vector<unsigned char> &getDg1() const {
+        return dg1;
+    }
+
+    void setDg1(const std::vector<unsigned char> &dg1) {
+        KycRequestScript::dg1 = dg1;
+    }
+
+    const std::vector<unsigned char> &getDg2() const {
+        return dg2;
+    }
+
+    void setDg2(const std::vector<unsigned char> &dg2) {
+        KycRequestScript::dg2 = dg2;
+    }
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action) {
+        READWRITE(passportHash);
+        READWRITE(addressPublicKey);
+        READWRITE(challenge);
+        READWRITE(challengeSignature);
+        READWRITE(ldsHashes);
+        READWRITE(dg1);
+        READWRITE(dg2);
+    }
+
+};
+
 #endif //TX_USCRIPT_H
