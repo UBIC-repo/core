@@ -178,6 +178,7 @@ struct NtpskAlreadyUsedScript {
 };
 
 struct KycRequestScript {
+    uint8_t mode;
     std::vector<unsigned char> passportHash;
     std::vector<unsigned char> addressPublicKey;
     std::vector<unsigned char> challenge;
@@ -185,6 +186,14 @@ struct KycRequestScript {
     std::vector<unsigned char> ldsHashes;
     std::vector<unsigned char> dg1; // written information
     std::vector<unsigned char> dg2; // facial image
+
+    uint8_t getMode() const {
+        return mode;
+    }
+
+    void setMode(uint8_t mode) {
+        KycRequestScript::mode = mode;
+    }
 
     const std::vector<unsigned char> &getPassportHash() const {
         return passportHash;
@@ -246,6 +255,7 @@ struct KycRequestScript {
 
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
+        READWRITE(mode);
         READWRITE(passportHash);
         READWRITE(addressPublicKey);
         READWRITE(challenge);
