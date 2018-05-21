@@ -744,13 +744,19 @@ bool TransactionHelper::applyTransaction(Transaction* tx, BlockHeader* blockHead
                 CDataStream srpscript(SER_DISK, 1);
                 srpscript.write((char *) passportScript.getScript().data(), passportScript.getScript().size());
 
+                CDataStream nauscript(SER_DISK, 1);
+                NtpskAlreadyUsedScript ntpskAlreadyUsedScript;
+                ntpskAlreadyUsedScript.setAddress(tx->getTxOuts().front().getScript().getScript());
+                ntpskAlreadyUsedScript.setDscID(txIn->getInAddress());
+
                 if((uint32_t)passportScript.getScript().at(0) % 2 == 0) {
                     // is NtpRsk
                     NtpRskSignatureVerificationObject *ntpRskSignatureVerificationObject = new NtpRskSignatureVerificationObject();
                     srpscript >> *ntpRskSignatureVerificationObject;
+                    nauscript << ntpskAlreadyUsedScript;
 
                     db.putInDB(DB_NTPSK_ALREADY_USED, ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM()),
-                               std::vector<unsigned char>(0x01));
+                               std::vector<unsigned char>(nauscript.data(), nauscript.data() + nauscript.size()));
                 } else {
                     // is NtpEsk
                     Cert* cert = certStore.getDscCertWithCertId(txIn->getInAddress());
@@ -759,8 +765,9 @@ bool TransactionHelper::applyTransaction(Transaction* tx, BlockHeader* blockHead
                     ntpEskSignatureVerificationObject->setCurveParams(EC_KEY_get0_group(ecKey));
 
                     srpscript >> *ntpEskSignatureVerificationObject;
+                    nauscript << ntpskAlreadyUsedScript;
                     db.putInDB(DB_NTPSK_ALREADY_USED, ntpEskSignatureVerificationObject->getMessageHash(),
-                               std::vector<unsigned char>(0x01));
+                               std::vector<unsigned char>(nauscript.data(), nauscript.data() + nauscript.size()));
                 }
 
                 DSCAttachedPassportCounter::increment(txIn->getInAddress());
