@@ -1029,7 +1029,7 @@ bool TransactionHelper::undoTransaction(Transaction* tx, BlockHeader* blockHeade
 }
 
 /**
- * The transaction fees depends on the size of the transaction and the current UBI payout
+ * The transaction fee depends on the size of the transaction and the current UBI payout
  * Current assumption is UBI payout should allow every one to send about ~1kb of data a day
  * As consequence minimum txfee for 1 Block a minute is:
  * (byte)txSize * payout = 1,440 bytes
