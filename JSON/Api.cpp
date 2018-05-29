@@ -611,8 +611,11 @@ std::string Api::myTransactions() {
         ptree txOutTree;
 
         BlockHeader* header = chain.getBlockHeader(it->getBlockHash());
+        // this part ensures that the transaction is on the main chain
         if(header != nullptr) {
-            transactionsTree.push_back(std::make_pair("", txToPtree(it->getTx(), true)));
+            ptree txTree = txToPtree(it->getTx(), true);
+            txTree.put("confirmations", chain.getCurrentBlockchainHeight() - header->getBlockHeight());
+            transactionsTree.push_back(std::make_pair("", txTree));
             txNbr++;
             if(txNbr > MAX_NUMBER_OF_MY_TRANSACTIONS_TO_DISPLAY) {
                 break;
