@@ -69,7 +69,7 @@ To open the web interface you have to open 127.0.0.1:6789/#yourApiKey in your br
 You will find your api key in the ```~/ubic/config.ini``` file.
 
 /!\ Warning: For security reasons the web interface can not be opened remotely by typing your server ip:6789/#yourApiKey.
-If you want to open the web insterface of your server do a port forwarding over SSH, and forward the ports 6789 and 12303 to the ports 6789 and 12303 on your local machine.
+If you want to open the web interface of your server do a port forwarding over SSH, and forward the ports 6789 and 12303 to the ports 6789 and 12303 on your local machine.
 
 #### Register a passport
 To register a passport go to the "My UBI" tab and click "Register passport", then enter your passport number, date of birth and the date of expiry.
