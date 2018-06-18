@@ -63,6 +63,20 @@ sudo make install
 /etc/init.d/ubic stop
 ```
 
+#### Running a node 
+If you are using a firewall make sure that port 1334 is open or TCP connections.
+This can be ensured by running: 
+
+```
+sudo ufw allow 1334/tcp
+```
+
+Also your log files might getting huge. You can delete them by running:
+
+```
+sudo rm -rf /var/ubic/LOGS/*.txt
+```
+
 #### Open the web interface
 To open the web interface you have to open 127.0.0.1:6789/#yourApiKey in your browser.
 
