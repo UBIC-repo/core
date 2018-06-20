@@ -64,6 +64,12 @@ sudo make install
 ```
 
 #### Running a node 
+To add your ip to the node-list, you can create a puul request at 
+
+```
+https://www.github.com/UBIC-repo/node-list/blob/master/nodes
+```
+
 If you are using a firewall make sure that port 1334 is open or TCP connections.
 This can be ensured by running: 
 
