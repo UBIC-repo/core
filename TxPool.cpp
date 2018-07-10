@@ -74,7 +74,7 @@ bool TxPool::appendTransaction(Transaction transaction) {
     }
 
     if(this->isTxInputPresent(&transaction)) {
-        Log(LOG_LEVEL_ERROR) << "cannot append transaction to txpool because one of it's input has another transaction pending";
+        Log(LOG_LEVEL_WARNING) << "cannot append transaction to txpool because one of it's input has another transaction pending";
         return false;
     }
 
