@@ -96,8 +96,6 @@ bool Wallet::generateWallet() {
 
 bool Wallet::initWallet() {
     return this->generateWallet();
-
-    return true;
 }
 
 bool Wallet::loadSeedFromFS() {
