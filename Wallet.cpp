@@ -200,6 +200,10 @@ Transaction* Wallet::payToTxOutputs(std::vector<TxOut> txOutputs) {
     Chain& chain = Chain::Instance();
     Transaction* tx = payToTxOutputsWithoutFees(txOutputs);
 
+    if(tx == nullptr) {
+        return nullptr;
+    }
+    
     UAmount minimumTransactionFees = TransactionHelper::calculateMinimumFee(tx, chain.getBestBlockHeader());
     Log(LOG_LEVEL_INFO) << "minimumTransactionFees:" << minimumTransactionFees;
 
