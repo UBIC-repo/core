@@ -203,7 +203,7 @@ Transaction* Wallet::payToTxOutputs(std::vector<TxOut> txOutputs) {
     if(tx == nullptr) {
         return nullptr;
     }
-    
+
     UAmount minimumTransactionFees = TransactionHelper::calculateMinimumFee(tx, chain.getBestBlockHeader());
     Log(LOG_LEVEL_INFO) << "minimumTransactionFees:" << minimumTransactionFees;
 
@@ -217,9 +217,6 @@ Transaction* Wallet::payToTxOutputs(std::vector<TxOut> txOutputs) {
         Log(LOG_LEVEL_INFO) << "nMinimumTransactionFees:" << nMinimumTransactionFees;
 
         for(auto cFee :nMinimumTransactionFees.map) {
-            for(auto txOut: txOutputs) {
-                auto found = txOut.getAmount().map.find(cFee.first);
-                if(found != txOut.getAmount().map.end()) {
 
                     // we add a virtual tx output that represents the transaction fee
                     std::vector <TxOut> txOuts = tx->getTxOuts();
@@ -248,8 +245,6 @@ Transaction* Wallet::payToTxOutputs(std::vector<TxOut> txOutputs) {
                             Log(LOG_LEVEL_INFO) << "Wallet::payToTxOutputs() failed for amount:" << nMinimumTransactionFees;
                         }
                     }
-                }
-            }
         }
     }
 
