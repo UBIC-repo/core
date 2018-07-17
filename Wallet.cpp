@@ -208,7 +208,7 @@ Transaction* Wallet::payToTxOutputs(std::vector<TxOut> txOutputs) {
     Log(LOG_LEVEL_INFO) << "minimumTransactionFees:" << minimumTransactionFees;
 
     // increase by 10%
-    for(int increaseFactor = 5; increaseFactor <= 2000; increaseFactor+=10) {
+    for(int increaseFactor = 15; increaseFactor <= 2000; increaseFactor+=10) {
         UAmount nMinimumTransactionFees;
         for(auto cFee :minimumTransactionFees.map) {
             nMinimumTransactionFees.map.insert(std::make_pair(cFee.first, cFee.second + cFee.second * increaseFactor / 100 ));
