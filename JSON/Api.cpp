@@ -1033,7 +1033,7 @@ std::string Api::sendTransaction(std::string json) {
     Wallet &wallet = Wallet::Instance();
 
     if (json.empty()) {
-        return "{\"error\": \"empty json\"}";
+        return "{\"success\": false, \"error\": \"empty json\"}";
     }
 
     std::stringstream ss(json);
@@ -1066,7 +1066,7 @@ std::string Api::sendTransaction(std::string json) {
             }
         }
     }
-    return "{\"error\": \"missing base64 parameter\"}";
+    return "{\"success\": false, \"error\": \"missing base64 parameter\"}";
 }
 
 void startMintingThread() {
