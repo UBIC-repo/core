@@ -43,8 +43,6 @@ bool Wallet::generateWallet() {
         this->persistSeedToFS();
     }
 
-    Log(LOG_LEVEL_INFO) << "Seed: " << this->seed;
-
     std::vector<unsigned char> currentPrivKey = this->seed;
 
     Config& config = Config::Instance();
