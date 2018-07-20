@@ -326,7 +326,6 @@ struct ChangeCertificateCurrencyIdScript {
         READWRITE(nonce);
         READWRITE(from);
         READWRITE(to);
-        READWRITE(dscID);
     }
 };
 
