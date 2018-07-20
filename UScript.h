@@ -276,6 +276,7 @@ struct ChangeCertificateCurrencyIdScript {
     uint32_t nonce;
     uint8_t from;
     uint8_t to;
+    std::vector<unsigned char> dscID;
 
     uint8_t getVersion() const {
         return version;
@@ -309,6 +310,14 @@ struct ChangeCertificateCurrencyIdScript {
         ChangeCertificateCurrencyIdScript::to = to;
     }
 
+    const std::vector<unsigned char> &getDscID() const {
+        return dscID;
+    }
+
+    void setDscID(const std::vector<unsigned char> &dscID) {
+        ChangeCertificateCurrencyIdScript::dscID = dscID;
+    }
+
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
@@ -317,6 +326,7 @@ struct ChangeCertificateCurrencyIdScript {
         READWRITE(nonce);
         READWRITE(from);
         READWRITE(to);
+        READWRITE(dscID);
     }
 };
 
