@@ -1396,6 +1396,43 @@ std::string Api::getDSCCertificate(std::string dscIdString) {
     return ss.str();
 }
 
+
+std::string Api::getCSCACertificate(std::string cscaIdString) {
+    CertStore& certStore = CertStore::Instance();
+
+    Cert* csca = certStore.getCscaCertWithCertId(Hexdump::hexStringToVector(cscaIdString));
+    if(csca == nullptr) {
+        return "{\"error\": \"CSCA not found\"}";
+    }
+
+    ptree cert;
+    cert.push_back(std::make_pair("statusList", statusListToPtree(csca->getStatusList())));
+    cert.put("active", csca->isCertAtive());
+    cert.put("currency", csca->getCurrencyId());
+    cert.put("expirationDate", csca->getExpirationDate());
+    cert.put("rootSignature", Hexdump::vectorToHexString(csca->getRootSignature()));
+
+    BIO *mem = BIO_new(BIO_s_mem());
+    X509_print(mem, csca->getX509());
+    char* x509Buffer;
+    BIO_get_mem_data(mem, &x509Buffer);
+
+    BIO_set_close(mem, BIO_CLOSE);
+    BIO_free(mem);
+
+    cert.put("x509", (std::string)(x509Buffer));
+
+    X509_NAME *name = X509_get_issuer_name(csca->getX509());
+
+    char* charName = X509_NAME_oneline(name, NULL, 0);
+    cert.put("issuer", (std::string)(charName));
+
+    std::stringstream ss;
+    boost::property_tree::json_parser::write_json(ss, cert);
+
+    return ss.str();
+}
+
 std::string Api::getDSCCertificates() {
     CertStore& certStore = CertStore::Instance();
 
