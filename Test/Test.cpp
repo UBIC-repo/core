@@ -201,6 +201,8 @@ void Test::importCACerts() {
             Log(LOG_LEVEL_INFO) << "Country code: " << countryStr;
 
             if(getCurrencyIdFromIso2Code((char*)countryStr) == 0) {
+                Log(LOG_LEVEL_INFO) << "Could not get currency ID" ;
+                return;
                 continue;
             }
 
