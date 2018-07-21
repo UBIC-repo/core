@@ -40,6 +40,7 @@ public:
     static std::string getIndex();
     static std::string getRootCertificates();
     static std::string getCSCACertificates();
+    static std::string getCSCACertificate(std::string cscaIdString);
     static std::string getDSCCertificate(std::string dscIdString);
     static std::string getDSCCertificates();
     static std::string addCert(std::string json, uint8_t type);
