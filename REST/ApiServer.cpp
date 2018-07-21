@@ -98,6 +98,8 @@ std::string ApiServer::route(std::vector<std::string> urlParts, std::string json
                             return Api::addCert(jsonPost, TYPE_CSCA);
                         } else if(urlParts.at(2) == "remove") {
                             return Api::removeCert(jsonPost, TYPE_CSCA);
+                        } else {
+                            return Api::getCSCACertificate(urlParts.at(2));
                         }
                     } else {
                         return Api::getCSCACertificates();
