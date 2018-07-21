@@ -191,7 +191,12 @@ set(SOURCE_FILES
         Tools/Log.cpp
 
         endian.h
-        Base64.cpp Base64.h)
+        Base64.cpp
+	Base64.h
+	
+	Fixes.cpp
+        Fixes.h
+	)
 add_executable(ubicd ${SOURCE_FILES})
 
 set(SOURCE_FILES_CLI
