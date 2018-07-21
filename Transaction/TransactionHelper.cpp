@@ -335,6 +335,11 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                     return false;
                 }
 
+                if(cert->getCurrencyId() == 0) {
+                    Log(LOG_LEVEL_ERROR) << "Cannot register passport because currency id is 0";
+                    return false;
+                }
+
                 if(!cert->isCertAtive()) {
                     Log(LOG_LEVEL_ERROR) << "Cert is not active " << txIn->getInAddress();
                     return false;
