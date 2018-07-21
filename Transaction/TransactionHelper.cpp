@@ -16,6 +16,7 @@
 #include "../Consensus/VoteStore.h"
 #include "../Time.h"
 #include "../TxPool.h"
+#include "../Fixes.h"
 
 bool TransactionHelper::verifyNonce(std::vector<unsigned char> inAddress, uint32_t nonce) {
     AddressStore& addressStore = AddressStore::Instance();
@@ -789,19 +790,20 @@ bool TransactionHelper::applyTransaction(Transaction* tx, BlockHeader* blockHead
                 CertStore &certStore = CertStore::Instance();
 
                 Cert *cert = new Cert();
-                Currency *currency = new Currency();
-                currency->setError(false);
-                currency->setCurrencyId(addCertificateScript.currency);
-                cert->setCurrency(currency);
-                cert->setCurrencyId(addCertificateScript.currency);
-                cert->setExpirationDate(addCertificateScript.expirationDate);
-                cert->setRootSignature(addCertificateScript.rootSignature);
-                cert->setNonce(txIn->getNonce());
 
                 BIO *certbio = BIO_new_mem_buf(addCertificateScript.certificate.data(), (int)addCertificateScript.certificate.size());
                 X509 *x509 = d2i_X509_bio(certbio, NULL);
 
                 cert->setX509(x509);
+
+                Currency *currency = new Currency();
+                currency->setError(false);
+                currency->setCurrencyId(Fixes::fixCertificateCurrencyID(cert->getId(), addCertificateScript.currency));
+                cert->setCurrency(currency);
+                cert->setCurrencyId(addCertificateScript.currency);
+                cert->setExpirationDate(addCertificateScript.expirationDate);
+                cert->setRootSignature(addCertificateScript.rootSignature);
+                cert->setNonce(txIn->getNonce());
 
                 if (addCertificateScript.isCSCA()) {
                     certStore.addCSCA(cert, blockHeader->getBlockHeight());
