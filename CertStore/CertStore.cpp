@@ -5,6 +5,7 @@
 #include "../Wallet.h"
 #include "../Tools/Hexdump.h"
 #include "../FS/FS.h"
+#include "../Fixes.h"
 #include <boost/filesystem.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <openssl/x509v3.h>
@@ -173,7 +174,8 @@ bool CertStore::isCertSignedByCSCA(Cert* cert, uint32_t blockHeight) {
     X509_STORE_CTX_set0_param(ctx, param);
     X509_STORE_CTX_init(ctx, store, cert->getX509(), nullptr);
 
-    if(X509_verify_cert(ctx) > 0) {
+    int verificationResult = X509_verify_cert(ctx);
+    if(verificationResult > 0) {
         X509_OBJECT *cscaObj = X509_OBJECT_new();
         X509_STORE_CTX_get_by_subject(ctx, X509_LU_X509, X509_get_issuer_name(cert->getX509()), cscaObj);
         X509* csca = X509_OBJECT_get0_X509(cscaObj);
@@ -181,8 +183,16 @@ bool CertStore::isCertSignedByCSCA(Cert* cert, uint32_t blockHeight) {
         cscaCert->setX509(csca);
         Cert* recoveredCscaCert = this->getCscaCertWithCertId(cscaCert->getId());
 
-        if(recoveredCscaCert->getCurrencyId() != cert->getCurrencyId()) {
-            Log(LOG_LEVEL_ERROR) << "DSC Cert: " << cert->getId() << " and CSCA cert don't have the same currency ID";
+        if(recoveredCscaCert->getId(), recoveredCscaCert->getCurrencyId() != Fixes::fixCertificateCurrencyID(cert->getId(), cert->getCurrencyId())) {
+            Log(LOG_LEVEL_ERROR) << "DSC Cert: "
+                                 << cert->getId()
+                                 << " currrencyID "
+                                 << Fixes::fixCertificateCurrencyID(cert->getId(), cert->getCurrencyId())
+                                 << " and CSCA cert "
+                                 << recoveredCscaCert->getId()
+                                 << " currrencyID "
+                                 << recoveredCscaCert->getCurrencyId()
+                                 << " don't have the same currency ID";
             return false;
         }
 
@@ -200,7 +210,7 @@ bool CertStore::isCertSignedByCSCA(Cert* cert, uint32_t blockHeight) {
     Log(LOG_LEVEL_ERROR) << "DSC Cert " << cert->getId()
                         << " subject:"
                         << X509_NAME_oneline(X509_get_subject_name(cert->getX509()), 0, 0)
-                        << " isn't signed by a CSCA ";
+                        << " isn't signed by a CSCA";
     Log(LOG_LEVEL_INFO) << "OPEN SSL X509_verify_cert_error_string: " << X509_verify_cert_error_string(X509_STORE_CTX_get_error(ctx));
     Log(LOG_LEVEL_INFO) << "error depth: " << X509_STORE_CTX_get_error_depth(ctx);
 
@@ -224,11 +234,11 @@ bool CertStore::addCSCA(Cert* cert, uint32_t blockHeight) {
                 return false;
             }
         }
+        cert->setCurrencyId(Fixes::fixCertificateCurrencyID(cert->getId(), cert->getCurrencyId()));
         cert->setNonce(cert->getNonce() + 1);
         cert->appendStatusList(std::pair<uint32_t, bool>(blockHeight, true));
         this->CSCAList[cert->getId()] = *cert;
         Log(LOG_LEVEL_INFO) << "added new CSCA: " << cert->getId();
-
 
         this->persistToFS("CSCA", cert->getId());
         return true;
@@ -258,6 +268,7 @@ bool CertStore::addDSC(Cert* cert, uint32_t blockHeight) {
 
             cert->appendStatusList(std::pair<uint32_t, bool>(blockHeight, true));
             cert->setNonce(cert->getNonce() + 1);
+            cert->setCurrencyId(Fixes::fixCertificateCurrencyID(cert->getId(), cert->getCurrencyId()));
 
             this->DSCList[Hexdump::vectorToHexString(cert->getId())] = *cert;
 
