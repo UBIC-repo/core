@@ -8,7 +8,7 @@
 #include <openssl/ossl_typ.h>
 #include <openssl/ec.h>
 
-#define VERSION "0.1.6"
+#define VERSION "0.1.7"
 
 #define CURRENCY_SWITZERLAND 1
 #define CURRENCY_GERMANY 2
