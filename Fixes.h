@@ -5,6 +5,7 @@
 #ifndef UBICD_FIXES_H
 #define UBICD_FIXES_H
 
+#include <cstdint>
 #include <vector>
 
 class Fixes {
