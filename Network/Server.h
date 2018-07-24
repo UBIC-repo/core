@@ -41,7 +41,7 @@ private:
 
                                        BanList &banList = BanList::Instance();
                                        if (!banList.isBanned(ip)) {
-                                           shared_ptr<PeerServer> peer(new PeerServer(std::move(socket_)));
+                                           shared_ptr<PeerServer> peer(new PeerServer(io_service_, std::move(socket_)));
                                            peer->start();
                                            peer->setIp(ip);
 
@@ -63,11 +63,13 @@ private:
     Server(boost::asio::io_service& io_service,
             const tcp::endpoint& endpoint)
             : acceptor_(io_service, endpoint),
-              socket_(io_service)
+              socket_(io_service),
+              io_service_(io_service)
     {
         do_accept();
     }
 
+    boost::asio::io_service& io_service_;
     tcp::acceptor acceptor_;
     tcp::socket socket_;
 public:
