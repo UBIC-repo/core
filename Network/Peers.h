@@ -12,8 +12,8 @@
 #include <set>
 #include <utility>
 #include <boost/asio.hpp>
+#include <boost/bind.hpp>
 #include <unordered_map>
-#include <mutex>
 #include "NetworkMessage.h"
 
 #define STATUS_UNSYNCED 0
@@ -49,7 +49,6 @@ private:
     uint16_t version;
     uint32_t blockHeight;
     uint64_t clock;
-    std::mutex deliverMutex;
     bool disconnected = false;
     std::string donationAddress;
     uint64_t lastAsked = 0;
@@ -57,15 +56,21 @@ private:
     void do_read_header();
     void do_read_body();
     void do_write();
+    void writeHandler(
+            const boost::system::error_code& error,
+            const size_t bytesTransferred
+    );
 
     tcp::socket socket_;
+    boost::asio::io_service::strand strand_;
     NetworkMessage read_msg_;
     std::deque<NetworkMessage> write_msgs_;
 
 public:
 
-    PeerServer(tcp::socket socket)
-            : socket_(std::move(socket))
+    PeerServer(boost::asio::io_service& io_service_, tcp::socket socket)
+            : socket_(std::move(socket)),
+              strand_(io_service_)
     {
     }
 
@@ -86,6 +91,7 @@ public:
     void start();
     void close();
     void deliver(NetworkMessage msg);
+    void deliverImpl(NetworkMessage msg);
     ip_t getIp();
     void setIp(ip_t &ip);
     uint16_t getPort() const;
@@ -116,15 +122,19 @@ private:
     uint16_t version;
     uint32_t blockHeight;
     uint64_t clock;
-    std::mutex deliverMutex;
     std::string donationAddress;
     uint64_t lastAsked = 0;
 
     void do_read_header();
     void do_read_body();
     void do_write();
+    void writeHandler(
+            const boost::system::error_code& error,
+            const size_t bytesTransferred
+    );
 
     boost::asio::io_service& io_service_;
+    boost::asio::io_service::strand strand_;
     tcp::socket socket_;
     NetworkMessage read_msg_;
     std::deque<NetworkMessage> write_msgs_;
@@ -137,7 +147,9 @@ public:
                std::shared_ptr<boost::asio::io_service::work> work
     )
             : io_service_(*io_service),
-              socket_(*io_service)
+              socket_(*io_service),
+              strand_( *io_service ),
+              write_msgs_()
     {
         endpoint_iterator_ = endpoint_iterator;
         work_ = work;
@@ -158,6 +170,7 @@ public:
     }
 
     void deliver(NetworkMessage msg);
+    void deliverImpl(NetworkMessage msg);
     void close();
     ip_t getIp();
     void setIp(ip_t &ip);
