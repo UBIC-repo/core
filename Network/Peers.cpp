@@ -173,13 +173,11 @@ void PeerServer::do_write()
 {
     if(write_msgs_.empty()) {
         Log(LOG_LEVEL_INFO) << "write_msgs_.empty()";
-        deliverMutex.unlock();
         return;
     }
 
     if((uint32_t)write_msgs_.front().length() == 0) {
         Log(LOG_LEVEL_ERROR) << "PeerClient::do_write(): message length is 0";
-        deliverMutex.unlock();
         return;
     }
 
@@ -193,30 +191,40 @@ void PeerServer::do_write()
         boost::asio::async_write(socket_,
                                  boost::asio::buffer(write_msgs_.front().data(),
                                                      write_msgs_.front().length()),
-                                 [this](boost::system::error_code ec, std::size_t /*length*/)
-                                 {
-                                     std::cout << "ec message: " << ec.message() << std::endl;
-                                     std::cout << "ec value: " << ec.value() << std::endl;
-                                     if (!ec)
-                                     {
-                                         write_msgs_.pop_front();
-                                         if (!write_msgs_.empty())
-                                         {
-                                             std::cout << "Server write: " << std::endl;
-                                             do_write();
-                                         } else {
-                                             deliverMutex.unlock();
-                                         }
-                                     }
-                                     else
-                                     {
-                                         Log(LOG_LEVEL_ERROR) << "PeerServer::do_write() " << ip << " terminated with error: " << ec.message();
-                                         Peers &peers = Peers::Instance();
-                                         peers.disconnect(ip);
-                                     }
-                                 });
+                                 strand_.wrap(
+                                         boost::bind(
+                                                 &PeerServer::writeHandler,
+                                                 this,
+                                                 boost::asio::placeholders::error,
+                                                 boost::asio::placeholders::bytes_transferred
+                                         )
+                                 )
+        );
+
     } catch (const std::exception& e) {
         Log(LOG_LEVEL_ERROR) << "Peer: " << ip << " terminated with exception: " << e.what();
+        Peers &peers = Peers::Instance();
+        peers.disconnect(ip);
+    }
+}
+
+void PeerServer::writeHandler(
+        const boost::system::error_code& error,
+        const size_t bytesTransferred
+) {
+    std::cout << "ec message: " << error.message() << std::endl;
+    std::cout << "ec value: " << error.value() << std::endl;
+    if (!error)
+    {
+        write_msgs_.pop_front();
+        if (!write_msgs_.empty())
+        {
+            std::cout << "Server write: " << std::endl;
+            do_write();
+        }
+    }
+    else {
+        Log(LOG_LEVEL_ERROR) << "PeerServer::do_write() " << ip << " terminated with error: " << error.message();
         Peers &peers = Peers::Instance();
         peers.disconnect(ip);
     }
@@ -239,8 +247,18 @@ void PeerServer::close()
 
 void PeerServer::deliver(NetworkMessage msg)
 {
+    strand_.post(
+            boost::bind(
+                    &PeerServer::deliverImpl,
+                    this,
+                    msg
+            )
+    );
+}
+
+void PeerServer::deliverImpl(NetworkMessage msg)
+{
     Log(LOG_LEVEL_INFO) << "PeerServer::deliver()";
-    deliverMutex.lock();
     bool write_in_progress = !write_msgs_.empty();
     write_msgs_.emplace_back(msg);
     Log(LOG_LEVEL_INFO) << "write_in_progress:" << write_in_progress;
@@ -249,7 +267,6 @@ void PeerServer::deliver(NetworkMessage msg)
         do_write();
         return;
     }
-    deliverMutex.unlock();
     Log(LOG_LEVEL_INFO) << "PeerServer::deliver() -> delivered";
 }
 
@@ -410,13 +427,11 @@ void PeerClient::do_write()
 {
     if(PeerClient::write_msgs_.empty()) {
         Log(LOG_LEVEL_INFO) << "write_msgs_.empty()";
-        deliverMutex.unlock();
         return;
     }
 
     if((uint32_t)write_msgs_.front().length() == 0) {
         Log(LOG_LEVEL_ERROR) << "PeerClient::do_write(): message length is 0";
-        deliverMutex.unlock();
         return;
     }
 
@@ -431,40 +446,57 @@ void PeerClient::do_write()
         boost::asio::async_write(socket_,
                                  boost::asio::buffer(write_msgs_.front().data(),
                                                      write_msgs_.front().length()),
-                                 [this](boost::system::error_code ec, std::size_t /*length*/)
-                                 {
-                                     if (!ec)
-                                     {
-                                         write_msgs_.pop_front();
-                                         if (!write_msgs_.empty())
-                                         {
-                                             std::cout << "Server write: " << std::endl;
-                                             do_write();
-                                         } else {
-                                             deliverMutex.unlock();
-                                         }
-                                     }
-                                     else
-                                     {
-                                         if(ec == boost::asio::error::eof) {
-                                             do_connect();
-                                             deliverMutex.unlock();
-                                         } else {
-                                             this->disconnect();
-                                         }
-                                         //deliverMutex.unlock();
-                                     }
-                                 });
+                                 strand_.wrap(
+                                         boost::bind(
+                                                 &PeerClient::writeHandler,
+                                                 this,
+                                                 boost::asio::placeholders::error,
+                                                 boost::asio::placeholders::bytes_transferred
+                                         )
+                                 )
+        );
     } catch (const std::exception& e) {
         Log(LOG_LEVEL_ERROR) << "Peer: " << ip << " terminated with exception: " << e.what();
         disconnect();
-        deliverMutex.unlock();
+    }
+}
+
+void PeerClient::writeHandler(
+        const boost::system::error_code& error,
+        const size_t bytesTransferred
+) {
+    if (!error)
+    {
+        write_msgs_.pop_front();
+        if (!write_msgs_.empty())
+        {
+            std::cout << "Server write: " << std::endl;
+            do_write();
+        }
+    }
+    else
+    {
+        if(error == boost::asio::error::eof) {
+            do_connect();
+        } else {
+            this->disconnect();
+        }
     }
 }
 
 void PeerClient::deliver(NetworkMessage msg)
 {
-    deliverMutex.lock();
+    strand_.post(
+            boost::bind(
+                    &PeerClient::deliverImpl,
+                    this,
+                    msg
+            )
+    );
+}
+
+void PeerClient::deliverImpl(NetworkMessage msg)
+{
     Log(LOG_LEVEL_INFO) << "PeerClient::deliver(): " <<
                         Hexdump::ucharToHexString((unsigned char*)msg.data(), (uint32_t)msg.length());
     bool write_in_progress = !write_msgs_.empty();
@@ -477,7 +509,6 @@ void PeerClient::deliver(NetworkMessage msg)
         do_write();
         return;
     }
-    deliverMutex.unlock();
     Log(LOG_LEVEL_INFO) << "PeerClient::deliver() -> delivered";
 }
 
