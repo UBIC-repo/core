@@ -51,6 +51,7 @@ public:
         CDataStream s(SER_DISK, 1);
         s.write((char*)found.data(), found.size());
         s >> data;
+        s.clear();
 
         return true;
     }
@@ -62,8 +63,10 @@ public:
         s << data;
 
         std::vector<unsigned char> sVector(s.data(), s.data() + s.size());
+        bool result = this->putInDB(store, key, sVector);
+        s.clear();
 
-        return this->putInDB(store, key, sVector);
+        return result;
     }
 
     template < class Serializable >
