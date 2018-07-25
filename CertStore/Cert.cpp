@@ -100,7 +100,8 @@ void Cert::finishDeserialization(const char* certType) {
         Log(LOG_LEVEL_ERROR) << "failed to BIO_read_filename " << path.data();
     }
 
-    if (!(this->x509 = d2i_X509_bio(certbio, NULL))) {
+    this->x509 = d2i_X509_bio(certbio, nullptr);
+    if (this->x509 == nullptr) {
         Log(LOG_LEVEL_ERROR) << "Error loading cert into memory " << path.data();
         printf("\n");
     }
