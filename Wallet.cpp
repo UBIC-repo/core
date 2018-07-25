@@ -87,6 +87,9 @@ bool Wallet::generateWallet() {
         std::vector<unsigned char> addressLink = AddressHelper::addressLinkFromScript(address.getScript());
         this->addressesLink.emplace_back(addressLink);
         //Log(LOG_LEVEL_INFO) << "added addressLink " << addressLink;
+
+        EVP_PKEY_free(privateKey);
+        EC_KEY_free(ecKey);
     }
 
     return true;
