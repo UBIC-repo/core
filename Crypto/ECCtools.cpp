@@ -14,6 +14,7 @@ EC_POINT* ECCtools::vectorToEcPoint(const EC_GROUP* curveParams, std::vector<uns
     BN_CTX *ctx = BN_CTX_new();
     EC_POINT* point = EC_POINT_new(curveParams);
     EC_POINT_oct2point(curveParams, point, pointVector.data(), pointVector.size(), ctx);
+    BN_CTX_free(ctx);
 
     return point;
 }
