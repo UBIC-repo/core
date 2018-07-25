@@ -397,8 +397,8 @@ void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
                 }
 
                 // Ask peer for it's new block height
-                std::thread t2(&Network::askForBlockchainHeight, peer);
-                t2.detach();
+                //std::thread t2(&Network::askForBlockchainHeight, peer);
+                //t2.detach();
 
                 if(!skip) {
                     // check for missing blocks by hash
