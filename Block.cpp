@@ -53,11 +53,28 @@ bool BlockHelper::verifyBlock(Block* block) {
                              << " and computed header hash "
                              << computedHeaderHash
                              << " mismatch";
+        free(previousBlockHeader);
         return false;
     }
 
     if(header->getTimestamp() > Time::getCurrentTimestamp() + 110) {
         Log(LOG_LEVEL_ERROR) << "Timestamp of the block is in the future";
+        free(previousBlockHeader);
+        return false;
+    }
+
+    if(previousBlockHeader!= nullptr && header->getIssuerPubKey() == previousBlockHeader->getIssuerPubKey()) {
+        Log(LOG_LEVEL_ERROR) << "Previous block was issued by the same issuer";
+        free(previousBlockHeader);
+        return false;
+    }
+
+    if(previousBlockHeader!= nullptr
+       && (uint64_t)(header->getTimestamp() / BLOCK_INTERVAL_IN_SECONDS )== (uint64_t)(previousBlockHeader->getTimestamp() / BLOCK_INTERVAL_IN_SECONDS)
+            ) {
+        Log(LOG_LEVEL_ERROR) << "Slot number " << (uint64_t)(header->getTimestamp() / BLOCK_INTERVAL_IN_SECONDS)
+                             << " is already taken by another block";
+        free(previousBlockHeader);
         return false;
     }
 
@@ -65,24 +82,13 @@ bool BlockHelper::verifyBlock(Block* block) {
         Log(LOG_LEVEL_ERROR) << "Block issuer is: " << header->getIssuerPubKey()
                              << " but " << voteStore.getValidatorForTimestamp(header->getTimestamp())
                              << " was expected";
-        return false;
-    }
-
-    if(previousBlockHeader!= nullptr && header->getIssuerPubKey() == previousBlockHeader->getIssuerPubKey()) {
-        Log(LOG_LEVEL_ERROR) << "Previous block was issued by the same issuer";
-        return false;
-    }
-
-    if(previousBlockHeader!= nullptr
-       && (uint64_t)(header->getTimestamp() / BLOCK_INTERVAL_IN_SECONDS )== (uint64_t)(previousBlockHeader->getTimestamp() / BLOCK_INTERVAL_IN_SECONDS)
-      ) {
-        Log(LOG_LEVEL_ERROR) << "Slot number " << (uint64_t)(header->getTimestamp() / BLOCK_INTERVAL_IN_SECONDS)
-                             << " is already taken by another block";
+        free(previousBlockHeader);
         return false;
     }
 
     if(!VerifySignature::verify(computedHeaderHash, header->getIssuerSignature(), header->getIssuerPubKey())) {
         Log(LOG_LEVEL_ERROR) << "Block isn't signature isn't correct";
+        free(previousBlockHeader);
         return false;
     }
 
@@ -90,6 +96,7 @@ bool BlockHelper::verifyBlock(Block* block) {
         for (auto vote: header->getVotes()) {
             if(!TransactionHelper::verifyTx(&vote, IS_IN_HEADER, header)) {
                 Log(LOG_LEVEL_ERROR) << "Couldn't verify Vote in block header";
+                free(previousBlockHeader);
                 return false;
             }
         }
@@ -103,6 +110,7 @@ bool BlockHelper::verifyBlock(Block* block) {
                              << header->getMerkleRootHash()
                              << " mismatch with computed merkle tree"
                              << computedMerkleTreeRootHash;
+        free(previousBlockHeader);
         return false;
     }
 
@@ -115,6 +123,7 @@ bool BlockHelper::verifyBlock(Block* block) {
                                  << " and header hash "
                                  << header->getHeaderHash()
                                  << " due to transaction";
+            free(previousBlockHeader);
             return false;
         }
     }
@@ -169,6 +178,8 @@ bool BlockHelper::verifyBlock(Block* block) {
                                      << " and header hash "
                                      << header->getHeaderHash()
                                      << " due to duplicate input";
+
+                free(previousBlockHeader);
                 return false;
             }
             txInputs.emplace_back(Hexdump::vectorToHexString(passportHash));
@@ -187,6 +198,8 @@ bool BlockHelper::verifyBlock(Block* block) {
                                          << " and header hash "
                                          << header->getHeaderHash()
                                          << " due to duplicate input";
+
+                    free(previousBlockHeader);
                     return false;
                 }
                 txInputs.emplace_back(Hexdump::vectorToHexString(txIn.getInAddress()));
@@ -205,6 +218,8 @@ bool BlockHelper::verifyBlock(Block* block) {
                              << calculatedUbiReceiverCount
                              << " header->getUbiReceiverCount() is: "
                              << header->getUbiReceiverCount();
+
+        free(previousBlockHeader);
         return false;
     }
 
@@ -225,6 +240,8 @@ bool BlockHelper::verifyBlock(Block* block) {
                              << calculatedPayout
                              << " header->getPayout() is: "
                              << header->getPayout();
+
+        free(previousBlockHeader);
         return false;
     }
 
@@ -234,9 +251,12 @@ bool BlockHelper::verifyBlock(Block* block) {
                              << calculatedPayoutRemainder
                              << " header->getPayoutRemainder() is: "
                              << header->getPayoutRemainder();
+
+        free(previousBlockHeader);
         return false;
     }
 
+    free(previousBlockHeader);
     return true;
 }
 
@@ -503,7 +523,7 @@ UAmount32 BlockHelper::calculateUbiReceiverCount(Block* block, BlockHeader* prev
         newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_ESTONIA, 0));
         newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_MONACO, 0));
         newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_LIECHTENSTEIN, 0));
-        
+
         return newUbiReceiverCount;
     }
 
