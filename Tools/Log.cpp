@@ -195,7 +195,10 @@ Log::~Log()
     logLock.lock();
     std::cout << std::endl;
     *currentStream << std::endl;
+
     fb.close();
 
+    currentStream->clear();
+    free(currentStream);
     logLock.unlock();
 }
