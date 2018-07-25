@@ -80,6 +80,10 @@ public:
     bool isCertAtive();
     bool isMature(uint32_t blockHeight);
 
+    ~Cert() {
+        X509_free(x509);
+    }
+
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
