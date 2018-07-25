@@ -25,6 +25,7 @@ bool VerifySignature::verify(unsigned char* msg, size_t mlen, unsigned char* sig
     if(1 == EVP_DigestVerifyFinal(mdctx, sig, slen))
     {
         //printf("signature verified\n");
+        EVP_MD_CTX_free(mdctx);
         return true;
     }
     else
@@ -32,6 +33,7 @@ bool VerifySignature::verify(unsigned char* msg, size_t mlen, unsigned char* sig
         BIO *bio_out;
         bio_out = BIO_new_fp(stdout, BIO_NOCLOSE);
         ERR_print_errors(bio_out);
+        EVP_MD_CTX_free(mdctx);
         //printf("signature not verified\n");
         return false;
     }
@@ -49,6 +51,10 @@ bool VerifySignature::verify(std::vector<unsigned char> msg, std::vector<unsigne
     EC_KEY_set_public_key(ecKey, pubkeyPoint);
     EVP_PKEY* pubkey = EVP_PKEY_new();
     EVP_PKEY_set1_EC_KEY(pubkey, ecKey);
+
+    EC_GROUP_free(group);
+    EC_POINT_free(pubkeyPoint);
+    EC_KEY_free(ecKey);
 
     return VerifySignature::verify(msg, signature, pubkey);
 }
