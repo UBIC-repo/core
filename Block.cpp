@@ -550,6 +550,7 @@ UAmount32 BlockHelper::calculateUbiReceiverCount(Block* block, BlockHeader* prev
                             DSCAttachedPassportCounter::getCount(cert->getId()))
                     );
                     newUbiReceiverCount += toAdd;
+                    free(cert);
                 }
             }
 
