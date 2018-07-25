@@ -50,6 +50,7 @@ std::vector<std::string> Network::getIpsFromGithub() {
             bytes_transferred = ssock.read_some(boost::asio::buffer(buffer, 256000), ec);
             totalBytesTransfered += bytes_transferred;
             response.append(buffer);
+            free(buffer);
 
             Log(LOG_LEVEL_INFO) <<  "bytes_transferred rom Github: '" << (uint64_t)bytes_transferred;
         } while(!ec);
