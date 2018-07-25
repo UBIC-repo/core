@@ -588,6 +588,8 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                     }
                 }
 
+                free(cert);
+                
                 needToPayFee = false;
                 break;
             }
