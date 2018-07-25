@@ -151,6 +151,7 @@ bool CertStore::isCertSignedByUBICrootCert(Cert* cert, bool status, uint8_t type
     Log(LOG_LEVEL_INFO) << "azr 2:" << Hexdump::ucharToHexString((unsigned char*)s.data(), (uint32_t)s.size());
 
     std::vector<unsigned char> toBeSigned(s.data(), s.data() + s.size());
+    s.clear();
 
     return this->isSignedByUBICrootCert(toBeSigned, cert->getRootSignature());
 }
@@ -193,6 +194,7 @@ bool CertStore::isCertSignedByCSCA(Cert* cert, uint32_t blockHeight) {
                                  << " currrencyID "
                                  << recoveredCscaCert->getCurrencyId()
                                  << " don't have the same currency ID";
+            X509_STORE_CTX_free(ctx);
             return false;
         }
 
@@ -201,9 +203,11 @@ bool CertStore::isCertSignedByCSCA(Cert* cert, uint32_t blockHeight) {
         // before an attacker could start a serious attack, letting enough time to figure out a solution
         if(recoveredCscaCert->isMature(blockHeight)) {
             Log(LOG_LEVEL_INFO) << "DSC Cert is signed by mature CSCA: " << cert->getId();
+            X509_STORE_CTX_free(ctx);
             return true;
         }
         Log(LOG_LEVEL_INFO) << "DSC Cert is signed by CSCA, but " << cert->getId() << " is not yet mature";
+        X509_STORE_CTX_free(ctx);
         return false;
     }
 
@@ -213,6 +217,8 @@ bool CertStore::isCertSignedByCSCA(Cert* cert, uint32_t blockHeight) {
                         << " isn't signed by a CSCA";
     Log(LOG_LEVEL_INFO) << "OPEN SSL X509_verify_cert_error_string: " << X509_verify_cert_error_string(X509_STORE_CTX_get_error(ctx));
     Log(LOG_LEVEL_INFO) << "error depth: " << X509_STORE_CTX_get_error_depth(ctx);
+
+    X509_STORE_CTX_free(ctx);
 
     return false;
 }
