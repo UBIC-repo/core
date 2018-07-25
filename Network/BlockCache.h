@@ -35,10 +35,10 @@ private:
             for (auto blockIt = cache.begin(); blockIt != cache.end();) {
 
                 Block* block = &blockIt->second.second;
-
+                BlockHeader* blockHeader = chain.getBlockHeader(block->getHeader()->getPreviousHeaderHash());
                 if (block->getHeader()->getBlockHeight() == 1
-                    || chain.getBlockHeader(block->getHeader()->getPreviousHeaderHash()) != nullptr) {
-
+                    || blockHeader != nullptr) {
+                    free(blockHeader);
                     if (chain.doesBlockExist(block->getHeader()->getHeaderHash())
                         && chain.doesBlockExist(block->getHeader()->getBlockHeight())) {
                         Log(LOG_LEVEL_INFO) << "remove block:" << block->getHeader()->getHeaderHash()
