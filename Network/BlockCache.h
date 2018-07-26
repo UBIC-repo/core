@@ -64,6 +64,7 @@ private:
                         cacheMutex.unlock();
                     }
                 } else {
+                    free(blockHeader);
                     blockIt++;
                 }
             }
