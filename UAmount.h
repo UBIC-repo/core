@@ -169,6 +169,10 @@ struct UAmount {
         return total;
     }
 
+    ~UAmount() {
+        map.clear();
+    }
+
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
@@ -335,6 +339,10 @@ struct UAmount32 {
             total += it->second;
         }
         return total;
+    }
+
+    ~UAmount32() {
+        map.clear();
     }
 
     ADD_SERIALIZE_METHODS;
