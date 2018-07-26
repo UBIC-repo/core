@@ -194,6 +194,7 @@ bool Loader::loadPathSum() {
         //Log(LOG_LEVEL_INFO) << "Temporary inserted Payout: " << found->getPayout();
         pathSumList.insert(std::pair<uint64_t, UAmount>(found->getBlockHeight(), found->getPayout()));
         previousHeaderHash = found->getPreviousHeaderHash();
+        free(found);
     }
 
     UAmount zeroBlockAmount;
