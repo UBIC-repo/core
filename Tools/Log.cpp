@@ -199,6 +199,6 @@ Log::~Log()
     fb.close();
 
     currentStream->clear();
-    free(currentStream);
+    delete currentStream;
     logLock.unlock();
 }
