@@ -477,7 +477,7 @@ void CertStore::loadFromFS() {
         FS::deserializeFromFile(file, *cert, CERT_SIZE_MAX);
         cert->finishDeserialization("dsc");
         this->DSCList[Hexdump::vectorToHexString(cert->getId())] = *cert;
-        free(cert);
+        delete cert;
     }
     Log(LOG_LEVEL_INFO) << "Loaded DSC cert(s)";
 }
