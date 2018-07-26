@@ -56,5 +56,8 @@ bool VerifySignature::verify(std::vector<unsigned char> msg, std::vector<unsigne
     EC_POINT_free(pubkeyPoint);
     EC_KEY_free(ecKey);
 
-    return VerifySignature::verify(msg, signature, pubkey);
+    bool result = VerifySignature::verify(msg, signature, pubkey);
+    EVP_PKEY_free(pubkey);
+
+    return result;
 }
