@@ -227,6 +227,8 @@ void NetworkMessageHandler::handleAskForBlocks(AskForBlocks *askForBlocks, PeerI
             recipient->deliver(msg);
             free(transmitBlock->block.data());
         }
+        
+        delete blockHeader;
         delete transmitBlock;
     }
 }
