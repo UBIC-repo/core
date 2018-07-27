@@ -16,6 +16,7 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
     if(networkMessage->body_length() == 0) {
         Log(LOG_LEVEL_ERROR) << "Received empty networkMessage";
         banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
+        delete networkMessage;
         return;
     }
     uint8_t commandType = (uint8_t)networkMessage->body()[0];
@@ -224,7 +225,9 @@ void NetworkMessageHandler::handleAskForBlocks(AskForBlocks *askForBlocks, PeerI
             msg.encode_header();
 
             recipient->deliver(msg);
+            free(transmitBlock->block.data());
         }
+        delete transmitBlock;
     }
 }
 
