@@ -258,6 +258,9 @@ void NetworkMessageHandler::handleAskForBlock(AskForBlock *askForBlock, PeerInte
     CDataStream s(SER_DISK, 1);
     s << *transmitBlock;
 
+    free(transmitBlock->block.data());
+    delete transmitBlock;
+    
     NetworkMessage msg;
     msg.body_length(s.size());
     std::memcpy(msg.body(), s.data(), msg.body_length());
