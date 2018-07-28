@@ -38,7 +38,7 @@ private:
                 BlockHeader* blockHeader = chain.getBlockHeader(block->getHeader()->getPreviousHeaderHash());
                 if (block->getHeader()->getBlockHeight() == 1
                     || blockHeader != nullptr) {
-                    free(blockHeader);
+                    delete blockHeader;
                     if (chain.doesBlockExist(block->getHeader()->getHeaderHash())
                         && chain.doesBlockExist(block->getHeader()->getBlockHeight())) {
                         Log(LOG_LEVEL_INFO) << "remove block:" << block->getHeader()->getHeaderHash()
@@ -64,7 +64,7 @@ private:
                         cacheMutex.unlock();
                     }
                 } else {
-                    free(blockHeader);
+                    delete blockHeader;
                     blockIt++;
                 }
             }
