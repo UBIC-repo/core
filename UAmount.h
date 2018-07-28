@@ -20,8 +20,8 @@ struct UAmount {
         return 0;
     }
 
-    inline UAmount& operator=(const UAmount& other){
-        map = other.map;
+    inline UAmount& operator=(UAmount other){
+        map.swap(other.map);
         return *this;
     }
 
@@ -192,8 +192,8 @@ struct UAmount32 {
         return 0;
     }
 
-    inline UAmount32& operator=(const UAmount32& other){
-        map = other.map;
+    inline UAmount32& operator=(UAmount32 other){
+        map.swap(other.map);
         return *this;
     }
 
