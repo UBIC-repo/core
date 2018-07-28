@@ -588,8 +588,8 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                     }
                 }
 
-                free(cert);
-                
+                delete cert;
+
                 needToPayFee = false;
                 break;
             }
@@ -621,7 +621,7 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                     cert = certStore.getCscaCertWithCertId(deactivateCertificateScript.certificateId);
                 }
 
-                if(!deactivateCertificateScript.nonce != cert->getNonce()) {
+                if(deactivateCertificateScript.nonce != cert->getNonce()) {
                     Log(LOG_LEVEL_ERROR) << "SCRIPT_DEACTIVATE_CERTIFICATE nonce mismatch";
                     return false;
                 }
@@ -815,6 +815,7 @@ bool TransactionHelper::applyTransaction(Transaction* tx, BlockHeader* blockHead
 
                 BIO_set_close(certbio, BIO_CLOSE);
                 BIO_free(certbio);
+                delete cert;
 
                 break;
             }
@@ -825,6 +826,7 @@ bool TransactionHelper::applyTransaction(Transaction* tx, BlockHeader* blockHead
                 CDataStream s(SER_DISK, 1);
                 s.write((char *) txIn->getScript().getScript().data(), txIn->getScript().getScript().size());
                 s >> deactivateCertificateScript;
+                s.clear();
                 deactivateCertificateScript.certificateId = txIn->getInAddress();
                 deactivateCertificateScript.nonce = txIn->getNonce();
 
@@ -951,6 +953,7 @@ bool TransactionHelper::undoTransaction(Transaction* tx, BlockHeader* blockHeade
                 CDataStream s(SER_DISK, 1);
                 s.write((char *) txIn->getScript().getScript().data(), txIn->getScript().getScript().size());
                 s >> addCertificateScript;
+                s.clear();
 
                 CertStore &certStore = CertStore::Instance();
 
@@ -973,6 +976,8 @@ bool TransactionHelper::undoTransaction(Transaction* tx, BlockHeader* blockHeade
                 CDataStream dcScript(SER_DISK, 1);
                 dcScript.write((char *) txIn->getScript().getScript().data(), txIn->getScript().getScript().size());
                 dcScript >> deactivateCertificateScript;
+                dcScript.clear();
+
                 deactivateCertificateScript.certificateId = txIn->getInAddress();
                 deactivateCertificateScript.nonce = txIn->getNonce();
 
@@ -992,6 +997,7 @@ bool TransactionHelper::undoTransaction(Transaction* tx, BlockHeader* blockHeade
                 CDataStream voScript(SER_DISK, 1);
                 voScript.write((char *) tx->getTxOuts().front().getScript().getScript().data(), tx->getTxOuts().front().getScript().getScript().size());
                 voScript >> *vote;
+                voScript.clear();
 
                 vote->setNonce(tx->getTxIns().front().getNonce());
                 vote->setFromPubKey(tx->getTxIns().front().getInAddress());
