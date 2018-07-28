@@ -53,19 +53,19 @@ bool BlockHelper::verifyBlock(Block* block) {
                              << " and computed header hash "
                              << computedHeaderHash
                              << " mismatch";
-        free(previousBlockHeader);
+        delete previousBlockHeader;
         return false;
     }
 
     if(header->getTimestamp() > Time::getCurrentTimestamp() + 110) {
         Log(LOG_LEVEL_ERROR) << "Timestamp of the block is in the future";
-        free(previousBlockHeader);
+        delete previousBlockHeader;
         return false;
     }
 
     if(previousBlockHeader!= nullptr && header->getIssuerPubKey() == previousBlockHeader->getIssuerPubKey()) {
         Log(LOG_LEVEL_ERROR) << "Previous block was issued by the same issuer";
-        free(previousBlockHeader);
+        delete previousBlockHeader;
         return false;
     }
 
@@ -74,7 +74,7 @@ bool BlockHelper::verifyBlock(Block* block) {
             ) {
         Log(LOG_LEVEL_ERROR) << "Slot number " << (uint64_t)(header->getTimestamp() / BLOCK_INTERVAL_IN_SECONDS)
                              << " is already taken by another block";
-        free(previousBlockHeader);
+        delete previousBlockHeader;
         return false;
     }
 
@@ -82,13 +82,13 @@ bool BlockHelper::verifyBlock(Block* block) {
         Log(LOG_LEVEL_ERROR) << "Block issuer is: " << header->getIssuerPubKey()
                              << " but " << voteStore.getValidatorForTimestamp(header->getTimestamp())
                              << " was expected";
-        free(previousBlockHeader);
+        delete previousBlockHeader;
         return false;
     }
 
     if(!VerifySignature::verify(computedHeaderHash, header->getIssuerSignature(), header->getIssuerPubKey())) {
         Log(LOG_LEVEL_ERROR) << "Block isn't signature isn't correct";
-        free(previousBlockHeader);
+        delete previousBlockHeader;
         return false;
     }
 
@@ -96,7 +96,7 @@ bool BlockHelper::verifyBlock(Block* block) {
         for (auto vote: header->getVotes()) {
             if(!TransactionHelper::verifyTx(&vote, IS_IN_HEADER, header)) {
                 Log(LOG_LEVEL_ERROR) << "Couldn't verify Vote in block header";
-                free(previousBlockHeader);
+                delete previousBlockHeader;
                 return false;
             }
         }
@@ -110,7 +110,7 @@ bool BlockHelper::verifyBlock(Block* block) {
                              << header->getMerkleRootHash()
                              << " mismatch with computed merkle tree"
                              << computedMerkleTreeRootHash;
-        free(previousBlockHeader);
+        delete previousBlockHeader;
         return false;
     }
 
@@ -123,7 +123,7 @@ bool BlockHelper::verifyBlock(Block* block) {
                                  << " and header hash "
                                  << header->getHeaderHash()
                                  << " due to transaction";
-            free(previousBlockHeader);
+            delete previousBlockHeader;
             return false;
         }
     }
@@ -179,7 +179,7 @@ bool BlockHelper::verifyBlock(Block* block) {
                                      << header->getHeaderHash()
                                      << " due to duplicate input";
 
-                free(previousBlockHeader);
+                delete previousBlockHeader;
                 return false;
             }
             txInputs.emplace_back(Hexdump::vectorToHexString(passportHash));
@@ -199,7 +199,7 @@ bool BlockHelper::verifyBlock(Block* block) {
                                          << header->getHeaderHash()
                                          << " due to duplicate input";
 
-                    free(previousBlockHeader);
+                    delete previousBlockHeader;
                     return false;
                 }
                 txInputs.emplace_back(Hexdump::vectorToHexString(txIn.getInAddress()));
@@ -219,7 +219,7 @@ bool BlockHelper::verifyBlock(Block* block) {
                              << " header->getUbiReceiverCount() is: "
                              << header->getUbiReceiverCount();
 
-        free(previousBlockHeader);
+        delete previousBlockHeader;
         return false;
     }
 
@@ -241,7 +241,7 @@ bool BlockHelper::verifyBlock(Block* block) {
                              << " header->getPayout() is: "
                              << header->getPayout();
 
-        free(previousBlockHeader);
+        delete previousBlockHeader;
         return false;
     }
 
@@ -252,11 +252,11 @@ bool BlockHelper::verifyBlock(Block* block) {
                              << " header->getPayoutRemainder() is: "
                              << header->getPayoutRemainder();
 
-        free(previousBlockHeader);
+        delete previousBlockHeader;
         return false;
     }
 
-    free(previousBlockHeader);
+    delete previousBlockHeader;
     return true;
 }
 
@@ -570,7 +570,7 @@ UAmount32 BlockHelper::calculateUbiReceiverCount(Block* block, BlockHeader* prev
                             DSCAttachedPassportCounter::getCount(cert->getId()))
                     );
                     newUbiReceiverCount += toAdd;
-                    free(cert);
+                    delete cert;
                 }
             }
 
