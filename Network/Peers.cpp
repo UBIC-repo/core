@@ -258,6 +258,9 @@ void PeerServer::deliver(NetworkMessage msg)
 
 void PeerServer::deliverImpl(NetworkMessage msg)
 {
+    if(this->disconnected) {
+        return;
+    }
     Log(LOG_LEVEL_INFO) << "PeerServer::deliver()";
     bool write_in_progress = !write_msgs_.empty();
     write_msgs_.emplace_back(msg);
@@ -497,6 +500,9 @@ void PeerClient::deliver(NetworkMessage msg)
 
 void PeerClient::deliverImpl(NetworkMessage msg)
 {
+    if(this->disconnected) {
+        return;
+    }
     Log(LOG_LEVEL_INFO) << "PeerClient::deliver(): " <<
                         Hexdump::ucharToHexString((unsigned char*)msg.data(), (uint32_t)msg.length());
     bool write_in_progress = !write_msgs_.empty();
