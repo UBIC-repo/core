@@ -81,7 +81,7 @@ public:
     bool isMature(uint32_t blockHeight);
 
     ~Cert() {
-        X509_free(x509);
+        //X509_free(x509);
     }
 
     ADD_SERIALIZE_METHODS;
