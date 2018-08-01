@@ -21,8 +21,15 @@ public:
             std::memcpy(this->data_, other.data_, header_length + other.body_length_);
     };
 
+    NetworkMessage& operator=( const NetworkMessage &other ) {
+        this->data_ = (char*)malloc(header_length + other.body_length_);
+        this->body_length_ = other.body_length_;
+        std::memcpy(this->data_, other.data_, header_length + other.body_length_);
+        return *this;
+    };
+
     uint32_t body_length_;
-    uint8_t from = 65;
+
     char* data_;
     const static uint8_t header_length = 4;
     const static uint32_t max_body_length = 2000000;
