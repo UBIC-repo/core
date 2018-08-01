@@ -12,84 +12,104 @@
 
 uint8_t Test::getCurrencyIdFromIso2Code(char* iso2code) {
     uint8_t currencyId = 0;
-    if(strcmp(iso2code, "AT") == 0) {
+    if(strcmp(iso2code, "AT") == 0 || strcmp(iso2code, "at") == 0) {
         currencyId = CURRENCY_AUSTRIA;
     }
 
-    if(strcmp(iso2code, "DE") == 0) {
+    if(strcmp(iso2code, "DE") == 0 || strcmp(iso2code, "de") == 0) {
         currencyId = CURRENCY_GERMANY;
     }
 
-    if(strcmp(iso2code, "FR") == 0) {
+    if(strcmp(iso2code, "FR") == 0 || strcmp(iso2code, "fr") == 0) {
         currencyId = CURRENCY_FRANCE;
     }
 
-    if(strcmp(iso2code, "SE") == 0) {
+    if(strcmp(iso2code, "SE") == 0 || strcmp(iso2code, "se") == 0) {
         currencyId = CURRENCY_SWEDEN;
     }
 
-    if(strcmp(iso2code, "CA") == 0) {
+    if(strcmp(iso2code, "CA") == 0 || strcmp(iso2code, "ca") == 0) {
         currencyId = CURRENCY_CANADA;
     }
 
-    if(strcmp(iso2code, "IE") == 0) {
+    if(strcmp(iso2code, "IE") == 0 || strcmp(iso2code, "ie") == 0) {
         currencyId = CURRENCY_IRELAND;
     }
 
-    if(strcmp(iso2code, "CN") == 0) {
+    if(strcmp(iso2code, "CN") == 0 || strcmp(iso2code, "cn") == 0) {
         currencyId = CURRENCY_CHINA;
     }
 
-    if(strcmp(iso2code, "GB") == 0) {
+    if(strcmp(iso2code, "GB") == 0 || strcmp(iso2code, "gb") == 0) {
         currencyId = CURRENCY_UNITED_KINGDOM;
     }
 
-    if(strcmp(iso2code, "AE") == 0) {
+    if(strcmp(iso2code, "AE") == 0 || strcmp(iso2code, "ae") == 0) {
         currencyId = CURRENCY_UNITED_ARAB_EMIRATES;
     }
 
-    if(strcmp(iso2code, "NZ") == 0) {
+    if(strcmp(iso2code, "NZ") == 0 || strcmp(iso2code, "nz") == 0) {
         currencyId = CURRENCY_NEW_ZEALAND;
     }
 
-    if(strcmp(iso2code, "FI") == 0) {
+    if(strcmp(iso2code, "FI") == 0 || strcmp(iso2code, "fi") == 0) {
         currencyId = CURRENCY_FINLAND;
     }
 
-    if(strcmp(iso2code, "LU") == 0) {
+    if(strcmp(iso2code, "LU") == 0 || strcmp(iso2code, "lu") == 0) {
         currencyId = CURRENCY_LUXEMBOURG;
     }
 
-    if(strcmp(iso2code, "SG") == 0) {
+    if(strcmp(iso2code, "SG") == 0 || strcmp(iso2code, "sg") == 0) {
         currencyId = CURRENCY_SINGAPORE;
     }
 
-    if(strcmp(iso2code, "HU") == 0) {
+    if(strcmp(iso2code, "HU") == 0 || strcmp(iso2code, "hu") == 0) {
         currencyId = CURRENCY_HUNGARY;
     }
 
-    if(strcmp(iso2code, "CZ") == 0) {
+    if(strcmp(iso2code, "CZ") == 0 || strcmp(iso2code, "cz") == 0) {
         currencyId = CURRENCY_CZECH_REPUBLIC;
     }
 
-    if(strcmp(iso2code, "MY") == 0) {
+    if(strcmp(iso2code, "MY") == 0 || strcmp(iso2code, "my") == 0) {
         currencyId = CURRENCY_MALAYSIA;
     }
 
-    if(strcmp(iso2code, "UA") == 0) {
+    if(strcmp(iso2code, "UA") == 0 || strcmp(iso2code, "ua") == 0) {
         currencyId = CURRENCY_UKRAINE;
     }
 
-    if(strcmp(iso2code, "EE") == 0) {
+    if(strcmp(iso2code, "EE") == 0 || strcmp(iso2code, "ee") == 0) {
         currencyId = CURRENCY_ESTONIA;
     }
 
-    if(strcmp(iso2code, "MC") == 0) {
+    if(strcmp(iso2code, "MC") == 0 || strcmp(iso2code, "mc") == 0) {
         currencyId = CURRENCY_MONACO;
     }
 
-    if(strcmp(iso2code, "LI") == 0) {
+    if(strcmp(iso2code, "LI") == 0 || strcmp(iso2code, "li") == 0) {
         currencyId = CURRENCY_LIECHTENSTEIN;
+    }
+
+    if(strcmp(iso2code, "US") == 0 || strcmp(iso2code, "us") == 0) {
+        currencyId = CURRENCY_USA;
+    }
+
+    if(strcmp(iso2code, "AU") == 0 || strcmp(iso2code, "au") == 0) {
+        currencyId = CURRENCY_AUSTRALIA;
+    }
+
+    if(strcmp(iso2code, "CH") == 0) {
+        currencyId = CURRENCY_SWITZERLAND;
+    }
+
+    if(strcmp(iso2code, "JP") == 0) {
+        currencyId = CURRENCY_JAPAN;
+    }
+
+    if(strcmp(iso2code, "TH") == 0) {
+        currencyId = CURRENCY_THAILAND;
     }
 
     return currencyId;
@@ -201,7 +221,7 @@ void Test::importCACerts() {
             Log(LOG_LEVEL_INFO) << "Country code: " << countryStr;
 
             if(getCurrencyIdFromIso2Code((char*)countryStr) == 0) {
-                Log(LOG_LEVEL_INFO) << "Could not get currency ID" ;
+                Log(LOG_LEVEL_INFO) << "Could not get currency ID for countryStr:" << countryStr;
                 return;
                 continue;
             }
@@ -316,7 +336,8 @@ void Test::importDSCCerts() {
             Log(LOG_LEVEL_INFO) << "Country code: " << countryStr;
 
             if(getCurrencyIdFromIso2Code((char*)countryStr) == 0) {
-                continue;
+                Log(LOG_LEVEL_INFO) << "Could not get currency ID for countryStr:" << countryStr;
+                return;
             }
 
             Log(LOG_LEVEL_INFO) << "notAfter: " << notAfter->data;
@@ -336,34 +357,34 @@ void Test::importDSCCerts() {
             uint32_t tenYears = 10 * 365 * 24 * 3600;
             uint32_t fiveYears = 5 * 365 * 24 * 3600;
 
-            if(strcmp((char*)countryStr, "AT") == 0 ||
-               strcmp((char*)countryStr, "DE") == 0 ||
-               strcmp((char*)countryStr, "CN") == 0 ||
-               strcmp((char*)countryStr, "GB") == 0 ||
-               strcmp((char*)countryStr, "AU") == 0 ||
-               strcmp((char*)countryStr, "IE") == 0 ||
-               strcmp((char*)countryStr, "NZ") == 0 ||
-               strcmp((char*)countryStr, "CZ") == 0 ||
-               strcmp((char*)countryStr, "CA") == 0 ||
-               strcmp((char*)countryStr, "UA") == 0 ||
-               strcmp((char*)countryStr, "US") == 0 ||
-               strcmp((char*)countryStr, "JP") == 0 ||
-               strcmp((char*)countryStr, "HU") == 0 ||
-               strcmp((char*)countryStr, "LI") == 0 ||
-               strcmp((char*)countryStr, "CH") == 0 ||
-               strcmp((char*)countryStr, "FR") == 0) {
+            if(strcmp((char*)countryStr, "AT") == 0 || strcmp((char*)countryStr, "at") == 0 ||
+               strcmp((char*)countryStr, "DE") == 0 || strcmp((char*)countryStr, "de") == 0 ||
+               strcmp((char*)countryStr, "CN") == 0 || strcmp((char*)countryStr, "cn") == 0 ||
+               strcmp((char*)countryStr, "GB") == 0 || strcmp((char*)countryStr, "gb") == 0 ||
+               strcmp((char*)countryStr, "AU") == 0 || strcmp((char*)countryStr, "au") == 0 ||
+               strcmp((char*)countryStr, "IE") == 0 || strcmp((char*)countryStr, "ie") == 0 ||
+               strcmp((char*)countryStr, "NZ") == 0 || strcmp((char*)countryStr, "nz") == 0 ||
+               strcmp((char*)countryStr, "CZ") == 0 || strcmp((char*)countryStr, "cz") == 0 ||
+               strcmp((char*)countryStr, "CA") == 0 || strcmp((char*)countryStr, "ca") == 0 ||
+               strcmp((char*)countryStr, "UA") == 0 || strcmp((char*)countryStr, "ua") == 0 ||
+               strcmp((char*)countryStr, "US") == 0 || strcmp((char*)countryStr, "us") == 0 ||
+               strcmp((char*)countryStr, "JP") == 0 || strcmp((char*)countryStr, "jp") == 0 ||
+               strcmp((char*)countryStr, "HU") == 0 || strcmp((char*)countryStr, "hu") == 0 ||
+               strcmp((char*)countryStr, "LI") == 0 || strcmp((char*)countryStr, "li") == 0 ||
+               strcmp((char*)countryStr, "CH") == 0 || strcmp((char*)countryStr, "ch") == 0 ||
+               strcmp((char*)countryStr, "FR") == 0 || strcmp((char*)countryStr, "fr") == 0) {
                 maxValidity = tenYears;
             }
 
-            if(strcmp((char*)countryStr, "SE") == 0 ||
-               strcmp((char*)countryStr, "FI") == 0 ||
-               strcmp((char*)countryStr, "MY") == 0 ||
-               strcmp((char*)countryStr, "TH") == 0 ||
-               strcmp((char*)countryStr, "SG") == 0 ||
-               strcmp((char*)countryStr, "MC") == 0 ||
-               strcmp((char*)countryStr, "EE") == 0 ||
-               strcmp((char*)countryStr, "LU") == 0 ||
-               strcmp((char*)countryStr, "AE") == 0
+            if(strcmp((char*)countryStr, "SE") == 0 || strcmp((char*)countryStr, "se") == 0 ||
+               strcmp((char*)countryStr, "FI") == 0 || strcmp((char*)countryStr, "fi") == 0 ||
+               strcmp((char*)countryStr, "MY") == 0 || strcmp((char*)countryStr, "my") == 0 ||
+               strcmp((char*)countryStr, "TH") == 0 || strcmp((char*)countryStr, "th") == 0 ||
+               strcmp((char*)countryStr, "SG") == 0 || strcmp((char*)countryStr, "sg") == 0 ||
+               strcmp((char*)countryStr, "MC") == 0 || strcmp((char*)countryStr, "mc") == 0 ||
+               strcmp((char*)countryStr, "EE") == 0 || strcmp((char*)countryStr, "ee") == 0 ||
+               strcmp((char*)countryStr, "LU") == 0 || strcmp((char*)countryStr, "lu") == 0 ||
+               strcmp((char*)countryStr, "AE") == 0 || strcmp((char*)countryStr, "ae") == 0
                ) {
                 maxValidity = fiveYears;
             }
