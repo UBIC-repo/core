@@ -513,8 +513,16 @@ std::string Api::getAddress(std::vector<unsigned char> address) {
     addressTree.push_back(std::make_pair("amountWithUBI", uamountToPtree(AddressHelper::getAmountWithUBI(&addressForStore))));
     addressTree.push_back(std::make_pair("amountWithoutUBI", uamountToPtree(addressForStore.getAmount())));
     addressTree.push_back(std::make_pair("UBIdebit", uamountToPtree(addressForStore.getUBIdebit())));
-    addressTree.put("DscCertificate", Hexdump::vectorToHexString(addressForStore.getDscCertificate()));
-    addressTree.put("DSCLinkedAtHeight", addressForStore.getDSCLinkedAtHeight());
+
+    auto dscToAddressLinks = addressForStore.getDscToAddressLinks();
+    auto it = dscToAddressLinks.begin();
+    while (it != dscToAddressLinks.end()) {
+        ptree dscTree;
+        dscTree.put("DscCertificate", Hexdump::vectorToHexString((*it).getDscCertificate()));
+        dscTree.put("DSCLinkedAtHeight", (*it).getDSCLinkedAtHeight());
+        addressTree.add_child("dsc", addressTree);
+        it++;
+    }
 
     baseTree.add_child("address", addressTree);
 
@@ -1111,9 +1119,18 @@ std::string Api::getUbi() {
         AddressForStore addressForStore = addressStore.getAddressFromStore(addressLink);
 
         if(UBICalculator::isAddressConnectedToADSC(&addressForStore)) {
+
+            auto dscToAddressLinks = addressForStore.getDscToAddressLinks();
+            auto it = dscToAddressLinks.begin();
+            while (it != dscToAddressLinks.end()) {
+                ptree dscTree;
+                dscTree.put("DscCertificate", Hexdump::vectorToHexString((*it).getDscCertificate()));
+                dscTree.put("DSCLinkedAtHeight", (*it).getDSCLinkedAtHeight());
+                ubiTree.add_child("dsc", dscTree);
+                it++;
+            }
+
             UAmount received = UBICalculator::totalReceivedUBI(&addressForStore);
-            ubiTree.put("startedAtBlockHeight", addressForStore.getDSCLinkedAtHeight());
-            ubiTree.put("dscCertificateId", Hexdump::vectorToHexString(addressForStore.getDscCertificate()));
             ubiTree.push_back(std::make_pair("totalUbiReceived", uamountToPtree(received)));
 
             ubisTree.push_back(std::make_pair("", ubiTree));
