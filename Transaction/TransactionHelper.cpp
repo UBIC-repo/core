@@ -441,10 +441,14 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                     std::vector<unsigned char> outAddress =  AddressHelper::addressLinkFromScript(txOuts.begin()->getScript());
                     AddressForStore addressForStore = addressStore.getAddressFromStore(outAddress);
 
+                    /*
+                     *  It is now possible to register several passports on the same address
+                     *
                     if(addressForStore.getDSCLinkedAtHeight() != 0) {
                         Log(LOG_LEVEL_ERROR) << "Address " << outAddress << " has already a DSC linked to it ";
                         return false;
                     }
+                     */
 
                 } else {
                     // is NtpEsk
@@ -481,10 +485,14 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                     std::vector<unsigned char> outAddress =  AddressHelper::addressLinkFromScript(txOuts.begin()->getScript());
                     AddressForStore addressForStore = addressStore.getAddressFromStore(outAddress);
 
+                    /*
+                     *  It is now possible to register several passports on the same address
+                     *
                     if(addressForStore.getDSCLinkedAtHeight() != 0) {
                         Log(LOG_LEVEL_ERROR) << "Address " << outAddress << " has already a DSC linked to it ";
                         return false;
                     }
+                     */
                 }
 
                 needToPayFee = false;
@@ -497,6 +505,7 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                     CDataStream acScript(SER_DISK, 1);
                     acScript.write((char *) script.getScript().data(), script.getScript().size());
                     acScript >> addCertificateScript;
+                    acScript.clear();
                 } catch (const std::exception& e) {
                     Log(LOG_LEVEL_ERROR) << "Failed to deserialize SCRIPT_ADD_CERTIFICATE payload";
                     return false;
@@ -777,6 +786,7 @@ bool TransactionHelper::applyTransaction(Transaction* tx, BlockHeader* blockHead
                     db.putInDB(DB_NTPSK_ALREADY_USED, ntpEskSignatureVerificationObject->getMessageHash(),
                                std::vector<unsigned char>(nauscript.data(), nauscript.data() + nauscript.size()));
                 }
+                srpscript.clear();
 
                 DSCAttachedPassportCounter::increment(txIn->getInAddress());
                 isRegisterPassportTx = true;
@@ -788,13 +798,14 @@ bool TransactionHelper::applyTransaction(Transaction* tx, BlockHeader* blockHead
                 CDataStream s(SER_DISK, 1);
                 s.write((char *) txIn->getScript().getScript().data(), txIn->getScript().getScript().size());
                 s >> addCertificateScript;
+                s.clear();
 
                 CertStore &certStore = CertStore::Instance();
 
                 Cert *cert = new Cert();
 
                 BIO *certbio = BIO_new_mem_buf(addCertificateScript.certificate.data(), (int)addCertificateScript.certificate.size());
-                X509 *x509 = d2i_X509_bio(certbio, NULL);
+                X509 *x509 = d2i_X509_bio(certbio, nullptr);
 
                 cert->setX509(x509);
 
@@ -857,8 +868,14 @@ bool TransactionHelper::applyTransaction(Transaction* tx, BlockHeader* blockHead
                 address->setScript(txOut->getScript());
 
                 if(isRegisterPassportTx) {
-                    address->setDscCertificate(txIns.begin()->getInAddress());
-                    address->setDSCLinkedAtHeight(blockHeader->getBlockHeight());
+                    std::vector<DscToAddressLink> dscToAddressLinks = address->getDscToAddressLinks();
+
+                    DscToAddressLink dscToAddressLink;
+                    dscToAddressLink.setDscCertificate(txIns.begin()->getInAddress());
+                    dscToAddressLink.setDSCLinkedAtHeight(blockHeader->getBlockHeight());
+                    dscToAddressLinks.push_back(dscToAddressLink);
+
+                    address->setDscToAddressLinks(dscToAddressLinks);
                 }
 
                 addressStore.creditAddressToStore(address, false);
@@ -870,6 +887,7 @@ bool TransactionHelper::applyTransaction(Transaction* tx, BlockHeader* blockHead
                 CDataStream dcScript(SER_DISK, 1);
                 dcScript.write((char *) tx->getTxOuts().front().getScript().getScript().data(), tx->getTxOuts().front().getScript().getScript().size());
                 dcScript >> *vote;
+                dcScript.clear();
 
                 vote->setNonce(tx->getTxIns().front().getNonce());
                 vote->setFromPubKey(tx->getTxIns().front().getInAddress());
@@ -942,6 +960,7 @@ bool TransactionHelper::undoTransaction(Transaction* tx, BlockHeader* blockHeade
                     srpscript >> *ntpEskSignatureVerificationObject;
                     db.removeFromDB(DB_NTPSK_ALREADY_USED, ntpEskSignatureVerificationObject->getMessageHash());
                 }
+                srpscript.clear();
 
                 DSCAttachedPassportCounter::decrement(txIn->getInAddress());
                 isRegisterPassportTx = true;
@@ -1019,8 +1038,18 @@ bool TransactionHelper::undoTransaction(Transaction* tx, BlockHeader* blockHeade
                 AddressForStore address = addressStore.getAddressFromStore(AddressHelper::addressLinkFromScript(txOut->getScript()));
 
                 if(isRegisterPassportTx) {
-                    address.setDscCertificate(std::vector<unsigned char>());
-                    address.setDSCLinkedAtHeight(0);
+
+                    std::vector<DscToAddressLink> dscToAddressLinks = address.getDscToAddressLinks();
+
+                    auto it = dscToAddressLinks.begin();
+                    while (it != dscToAddressLinks.end()) {
+                        if(((DscToAddressLink)*it).getDscCertificate() == txIns.front().getInAddress()) {
+                            it = dscToAddressLinks.erase(it);
+                            break;
+                        }
+                    }
+
+                    address.setDscToAddressLinks(dscToAddressLinks);
                 }
 
                 addressStore.debitAddressToStore(
