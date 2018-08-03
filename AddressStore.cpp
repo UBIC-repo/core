@@ -26,6 +26,7 @@ void AddressStore::debitAddressToStore(AddressForStore* address, UAmount amount,
         Log(LOG_LEVEL_INFO) << "will debit: " << debit;
         Log(LOG_LEVEL_INFO) << "setUBIdebit: " << address->getUBIdebit() + debit;
         address->setUBIdebit(address->getUBIdebit() + debit);
+        amount = amount - debit;
     }
 
     UAmount finalAmount = address->getAmount() - amount;
@@ -42,7 +43,7 @@ void AddressStore::debitAddressToStore(AddressForStore* address, UAmount amount,
 void AddressStore::creditAddressToStore(AddressForStore* address, bool isUndo) {
 
     std::vector<unsigned char> addressKey = AddressHelper::addressLinkFromScript(address->getScript());
-    AddressForStore currentAddress = AddressStore::getAddressFromStore(
+    AddressForStore currentAddress = getAddressFromStore(
             addressKey
     );
 
@@ -62,9 +63,17 @@ void AddressStore::creditAddressToStore(AddressForStore* address, bool isUndo) {
         currentAddress.setScript(address->getScript());
     }
 
-    if(address->getDSCLinkedAtHeight() != 0) {
-        currentAddress.setDSCLinkedAtHeight(address->getDSCLinkedAtHeight());
-        currentAddress.setDscCertificate(address->getDscCertificate());
+    if(!address->getDscToAddressLinks().empty()) {
+        std::vector<DscToAddressLink> currentDscToAddressLinks = currentAddress.getDscToAddressLinks();
+        std::vector<DscToAddressLink> newDscToAddressLinks = address->getDscToAddressLinks();
+
+        auto it = newDscToAddressLinks.begin();
+        while (it != newDscToAddressLinks.end()) {
+            currentDscToAddressLinks.push_back(*it);
+            it++;
+        }
+
+        currentAddress.setDscToAddressLinks(currentDscToAddressLinks);
     }
 
     DB& db = DB::Instance();
