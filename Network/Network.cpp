@@ -91,66 +91,69 @@ void Network::lookForPeers() {
     auto ipList = Network::getIpsFromGithub();
 
     for(auto ip : ipList) {
+        try {
+		if(ip == Network::myIP) {
+		    Log(LOG_LEVEL_INFO) << "Cannot add ip: " << ip << " because it is your own IP";
+		    continue;
+		}
 
-        if(ip == Network::myIP) {
-            Log(LOG_LEVEL_INFO) << "Cannot add ip: " << ip << " because it is your own IP";
-            continue;
-        }
+		auto io_service = std::make_shared<boost::asio::io_service>();
+		tcp::resolver resolver(*io_service);
+		auto work = std::make_shared<boost::asio::io_service::work>(*io_service);
+		auto endpoint_iterator = resolver.resolve({ip, NET_PORT});
 
-        auto io_service = std::make_shared<boost::asio::io_service>();
-        tcp::resolver resolver(*io_service);
-        auto work = std::make_shared<boost::asio::io_service::work>(*io_service);
-        auto endpoint_iterator = resolver.resolve({ip, NET_PORT});
+		auto peer = std::make_shared<PeerClient>(io_service, endpoint_iterator, work);
 
-        auto peer = std::make_shared<PeerClient>(io_service, endpoint_iterator, work);
+		//std::shared_ptr<PeerClient> nPeer = peer->get();
+		peer->setBlockHeight(0);
+		peer->setIp(ip);
+		if (peers.appendPeer(peer->get())) {
+		    peer->do_connect();
 
-        //std::shared_ptr<PeerClient> nPeer = peer->get();
-        peer->setBlockHeight(0);
-        peer->setIp(ip);
-        if (peers.appendPeer(peer->get())) {
-            peer->do_connect();
+		    auto io_service_run = [io_service]() {
+		        try {
+		            io_service->run();
+		            //io_service->stop();
+		            Log(LOG_LEVEL_INFO) << "io_service terminated";
+		        }
+		        catch (const std::exception &e) {
+		            Log(LOG_LEVEL_ERROR) << "io_service.run terminated with: " << e.what();
+		        }
+		    };
+		    std::thread t(io_service_run);
+		    t.detach();
 
-            auto io_service_run = [io_service]() {
-                try {
-                    io_service->run();
-                    //io_service->stop();
-                    Log(LOG_LEVEL_INFO) << "io_service terminated";
-                }
-                catch (const std::exception &e) {
-                    Log(LOG_LEVEL_ERROR) << "io_service.run terminated with: " << e.what();
-                }
-            };
-            std::thread t(io_service_run);
-            t.detach();
+		    Chain &chain = Chain::Instance();
 
-            Chain &chain = Chain::Instance();
+		    // transmit our own block height
+		    CDataStream s(SER_DISK, 1);
+		    TransmitBlockchainHeight *transmitBlockchainHeight = new TransmitBlockchainHeight();
+		    transmitBlockchainHeight->height = chain.getCurrentBlockchainHeight();
+		    s << *transmitBlockchainHeight;
 
-            // transmit our own block height
-            CDataStream s(SER_DISK, 1);
-            TransmitBlockchainHeight *transmitBlockchainHeight = new TransmitBlockchainHeight();
-            transmitBlockchainHeight->height = chain.getCurrentBlockchainHeight();
-            s << *transmitBlockchainHeight;
+		    NetworkMessage msg;
+		    msg.body_length(s.size());
+		    std::memcpy(msg.body(), s.data(), msg.body_length());
+		    msg.encode_header();
 
-            NetworkMessage msg;
-            msg.body_length(s.size());
-            std::memcpy(msg.body(), s.data(), msg.body_length());
-            msg.encode_header();
+		    peer->deliver(msg);
 
-            peer->deliver(msg);
+		    //ask for blockheight
+		    CDataStream s2(SER_DISK, 1);
+		    AskForBlockchainHeight *askForBlockchainHeight = new AskForBlockchainHeight();
+		    s2 << *askForBlockchainHeight;
 
-            //ask for blockheight
-            CDataStream s2(SER_DISK, 1);
-            AskForBlockchainHeight *askForBlockchainHeight = new AskForBlockchainHeight();
-            s2 << *askForBlockchainHeight;
+		    NetworkMessage msg2;
+		    msg2.body_length(s2.size());
+		    std::memcpy(msg2.body(), s2.data(), msg2.body_length());
+		    msg2.encode_header();
 
-            NetworkMessage msg2;
-            msg2.body_length(s2.size());
-            std::memcpy(msg2.body(), s2.data(), msg2.body_length());
-            msg2.encode_header();
-
-            peer->deliver(msg2);
-        } else {
-            peer->close();
+		    peer->deliver(msg2);
+		} else {
+		    peer->close();
+		}
+        } catch (const std::exception& e) {
+            Log(LOG_LEVEL_ERROR) << "lookForPeers(" << ip << ") exception:" << e.what();
         }
     }
 
