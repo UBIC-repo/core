@@ -6,6 +6,7 @@
 #include "ChainParams.h"
 
 #include <stdlib.h>
+#include <iostream>
 
 typedef uint64_t CAmount;
 typedef uint32_t CAmount32;
@@ -17,6 +18,10 @@ struct UAmount {
         if(n1 > n2) {
             return n1 - n2;
         }
+
+        std::cout << "CRITICAL: safeSub incorrect substraction";
+        throw "safeSub incorrect substraction";
+
         return 0;
     }
 
