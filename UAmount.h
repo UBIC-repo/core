@@ -18,6 +18,10 @@ struct UAmount {
         if(n1 > n2) {
             return n1 - n2;
         }
+        
+        if(n1 == n2) {
+            return 0;
+        }
 
         std::cout << "CRITICAL: safeSub incorrect substraction";
         throw "safeSub incorrect substraction";
