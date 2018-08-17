@@ -47,7 +47,7 @@ bool VerifySignature::verify(std::vector<unsigned char> msg, std::vector<unsigne
     EC_GROUP* group = Wallet::getDefaultEcGroup();
     EC_POINT* pubkeyPoint = ECCtools::vectorToEcPoint(group, pubKey);
     EC_KEY* ecKey = EC_KEY_new();
-    EC_KEY_set_group(ecKey, Wallet::getDefaultEcGroup());
+    EC_KEY_set_group(ecKey, group);
     EC_KEY_set_public_key(ecKey, pubkeyPoint);
     EVP_PKEY* pubkey = EVP_PKEY_new();
     EVP_PKEY_set1_EC_KEY(pubkey, ecKey);
