@@ -301,6 +301,7 @@ bool BlockHelper::applyBlock(Block* block) {
     devFundAddressForStore->setScript(devFundAddress.getScript());
 
     addressStore.creditAddressToStore(devFundAddressForStore, false);
+    delete devFundAddressForStore;
 
     Chain &chain = Chain::Instance();
     BlockHeader* previousBlockHeader = chain.getBlockHeader(block->getHeader()->getPreviousHeaderHash());
