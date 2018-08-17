@@ -5,6 +5,7 @@ std::vector<unsigned char> ECCtools::ecPointToVector(const EC_GROUP* curveParams
     BN_CTX *ctx = BN_CTX_new();
     unsigned char pointChar[1024];
     size_t length = EC_POINT_point2oct(curveParams, point, POINT_CONVERSION_COMPRESSED, pointChar, 1024, ctx);
+    BN_CTX_free(ctx);
 
     std::vector<unsigned char> pointVector(pointChar, pointChar + length);
     return pointVector;
