@@ -292,6 +292,7 @@ bool BlockHelper::applyBlock(Block* block) {
     delegateAddressForStore->setScript(delegateAddress.getScript());
 
     addressStore.creditAddressToStore(delegateAddressForStore, false);
+    delete delegateAddressForStore;
 
     // apply dev fund payout
     Address devFundAddress = wallet.addressFromPublicKey(Hexdump::hexStringToVector(DEV_FUND_PUBLIC_KEY));
