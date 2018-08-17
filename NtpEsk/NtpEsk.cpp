@@ -42,11 +42,13 @@ bool NtpEsk::verifyNtpEsk(NtpEskSignatureVerificationObject *ntpEskSignatureVeri
     unsigned char minHash[1] = {'\x01'};
     if(BN_cmp(nm, BN_bin2bn(minHash, 1, NULL)) != 1) {
         Log(LOG_LEVEL_ERROR) << "new hash is smaller or equal to 1";
+        BN_CTX_free(ctx);
         return false;
     }
 
     if(BN_cmp(m, BN_bin2bn(minHash, 1, NULL)) != 1) {
         Log(LOG_LEVEL_ERROR) << "hash smaller or equal to 1";
+        BN_CTX_free(ctx);
         return false;
     }
 
@@ -87,6 +89,8 @@ bool NtpEsk::verifyNtpEsk(NtpEskSignatureVerificationObject *ntpEskSignatureVeri
 
     BIGNUM *calculatedrp = BN_new();
     EC_POINT_get_affine_coordinates_GFp(curveParams, calculatedRp, calculatedrp, NULL, NULL);
+
+    BN_CTX_free(ctx);
 
     if(BN_cmp(calculatedrp, rp) == 0) {
         return true;
