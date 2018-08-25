@@ -370,8 +370,8 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
 
                     ntpRskSignatureVerificationObject->setN(n);
                     ntpRskSignatureVerificationObject->setE(e);
+                    ntpRskSignatureVerificationObject->setM(ECCtools::vectorToBn(txId));
 
-                    std::vector<unsigned char> messageHash = ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM());
                     std::vector<unsigned char> em = ECCtools::bnToVector(ntpRskSignatureVerificationObject->getPaddedM());
 
                     Log(LOG_LEVEL_INFO) << "going to verify padding on: " << em;
@@ -394,7 +394,7 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                     std::vector<unsigned char> asn1RSAWITHSHA256;
                     asn1RSAWITHSHA256 = Hexdump::hexStringToVector(asn1RSAWITHSHA256hex);
 
-                    asn1RSAWITHSHA256.insert(asn1RSAWITHSHA256.end(), messageHash.begin(), messageHash.end());
+                    asn1RSAWITHSHA256.insert(asn1RSAWITHSHA256.end(), txId.begin(), txId.end());
 
                     if(RSA_padding_check_PKCS1_type_1(asn1RSAWITHSHA256.data(), (uint32_t)asn1RSAWITHSHA256.size(), em2.data(), (uint32_t)em2.size(), (uint32_t)em2.size()) >= 0) {
                         Log(LOG_LEVEL_INFO) << "Register passport: PKCS1_type_1 verified with SHA256 ASN1";
@@ -412,7 +412,6 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
 
                     if(!verifiedPadding) {
                         Log(LOG_LEVEL_ERROR) << "Failed to verify padding";
-                        Log(LOG_LEVEL_INFO) << "messageHash : " << messageHash;
                         Log(LOG_LEVEL_INFO) << "em : " << em;
                         Log(LOG_LEVEL_INFO) << "em2 : " << em2;
                         return false;
@@ -440,15 +439,6 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                     // verify address hasn't already a passport linked to it
                     std::vector<unsigned char> outAddress =  AddressHelper::addressLinkFromScript(txOuts.begin()->getScript());
                     AddressForStore addressForStore = addressStore.getAddressFromStore(outAddress);
-
-                    /*
-                     *  It is now possible to register several passports on the same address
-                     *
-                    if(addressForStore.getDSCLinkedAtHeight() != 0) {
-                        Log(LOG_LEVEL_ERROR) << "Address " << outAddress << " has already a DSC linked to it ";
-                        return false;
-                    }
-                     */
 
                 } else {
                     // is NtpEsk
@@ -484,15 +474,6 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                     // verify address hasn't already a passport linked to it
                     std::vector<unsigned char> outAddress =  AddressHelper::addressLinkFromScript(txOuts.begin()->getScript());
                     AddressForStore addressForStore = addressStore.getAddressFromStore(outAddress);
-
-                    /*
-                     *  It is now possible to register several passports on the same address
-                     *
-                    if(addressForStore.getDSCLinkedAtHeight() != 0) {
-                        Log(LOG_LEVEL_ERROR) << "Address " << outAddress << " has already a DSC linked to it ";
-                        return false;
-                    }
-                     */
                 }
 
                 needToPayFee = false;
