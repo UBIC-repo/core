@@ -30,7 +30,7 @@ struct UAmount {
     }
 
     inline UAmount& operator=(UAmount other){
-        map.swap(other.map);
+        map = other.map;
         return *this;
     }
 
