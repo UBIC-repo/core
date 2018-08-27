@@ -35,7 +35,7 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleAskForBlocks(askForBlocks, recipient);
-            free(askForBlocks);
+            delete askForBlocks;
             break;
         }
         case ASK_FOR_BLOCK_COMMAND: {
@@ -49,7 +49,7 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
             }
             NetworkMessageHandler::handleAskForBlock(askForBlock, recipient);
             free(askForBlock->blockHeaderHash.data());
-            free(askForBlock);
+            delete askForBlock;
             break;
         }
         case ASK_FOR_PEERS_COMMAND: {
@@ -62,6 +62,7 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleAskForPeers(recipient);
+            delete askForPeers;
             break;
         }
         case ASK_FOR_BLOCKCHAIN_HEIGHT_COMMAND: {
@@ -94,6 +95,7 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleTransmitTransactions(transmitTransactions, recipient);
+            delete transmitTransactions;
             break;
         }
         case TRANSMIT_BLOCKS_COMMAND: {
@@ -119,6 +121,7 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleTransmitPeers(transmitPeers, recipient);
+            delete transmitPeers;
             break;
         }
         case TRANSMIT_BLOCKCHAIN_HEIGHT_COMMAND: {
@@ -131,6 +134,7 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleTransmitBlockchainHeight(transmitBlockchainHeight, recipient);
+            delete transmitBlockchainHeight;
             break;
         }
         case TRANSMIT_BEST_BLOCK_HEADER_COMMAND: {
@@ -143,6 +147,7 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleTransmitBestBlockHeader(transmitBestBlockHeader, recipient);
+            delete transmitBestBlockHeader;
             break;
         }
         case TRANSMIT_VERSION_COMMAND: {
@@ -155,6 +160,7 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleTransmitVersion(transmitVersion, recipient);
+            delete transmitVersion;
             break;
         }
         case TRANSMIT_STATUS_COMMAND: {
@@ -167,6 +173,7 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleTransmitStatus(transmitStatus, recipient);
+            delete transmitStatus;
             break;
         }
         case TRANSMIT_LEAVE_COMMAND: {
@@ -183,6 +190,7 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleTransmitDonationAddress(transmitDonationAddress, recipient);
+            delete transmitDonationAddress;
             break;
         }
         default:
@@ -225,7 +233,6 @@ void NetworkMessageHandler::handleAskForBlocks(AskForBlocks *askForBlocks, PeerI
             msg.encode_header();
 
             recipient->deliver(msg);
-            free(transmitBlock->block.data());
         }
         
         delete blockHeader;
