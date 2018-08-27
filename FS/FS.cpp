@@ -100,7 +100,10 @@ std::vector<unsigned char> FS::readFile(std::vector<unsigned char> path, uint64_
     fread(pch, 1, size, file);
     fclose(file);
 
-    return std::vector<unsigned char>(pch, pch + size);
+    auto fVector = std::vector<unsigned char>(pch, pch + size);
+    free(pch);
+
+    return fVector;
 }
 
 std::vector<std::vector<unsigned char> > FS::readDir(std::vector<unsigned char> path) {
