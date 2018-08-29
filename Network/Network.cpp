@@ -40,20 +40,21 @@ std::vector<std::string> Network::getIpsFromGithub() {
         std::string request("GET /UBIC-repo/node-list/master/nodes HTTP/1.0\r\nHost: raw.githubusercontent.com\r\n\r\n");
         boost::asio::write(ssock, buffer(request));
 
-        std::string response;
+        std::string response = "";
 
         size_t bytes_transferred = 0;
         size_t totalBytesTransfered = 0;
-        do {
-            char *buffer = (char *) malloc(256000 * sizeof(char));
 
+        char *buffer = (char *) malloc(256000 * sizeof(char));
+
+        do {
             bytes_transferred = ssock.read_some(boost::asio::buffer(buffer, 256000), ec);
             totalBytesTransfered += bytes_transferred;
             response.append(buffer);
-            free(buffer);
 
             Log(LOG_LEVEL_INFO) <<  "bytes_transferred rom Github: '" << (uint64_t)bytes_transferred;
         } while(!ec);
+        free(buffer);
 
         Log(LOG_LEVEL_INFO) <<  "Response received from Github: '" << response;
 
