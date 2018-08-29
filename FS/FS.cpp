@@ -188,9 +188,6 @@ std::vector<unsigned char> FS::getBlockDatPath() {
         }
     }
 
-    Log(LOG_LEVEL_INFO) << "currentBlkFileNbr: " << currentBlkFileNbrI;
-    Log(LOG_LEVEL_INFO) << "currentBlkFile: " << currentBlkFile.data();
-
     if(FS::getEofPosition(currentBlkFile) > BLOCK_FILES_MAX_SIZE) {
 
         std::string currentBlkFileNbrS2;
@@ -199,8 +196,6 @@ std::vector<unsigned char> FS::getBlockDatPath() {
         sprintf(currentBlkFileNbrS, "%d", currentBlkFileNbrI + 1);
         char* prefix = (char*)malloc(sizeof(char) * 32);
         sprintf(prefix, "0");
-
-        Log(LOG_LEVEL_INFO) << "currentBlkFileNbrS: " << currentBlkFileNbrS;
 
         int currentBlkFileNbrSLength  = (int) strlen(currentBlkFileNbrS);
 
