@@ -8,14 +8,24 @@
 #ifndef PASSPORTREADER_LDSPARSER_H
 #define PASSPORTREADER_LDSPARSER_H
 
+#include <vector>
+
 class LDSParser {
 private:
     unsigned char lds[64000];
     unsigned int ldsLength;
 public:
+    LDSParser(std::vector<unsigned char> lds);
     LDSParser(unsigned char *lds, unsigned int ldsLength);
+    std::vector<LDSParser> getSequence();
     LDSParser* getTag(unsigned char *tag);
     void getContent(unsigned char *lds, unsigned int *ldsLength);
+    std::vector<unsigned char> getContent();
+
+    ~LDSParser()
+    {
+        //free(lds);
+    }
 };
 
 
