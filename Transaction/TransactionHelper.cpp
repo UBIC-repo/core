@@ -332,7 +332,7 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                 Cert* cert = certStore.getDscCertWithCertId(txIn->getInAddress());
 
                 if(cert == nullptr) {
-                    Log(LOG_LEVEL_ERROR) << "CertStore returned no DCS " << txIn->getInAddress() << " match for the NtpEsk";
+                    Log(LOG_LEVEL_ERROR) << "CertStore returned no DSC " << txIn->getInAddress() << " match for the Ntpsk";
                     return false;
                 }
 
