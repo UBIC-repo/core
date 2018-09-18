@@ -62,6 +62,12 @@ bool BlockHelper::verifyBlock(Block* block) {
         delete previousBlockHeader;
         return false;
     }
+    
+    if(header->getTimestamp() <= previousBlockHeader->getTimestamp()) {
+        Log(LOG_LEVEL_ERROR) << "Timestamp of the block is before previous block";
+        delete previousBlockHeader;
+        return false;
+    }
 
     if(previousBlockHeader!= nullptr && header->getIssuerPubKey() == previousBlockHeader->getIssuerPubKey()) {
         Log(LOG_LEVEL_ERROR) << "Previous block was issued by the same issuer";
