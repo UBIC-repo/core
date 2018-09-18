@@ -63,7 +63,7 @@ bool BlockHelper::verifyBlock(Block* block) {
         return false;
     }
     
-    if(header->getTimestamp() <= previousBlockHeader->getTimestamp()) {
+    if(previousBlockHeader != nullptr && header->getTimestamp() <= previousBlockHeader->getTimestamp()) {
         Log(LOG_LEVEL_ERROR) << "Timestamp of the block is before previous block";
         delete previousBlockHeader;
         return false;
