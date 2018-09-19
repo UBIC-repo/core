@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <style>
@@ -103,6 +102,9 @@ background-color: #000;
             <a class="nav-link" id="my-ubi-link" href="#"><span class="glyphicon glyphicon-equalizer"></span> My UBI</a>
           </li>
           <li class="nav-item">
+            <a class="nav-link" id="kyc-link" href="#"><span class="glyphicon glyphicon-equalizer"></span>  KYC</a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link" id="send-link" href="#"><span class="glyphicon glyphicon-export" aria-hidden="true"></span> Send</a>
           </li>
           <li class="nav-item">
@@ -171,6 +173,16 @@ background-color: #000;
 	</div>
 	<div id="ubi-existing-identities">
 
+	</div>
+</div>
+
+<div id="kyc" class="tab hidden">
+	<div>
+		<button data-toggle="modal" class="btn btn-default" data-target="#kycModal" type="button">do KYC</button>
+	</div>
+
+	<div>
+		<button data-toggle="modal" class="btn btn-default" data-target="#verifyKycModal" type="button">verify KYC</button>
 	</div>
 </div>
 
@@ -393,6 +405,86 @@ background-color: #000;
         <div class="modal-footer">
           <a href="#" data-dismiss="modal" class="btn">Close</a>
           <a href="#" class="btn btn-primary" id="register-passport-btn">Register Passport</a>
+        </div>
+      </div>
+    </div>
+</div>
+
+
+<div class="modal" id="verifyKycModal">
+<div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <h4 class="modal-title">KYC</h4>
+        </div>
+	<div class="modal-body">
+		<form id="verifyKycForm">
+			<div class="form-group">
+				<label for="kyc-proof">Proof to verify:</label>
+				<textarea id="kyc-proof" style="width:100%; height: 200px;"></textarea>
+			</div>
+		</form>
+	</div>
+        <div class="modal-footer">
+          <a href="#" data-dismiss="modal" class="btn">Close</a>
+          <a href="#" class="btn btn-primary" id="verify-kyc-btn">Verify KYC</a>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal" id="kycModal">
+	<div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <h4 class="modal-title">KYC</h4>
+        </div>
+	<div class="modal-body">
+		<form id="kycForm">
+			<div class="form-group">
+				<label for="kyc-passport-nbr">Passport Nbr:</label>
+				<input id="kyc-passport-nbr" data-error="Passport Nbr is 9 characters long and contains only numbers and upper case letters" class="form-control" type="text" pattern="^[0-9A-Z]{9}$" required>
+ 				<div class="help-block with-errors"></div>
+			</div>
+
+			<div class="form-group">
+				<label for="kyc-date-of-birth">Date of birth:</label>
+				<div class="input-group date">
+				  <input placeholder="01.01.1990" id="kyc-date-of-birth" type="text" class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label for="kyc-date-of-expiry">Date of expiry:</label>
+				<div class="input-group date">
+				  <input placeholder="01.01.2020" type="text" id="kyc-date-of-expiry" class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label for="kyc-challenge">Challenge:</label>
+				<div class="input-group date">
+				  <input type="text" id="kyc-challenge" class="form-control">
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label for="kyc-type">Type:</label>
+				<div class="input-group date">
+				  	<select id="kyc-type">
+						<option value="0">Anonymous</option>
+						<option value="1">Name, date of birth, passport number</option>
+						<option value="2">Facial image</option>
+					</select>
+				</div>
+			</div>
+		</form>
+	</div>
+        <div class="modal-footer">
+          <a href="#" data-dismiss="modal" class="btn">Close</a>
+          <a href="#" class="btn btn-primary" id="do-kyc-btn">Do KYC</a>
         </div>
       </div>
     </div>
@@ -925,6 +1017,7 @@ function toggle(to) {
 
 $('#home-link').bind('click', function() { updateStatus(); toggle('home'); return false; });
 $('#my-ubi-link').bind('click', function() { updateMyUbi(); toggle('my-ubi'); return false; });
+$('#kyc-link').bind('click', function() { updateMyUbi(); toggle('kyc'); return false; });
 $('#send-link').bind('click', function() { toggle('send'); return false; });
 $('#receive-link').bind('click', function() { updateWallet(); toggle('receive'); return false; });
 $('#transactions-link').bind('click', function() { updateTransactions(); toggle('transactions'); return false; });
@@ -1069,6 +1162,16 @@ $('#add-peer-btn').bind('click', function() {
 	return false;
 });
 
+$('#do-kyc-btn').bind('click', function() {
+	$('#kycForm').submit();
+	return false;
+});
+
+$('#verify-kyc-btn').bind('click', function() {
+	$('#verifyKycModal').submit();
+	return false;
+});
+
 $('#register-passport-btn').bind('click', function() {
 	$('#passportForm').submit();
 	return false;
@@ -1138,6 +1241,93 @@ $('#passportForm').validator().on('submit', function (e) {
 	return false;
 });
 
+
+$('#kycForm').validator().on('submit', function (e) {
+	var dateOfExpiry = $('#kyc-date-of-expiry').val();
+	var dateOfBirth = $('#kyc-date-of-birth').val();
+	console.log(dateOfExpiry);
+	console.log(dateOfExpiry.length);
+	if(dateOfExpiry.length != 10) {
+		return false;
+	}
+
+	if(dateOfBirth.length != 10) {
+		return false;
+	}
+
+	var dateOfExpirySplit = dateOfExpiry.split(".");
+	dateOfExpiry = dateOfExpirySplit[2].substr(2, 2) + dateOfExpirySplit[1] + dateOfExpirySplit[0];
+
+
+	var dateOfBirthSplit = dateOfBirth.split(".");
+	dateOfBirth = dateOfBirthSplit[2].substr(2, 2) + dateOfBirthSplit[1] + dateOfBirthSplit[0];
+
+	if (e.isDefaultPrevented()) {
+	} else {
+		NProgress.start();
+
+		$('#do-kyc-btn').prop("disabled",true);
+		var payload = {}
+		payload['documentNumber'] = $('#kyc-passport-nbr').val();
+		payload['dateOfBirth'] = dateOfBirth;
+		payload['dateOfExpiry'] = dateOfExpiry;
+		payload['challenge'] = $('#kyc-challenge').val();
+		payload['type'] = $('#kyc-type').val();
+
+		$.ajax( {type: "POST", url:protocol + host + "/ubi/do-kyc", data:{"json": JSON.stringify(payload)}, headers: { 'apiKey': apiKey }} ).done(function(data) {
+			$('#do-kyc-btn').prop("disabled",false);
+			NProgress.done();
+
+			if(typeof data['success'] != "undefined" && data['success']) {
+				displaySuccess("Authenticqtion success");
+			} else {
+				displayError("Please try again, Reading failed with message:" + data['error']);
+			}
+			$('#kycModal').modal('hide');
+		}).fail(function() {
+			displayError("Something went wrong please try again in a minute or two");
+		  	$('#do-kyc-btn').prop("disabled",false);
+			$('#kycModal').modal('hide');
+			NProgress.done();
+		});
+	}
+	return false;
+});
+
+
+
+
+$('#verifyKycModal').validator().on('submit', function (e) {
+
+	if (e.isDefaultPrevented()) {
+	} else {
+		NProgress.start();
+
+		$('#verify-kyc-btn').prop("disabled",true);
+		var payload = {};
+		payload['base64'] = $('#kyc-type').val();
+
+		$.ajax( {type: "POST", url:protocol + host + "/ubi/verify-kyc", data:{"json": JSON.stringify(payload)}, headers: { 'apiKey': apiKey }} ).done(function(data) {
+			$('#verify-kyc-btn').prop("disabled",false);
+			NProgress.done();
+
+			if(typeof data['success'] != "undefined" && data['success']) {
+				displaySuccess("Your passport has been registered, you'll soon receive your UBI");
+			} else {
+				displayError("Please try again, Reading failed with message:" + data['error']);
+			}
+			$('#verifyKycModal').modal('hide');
+		}).fail(function() {
+			displayError("Something went wrong please try again in a minute or two");
+		  	$('#verify-kyc-btn').prop("disabled",false);
+			$('#verifyKycModal').modal('hide');
+			NProgress.done();
+		});
+	}
+	return false;
+});
+
+
 function updateIncoming() {
 
    $.ajax( {url: protocol + host + "/incoming", headers: { 'apiKey': apiKey } })
@@ -1166,7 +1356,7 @@ function updateIncoming() {
 }
 
 function regularUpdates() {
-	updateIncoming();
+	//updateIncoming();
 }
 
 function unregularUpdates() {
@@ -1208,6 +1398,23 @@ $(document).ready(function() {
 	});
 	$('#date-of-expiry').datepicker({
 	    container:'#registerPassportModal',
+	    format: "dd.mm.yyyy",
+	    startView: 2,
+	    startDate: "01/01/2017",
+	    endDate: "01/01/2040"
+	});
+
+	$('#kycForm').validator();
+
+	$('#kyc-date-of-birth').datepicker({
+	    container:'#kycModal',
+	    format: "dd.mm.yyyy",
+	    startView: 2,
+	    startDate: "01/01/1900",
+	    endDate: "01/01/2020"
+	});
+	$('#kyc-date-of-expiry').datepicker({
+	    container:'#kycModal',
 	    format: "dd.mm.yyyy",
 	    startView: 2,
 	    startDate: "01/01/2017",
