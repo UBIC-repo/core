@@ -129,7 +129,6 @@ set(SOURCE_FILES
         Address.cpp
         Address.h
         UAmount.h
-        UScript.h
         ChainParams.h
         MerkleTree.cpp
         MerkleTree.h
@@ -196,6 +195,17 @@ set(SOURCE_FILES
 	
 	Fixes.cpp
         Fixes.h
+	
+	Scripts/UScript.h
+        Scripts/AddCertificateScript.h
+        Scripts/NtpskAlreadyUsedScript.h
+        Scripts/KycRequestScript.h
+        Scripts/PkhInScript.h
+        Scripts/DeactivateCertificateScript.h
+
+        KYC/MRZResponseOject.h
+        KYC/MRZParser.cpp
+        KYC/MRZParser.h
 	)
 add_executable(ubicd ${SOURCE_FILES})
 
