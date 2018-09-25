@@ -25,6 +25,9 @@
 #include "../Network/BanList.h"
 #include "../Crypto/CreateSignature.h"
 #include "../Base64.h"
+#include "../Scripts/KycRequestScript.h"
+#include "../Scripts/NtpskAlreadyUsedScript.h"
+#include "../KYC/MRZParser.h"
 
 using boost::property_tree::ptree;
 
@@ -716,7 +719,6 @@ std::string Api::readPassport(std::string json) {
             return "{\"success\": false, \"error\" : \"Pkcs7Parser has an error\"}";
         }
 
-
         Cert* pkcsCert = new Cert();
         Address randomWalletAddress = wallet.getRandomAddressFromWallet();
         pkcsCert->setX509(pkcs7Parser->getDscCertificate());
@@ -803,7 +805,7 @@ std::string Api::readPassport(std::string json) {
                 fclose(fileDSC);
             }
 
-           return "{\"success\": false, \"error\" : \"couldn't verify Passport transaction\"}";
+            return "{\"success\": false, \"error\" : \"couldn't verify Passport transaction\"}";
         }
 
         CDataStream spTx(SER_DISK, 1);
@@ -822,6 +824,242 @@ std::string Api::readPassport(std::string json) {
         } else {
             return "{\"success\": false, \"error\" : \"Cannot append transaction to txPool, may be this passport is already registered\"}";
         }
+
+    } else {
+        return "{\"success\": false, \"error\" : \"couldn't read NFC chip\"}";
+    }
+
+    return "{\"success\": false}";
+
+}
+
+std::string Api::doKYC(std::string json) {
+
+    Wallet &wallet = Wallet::Instance();
+
+    if(json.empty()) {
+        return "{\"success\": false, \"error\": \"empty json\"}";
+    }
+
+    std::stringstream ss(json);
+    boost::property_tree::ptree pt;
+    boost::property_tree::read_json(ss, pt);
+
+    std::string documentNumber;
+    std::string dateOfBirth;
+    std::string dateOfExpiry;
+    std::string challenge;
+    std::string type;
+
+    for (boost::property_tree::ptree::value_type &v : pt)
+    {
+        if(strcmp(v.first.data(), "documentNumber") == 0) {
+            documentNumber = v.second.data();
+            if(documentNumber.size() != 9) {
+                return "{\"success\": false, \"error\" : \"documentNumber should be of length 9\"}";
+            }
+        }
+        if(strcmp(v.first.data(), "dateOfBirth") == 0) {
+            dateOfBirth = v.second.data();
+            if(dateOfBirth.size() != 6) {
+                return "{\"success\": false, \"error\" : \"dateOfBirth should be of length 6\"}";
+            }
+        }
+        if(strcmp(v.first.data(), "dateOfExpiry") == 0) {
+            dateOfExpiry = v.second.data();
+            if(dateOfExpiry.size() != 6) {
+                return "{\"success\": false, \"error\" : \"dateOfExpiry should be of length 6\"}";
+            }
+        }
+
+        if(strcmp(v.first.data(), "challenge") == 0) {
+            challenge = v.second.data();
+            if(challenge.size() < 1) {
+                return "{\"success\": false, \"error\" : \"missing challenge\"}";
+            }
+        }
+
+        if(strcmp(v.first.data(), "type") == 0) {
+            type = v.second.data();
+            if(type.size() < 1) {
+                return "{\"success\": false, \"error\" : \"missing KYC type\"}";
+            }
+        }
+    }
+
+    BacKeys* bacKeys = new BacKeys();
+    bacKeys->setDateOfBirth(dateOfBirth);
+    bacKeys->setDateOfExpiry(dateOfExpiry);
+    bacKeys->setDocumentNumber(documentNumber);
+
+    SessionKeys *sessionKeys = new SessionKeys;
+
+    Reader* reader = new Reader();
+    if(reader->initConnection(bacKeys, sessionKeys))
+    {
+        unsigned char sodFile[64000];
+        unsigned int sodFileSize;
+        unsigned char sodFileId[3] = {'\x01', '\x1D', '\0'}; // SOD
+
+        unsigned char dg1File[64000];
+        unsigned int dg1FileSize;
+        unsigned char dg1FileId[3] = {'\x01', '\x01', '\0'}; // DG1
+
+        unsigned char dg2File[64000];
+        unsigned int dg2FileSize;
+        unsigned char dg2FileId[3] = {'\x01', '\x02', '\0'}; // DG2
+
+        if(!reader->readFile(sodFileId, sodFile, &sodFileSize, sessionKeys)) {
+            reader->close();
+            return "{\"success\": false, \"error\" : \"failed to read SOD file\"}";
+        }
+
+        if(!reader->readFile(dg1FileId, dg1File, &dg1FileSize, sessionKeys)) {
+            reader->close();
+            return "{\"success\": false, \"error\" : \"failed to read DG1 file\"}";
+        }
+
+        if(!reader->readFile(dg2FileId, dg2File, &dg2FileSize, sessionKeys)) {
+            reader->close();
+            return "{\"success\": false, \"error\" : \"failed to read DG2 file\"}";
+        }
+
+        reader->close();
+
+        Hexdump::dump(sodFile, sodFileSize);
+        Hexdump::dump(dg1File, dg1FileSize);
+        //Hexdump::dump(dg2File, dg2FileSize);
+
+        LDSParser* ldsParser = new LDSParser(sodFile, sodFileSize);
+
+        unsigned char sod[32000];
+        unsigned int sodSize = 0;
+
+        ldsParser->getTag((unsigned char*)"\x77")
+                ->getContent(sod, &sodSize);
+
+        Log(LOG_LEVEL_INFO) << "Sod:";
+        Hexdump::dump(sod, sodSize);
+
+        Log(LOG_LEVEL_INFO) << "DG1:";
+        Hexdump::dump(dg1File, dg1FileSize);
+
+        Log(LOG_LEVEL_INFO) << "DG2:";
+        Hexdump::dump(dg2File, dg2FileSize);
+
+        PKCS7Parser* pkcs7Parser = new PKCS7Parser((char*)sod, sodSize);
+
+        std::vector<unsigned char> signedPayload = pkcs7Parser->getSignedPayload();
+        std::vector<unsigned char> ldsPayload = pkcs7Parser->getLDSPayload();
+
+        if(pkcs7Parser->hasError()) {
+            Log() << "Pkcs7Parser has an error";
+            return "{\"success\": false, \"error\" : \"Pkcs7Parser has an error\"}";
+        }
+
+
+        Cert* pkcsCert = new Cert();
+        Address randomWalletAddress = wallet.getRandomAddressFromWallet();
+        pkcsCert->setX509(pkcs7Parser->getDscCertificate());
+
+        Transaction* registerPassportTx = new Transaction();
+        TxIn* pTxIn = new TxIn();
+        UScript* pIScript = new UScript();
+        pIScript->setScript(std::vector<unsigned char>());
+        pIScript->setScriptType(SCRIPT_REGISTER_PASSPORT);
+        pTxIn->setInAddress(pkcsCert->getId());
+        pTxIn->setScript(*pIScript);
+        pTxIn->setNonce(0);
+        pTxIn->setAmount(*(new UAmount()));
+        registerPassportTx->addTxIn(*pTxIn);
+
+        TxOut* pTxOut = new TxOut();
+        pTxOut->setAmount(*(new UAmount()));
+        pTxOut->setScript(randomWalletAddress.getScript());
+        registerPassportTx->addTxOut(*pTxOut);
+        registerPassportTx->setNetwork(NET_CURRENT);
+
+        Log(LOG_LEVEL_INFO) << "randomWalletAddressScript : " << AddressHelper::addressLinkFromScript(randomWalletAddress.getScript());
+
+        std::vector<unsigned char> txId = TransactionHelper::getTxId(registerPassportTx);
+
+        if(pkcs7Parser->isRSA()) {
+            NtpRskSignatureRequestObject *ntpRskSignatureRequestObject = pkcs7Parser->getNtpRsk();
+
+            // @TODO perhaps add padding to txId
+            ntpRskSignatureRequestObject->setNm(ECCtools::vectorToBn(txId));
+
+            NtpRskSignatureVerificationObject *ntpEskSignatureVerificationObject = NtpRsk::signWithNtpRsk(
+                    ntpRskSignatureRequestObject
+            );
+
+            CDataStream sntpRsk(SER_DISK, 1);
+            sntpRsk << *ntpEskSignatureVerificationObject;
+
+            Log(LOG_LEVEL_INFO) << "generated NtpRsk: " << sntpRsk;
+            pIScript->setScript((unsigned char *) sntpRsk.data(), (uint16_t) sntpRsk.size());
+
+            pTxIn->setScript(*pIScript);
+
+        } else {
+
+            NtpEskSignatureRequestObject *ntpEskSignatureRequestObject = pkcs7Parser->getNtpEsk();
+            ntpEskSignatureRequestObject->setNewMessageHash(txId);
+
+            Log(LOG_LEVEL_INFO) << "P-UID, Passport unique identifier (signed hash):: "
+                                << ntpEskSignatureRequestObject->getMessageHash();
+
+            std::string dscId = pkcsCert->getIdAsHexString();
+            Log(LOG_LEVEL_INFO) << "dscId: " << dscId;
+            Log(LOG_LEVEL_INFO) << "subject: "
+                                << X509_NAME_oneline(X509_get_subject_name(pkcs7Parser->getDscCertificate()), 0, 0);
+
+
+            NtpEskSignatureVerificationObject *ntpEskSignatureVerificationObject = NtpEsk::signWithNtpEsk(
+                    ntpEskSignatureRequestObject);
+
+            CDataStream sntpEsk(SER_DISK, 1);
+            sntpEsk << *ntpEskSignatureVerificationObject;
+            Log(LOG_LEVEL_INFO) << "generated NtpEsk: " << sntpEsk;
+            pIScript->setScript((unsigned char *) sntpEsk.data(), (uint16_t) sntpEsk.size());
+
+            pTxIn->setScript(*pIScript);
+        }
+        std::vector<TxIn> pTxIns;
+        pTxIns.push_back(*pTxIn);
+        registerPassportTx->setTxIns(pTxIns);
+
+        KycRequestScript kycRequestScript;
+        kycRequestScript.setTransaction(*registerPassportTx);
+
+        std::vector<unsigned char> challengeVector = std::vector<unsigned char>(challenge.c_str(), challenge.c_str() + challenge.size());
+        std::vector<unsigned char> dg1Vector = std::vector<unsigned char>(dg1File, dg1File + dg1FileSize);
+        std::vector<unsigned char> dg2Vector = std::vector<unsigned char>(dg2File, dg2File + dg2FileSize);
+
+        std::vector<unsigned char> challengeSignature = wallet.signWithAddress(AddressHelper::addressLinkFromScript(randomWalletAddress.getScript()), challengeVector);
+        kycRequestScript.setChallenge(challengeVector);
+        kycRequestScript.setChallengeSignature(challengeSignature);
+        kycRequestScript.setDg1(dg1Vector);
+        kycRequestScript.setDg2(dg2Vector);
+        kycRequestScript.setMode((uint8_t) stoi(type.c_str()));
+        kycRequestScript.setSignedPayload(signedPayload);
+        kycRequestScript.setLdsPayload(ldsPayload);
+        kycRequestScript.setMdAlg((uint16_t)pkcs7Parser->getMdAlg());
+
+        CDataStream krs(SER_DISK, 1);
+        krs << kycRequestScript;
+
+        std::string krs64 = base64_encode((unsigned char*)krs.str().data(), (uint32_t)krs.str().size());
+
+        ptree baseTree;
+
+        baseTree.put("success", true);
+        baseTree.put("base64", krs64);
+
+        std::stringstream ss2;
+        boost::property_tree::json_parser::write_json(ss2, baseTree);
+
+        return ss2.str();
 
     } else {
         return "{\"success\": false, \"error\" : \"couldn't read NFC chip\"}";
@@ -890,7 +1128,7 @@ std::string Api::pay(std::string json) {
     return "{\"success\": false}";
 }
 
-std::string Api::kyc(std::string json) {
+std::string Api::verifyKYC(std::string json) {
 
     if (json.empty()) {
         return "{\"error\": \"empty json\"}";
@@ -911,61 +1149,223 @@ std::string Api::kyc(std::string json) {
                 s >> krs;
             } catch (const std::exception& e) {
                 Log(LOG_LEVEL_ERROR) << "Cannot deserialize base64 encoded kyc request";
+                Log(LOG_LEVEL_ERROR) << e.what();
+                Log(LOG_LEVEL_ERROR) << Hexdump::ucharToHexString((unsigned char*)b64String.c_str(), b64String.length());
                 return "{\"success\": false, \"error\":\"Cannot deserialize base64 encoded kyc request\"}";
             }
 
-            DB& db = DB::Instance();
+            Log(LOG_LEVEL_INFO) << "DG1:" << krs.getDg1();
+            Log(LOG_LEVEL_INFO) << "LDS payload:" << krs.getLdsPayload();
+            LDSParser* ldsParserDG1 = new LDSParser(krs.getDg1());
+            LDSParser* tag61 = ldsParserDG1->getTag((unsigned char *) "\x61");
+            if (tag61 == nullptr) return "{\"success\": false, \"error\":\"tag61 == nullptr\"}";
+            LDSParser* tag5F1F = tag61->getTag((unsigned char *) "\x5F\x1F");
+            if (tag5F1F == nullptr) return "{\"success\": false, \"error\":\"tag5F1F == nullptr\"}";
 
-            std::vector<unsigned char> ntpskResultVector = db.getFromDB(DB_NTPSK_ALREADY_USED, krs.getPassportHash());
+            Log(LOG_LEVEL_INFO) << "DG1 content:" << tag5F1F->getContent();
 
-            if(ntpskResultVector.empty()) {
-                Log(LOG_LEVEL_ERROR) << "No DB_NTPSK_ALREADY_USED entry";
-                return "{\"success\": false, \"error\":\"No DB_NTPSK_ALREADY_USED entry\"}";
-            }
+            MRZParser* mrzParser = new MRZParser();
+            //mrzParser->parse()
 
-            s.clear();
-            s.write((const char*)ntpskResultVector.data(), ntpskResultVector.size());
-            NtpskAlreadyUsedScript nauScript;
-            try {
-                s >> nauScript;
-            } catch (const std::exception& e) {
-                Log(LOG_LEVEL_ERROR) << "Cannot deserialize NtpskAlreadyUsedScript";
-                return "{\"success\": false, \"error\":\"Cannot deserialize NtpskAlreadyUsedScript\"}";
-            }
+            Transaction tx = krs.getTransaction();
 
-            if(nauScript.getAddress() != Wallet::addressFromPublicKey(krs.getAddressPublicKey()).getScript().getScript()) {
-                Log(LOG_LEVEL_ERROR) << "Address and public key don't match";
-                return "{\"success\": false, \"error\":\"Address and public key don't match\"}";
-            }
+            std::vector<unsigned char> txId = TransactionHelper::getTxId(&tx);
+            TxIn txIn = tx.getTxIns().front();
+            UScript script = txIn.getScript();
 
-            if(!VerifySignature::verify(krs.getChallenge(), krs.getChallengeSignature(), krs.getAddressPublicKey())) {
-                Log(LOG_LEVEL_ERROR) << "Signature verification failed";
-                return "{\"success\": false, \"error\":\"Signature verification failed\"}";
-            }
+            CDataStream srpScript(SER_DISK, 1);
+            srpScript.write((char *) script.getScript().data(), script.getScript().size());
+
+            std::vector<unsigned char> passportHash;
 
             CertStore& certStore = CertStore::Instance();
-            Cert* dscCert = certStore.getDscCertWithCertId(nauScript.getDscID());
+            Cert* cert = certStore.getDscCertWithCertId(txIn.getInAddress());
+            if (cert == nullptr) return "{\"success\": false, \"error\":\"cert == nullptr\"}";
+
+            if((uint32_t)script.getScript().at(0) % 2 == 0) {
+                // is NtpRsk
+                NtpRskSignatureVerificationObject *ntpRskSignatureVerificationObject = new NtpRskSignatureVerificationObject();
+
+                try {
+                    srpScript >> *ntpRskSignatureVerificationObject;
+                } catch (const std::exception& e) {
+                    Log(LOG_LEVEL_ERROR) << "Failed to deserialize SCRIPT_REGISTER_PASSPORT payload";
+
+                    return "{\"success\": false, \"error\":\"Failed to deserialize SCRIPT_REGISTER_PASSPORT payload\"}";
+                }
+
+                passportHash = ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM());
+
+            } else {
+                // is NtpEsk
+                EC_KEY* ecKey = EVP_PKEY_get1_EC_KEY(cert->getPubKey());
+                NtpEskSignatureVerificationObject *ntpEskSignatureVerificationObject = new NtpEskSignatureVerificationObject();
+                ntpEskSignatureVerificationObject->setPubKey(EC_KEY_get0_public_key(ecKey));
+                ntpEskSignatureVerificationObject->setCurveParams(EC_KEY_get0_group(ecKey));
+                ntpEskSignatureVerificationObject->setNewMessageHash(txId);
+                passportHash = ntpEskSignatureVerificationObject->getMessageHash();
+
+                try {
+                    srpScript >> *ntpEskSignatureVerificationObject;
+                } catch (const std::exception& e) {
+                    Log(LOG_LEVEL_ERROR) << "Failed to deserialize SCRIPT_REGISTER_PASSPORT payload";
+                    return "{\"success\": false, \"error\":\"Failed to deserialize SCRIPT_REGISTER_PASSPORT payload\"}";
+                }
+            }
+            // verify if passport already exists on the blockchain
+            DB& db = DB::Instance();
+
+            auto ntpEskEntry = db.getFromDB(DB_NTPSK_ALREADY_USED, passportHash);
+            if(ntpEskEntry.empty()) {
+                CDataStream neScript(SER_DISK, 1);
+                neScript.write((char *) ntpEskEntry.data(), ntpEskEntry.size());
+                NtpskAlreadyUsedScript ntpskAlreadyUsedScript;
+                neScript >> ntpskAlreadyUsedScript;
+
+                if(ntpskAlreadyUsedScript.getAddress() != tx.getTxOuts().front().getScript().getScript()) {
+                    Log(LOG_LEVEL_ERROR) << "current register passport transaction address and the one on the blockchain mismatch";
+
+                    return "{\"success\": false, \"error\":\"current register passport transaction address and the one on the blockchain mismatch\"}";
+                }
+            } else {
+                if(!TransactionHelper::verifyRegisterPassportTx(&tx)) {
+                    return "{\"success\": false, \"error\":\"Cannot verify kyc transaction\"}";
+                }
+            }
+
+            bool dg1HashMatch = false, dg2HashMatch = false;
+            if(krs.getMode() != KYC_MODE_ANONYMOUS) {
+                // Step 1 verify signed hash
+                LDSParser *ldsParser0 = new LDSParser(krs.getSignedPayload());
+                std::vector<LDSParser> sequence0 = ldsParser0->getSequence();
+
+                if (sequence0.size() < 2) return "{\"success\": false, \"error\":\"sequence0.size() < 2\"}";
+                std::vector<LDSParser> sequence01 = sequence0.at(1).getSequence();
+
+                if (sequence01.size() < 2) return "{\"success\": false, \"error\":\"sequence01.size() < 2\"}";
+                std::vector<LDSParser> sequence02 = sequence01.at(1).getSequence();
+                if (sequence02.size() < 1) return "{\"success\": false, \"error\":\"sequence02.size() < 1\"}";
+
+                LDSParser *tag04 = sequence02.at(0).getTag((unsigned char *) "\x04");
+                if (tag04 == nullptr) return "{\"success\": false, \"error\":\"tag04 == nullptr\"}";
+                Log(LOG_LEVEL_INFO) << "Hash1: " << tag04;
+
+
+                unsigned char digest[128];
+                unsigned int digestLength;
+                EVP_MD_CTX *mdctx;
+                mdctx = EVP_MD_CTX_create();
+
+                EVP_DigestInit_ex(mdctx, EVP_get_digestbynid(krs.getMdAlg()), NULL);
+                EVP_DigestUpdate(mdctx, krs.getSignedPayload().data(), krs.getSignedPayload().size());
+                EVP_DigestFinal_ex(mdctx, digest, &digestLength);
+
+                EVP_MD_CTX_destroy(mdctx);
+
+                if (memcmp(digest, passportHash.data(), digestLength) != 0) {
+                    Log(LOG_LEVEL_ERROR) << "Signed payload hash mismatch";
+
+                    return "{\"success\": false, \"error\":\"Signed payload hash mismatch\"}";
+                }
+
+                // Step 2 verify the payload
+                LDSParser *ldsParser = new LDSParser(krs.getLdsPayload());
+
+                std::vector<LDSParser> sequence1 = ldsParser->getSequence();
+
+                if (sequence1.size() < 2) return "{\"success\": false, \"error\":\"sequence1.size() < 2\"}";
+
+                LDSParser algoLDS = sequence1.at(1);
+                std::vector<LDSParser> algoSequence = algoLDS.getSequence();
+                if (algoSequence.size() < 2) return "{\"success\": false, \"error\":\"algoSequence.size() < 2\"}";
+
+                unsigned char *content = (unsigned char *) malloc(120);
+                unsigned int contentLength = 0;
+                algoSequence.at(0).getContent(content, &contentLength);
+                ASN1_OBJECT *o = d2i_ASN1_OBJECT(nullptr, (const unsigned char **) &content, contentLength);
+                int nid = OBJ_obj2nid(o);
+                const EVP_MD *digestAlgo = EVP_get_digestbynid(nid);
+
+                LDSParser hashListLDS = sequence1.at(2);
+
+                Log(LOG_LEVEL_INFO) << "hashListLDS: " << hashListLDS.getContent();
+
+                std::vector<LDSParser> hashListSequence = hashListLDS.getSequence();
+
+                Log(LOG_LEVEL_INFO) << "hashListLDS size: " << (uint64_t) hashListSequence.size();
+
+                unsigned char digestDG1[128];
+                unsigned int digestDG1Length;
+
+                EVP_MD_CTX *mdctx2;
+                mdctx2 = EVP_MD_CTX_create();
+
+                EVP_DigestInit_ex(mdctx2, digestAlgo, NULL);
+                EVP_DigestUpdate(mdctx2, krs.getDg1().data(), krs.getDg1().size());
+                EVP_DigestFinal_ex(mdctx2, digestDG1, &digestDG1Length);
+
+                EVP_MD_CTX_destroy(mdctx2);
+
+                unsigned char digestDG2[128];
+                unsigned int digestDG2Length;
+
+                EVP_MD_CTX *mdctx3;
+                mdctx3 = EVP_MD_CTX_create();
+
+                EVP_DigestInit_ex(mdctx3, digestAlgo, NULL);
+                EVP_DigestUpdate(mdctx3, krs.getDg2().data(), krs.getDg2().size());
+                EVP_DigestFinal_ex(mdctx3, digestDG2, &digestDG2Length);
+
+                EVP_MD_CTX_destroy(mdctx3);
+
+                for(int i=0; i < hashListSequence.size(); i++) {
+                    std::vector<LDSParser> innerSeq = hashListSequence.at((unsigned long)i).getSequence();
+
+                    if(innerSeq.size() < 2) { return "{\"success\": false, \"error\": \"innerSeq.size() < 2\"}"; }
+
+                    LDSParser* tag04 = innerSeq.at(1).getTag((unsigned char*)"\x04");
+
+                    if(tag04 == nullptr) { return "{\"success\": false, \"error\": \"tag04 == nullptr\"}"; }
+
+                    if(memcmp(tag04->getContent().data(), digestDG1, digestDG1Length) == 0) {
+                        dg1HashMatch = true;
+                    }
+
+                    if(memcmp(tag04->getContent().data(), digestDG2, digestDG2Length) == 0) {
+                        dg2HashMatch = true;
+                    }
+                }
+
+            }
 
             ptree baseTree;
-
             baseTree.put("success", true);
-            baseTree.put("dscID", Hexdump::vectorToHexString(dscCert->getId()));
-            baseTree.put("currencyID", dscCert->getCurrencyId());
-            baseTree.put("expiration", dscCert->getExpirationDate());
-            baseTree.put("passportHash", Hexdump::vectorToHexString(krs.getPassportHash()));
+            baseTree.put("dscID", Hexdump::vectorToHexString(cert->getId()));
+            baseTree.put("currencyID", cert->getCurrencyId());
+            baseTree.put("expiration", cert->getExpirationDate());
+            baseTree.put("passportHash", Hexdump::vectorToHexString(passportHash));
 
-            switch (krs.getMode()) {
+            std::stringstream ss;
+            boost::property_tree::json_parser::write_json(ss, baseTree);
+
+            switch(krs.getMode()) {
+
                 case KYC_MODE_ANONYMOUS: {
-                    std::stringstream ss;
-                    boost::property_tree::json_parser::write_json(ss, baseTree);
-
                     return ss.str();
                 }
                 case KYC_MODE_DG1: {
+                    if(!dg1HashMatch) {
+                        return "{\"success\": false, \"error\": \"!dg1HashMatch\"}";
+                    }
 
+                    return ss.str();
                 }
                 case KYC_MODE_DG1_AND_DG2: {
+                    if(!dg1HashMatch || !dg2HashMatch) {
+                        return "{\"success\": false, \"error\": \"!dg1HashMatch || !dg2HashMatch\"}";
+                    }
 
+                    return ss.str();
                 }
             }
 
