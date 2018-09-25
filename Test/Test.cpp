@@ -9,6 +9,7 @@
 #include "../TxPool.h"
 #include "../Wallet.h"
 #include "../Time.h"
+#include "../Scripts/AddCertificateScript.h"
 
 uint8_t Test::getCurrencyIdFromIso2Code(char* iso2code) {
     uint8_t currencyId = 0;
