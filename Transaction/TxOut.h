@@ -5,7 +5,7 @@
 
 #include <cstdint>
 #include "../UAmount.h"
-#include "../UScript.h"
+#include "../Scripts/UScript.h"
 
 class TxOut {
 private:
