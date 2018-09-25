@@ -16,6 +16,7 @@
 #include "Time.h"
 #include "MerkleTree.h"
 #include "AddressHelper.h"
+#include "Scripts/AddCertificateScript.h"
 #include <math.h>
 
 BlockHeader *Block::getHeader() {
@@ -62,7 +63,7 @@ bool BlockHelper::verifyBlock(Block* block) {
         delete previousBlockHeader;
         return false;
     }
-    
+
     if(previousBlockHeader != nullptr && header->getTimestamp() <= previousBlockHeader->getTimestamp()) {
         Log(LOG_LEVEL_ERROR) << "Timestamp of the block is before previous block";
         delete previousBlockHeader;
