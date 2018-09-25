@@ -4,7 +4,7 @@
 
 #include <cstdint>
 #include "UAmount.h"
-#include "UScript.h"
+#include "Scripts/UScript.h"
 #include "streams.h"
 #include "Crypto/Hash160.h"
 #include "ChainParams.h"
