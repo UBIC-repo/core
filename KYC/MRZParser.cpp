@@ -1,8 +1,8 @@
 
 #include "MRZParser.h"
 
-KYCResponseObject MRZParser::parseTD1(std::vector<unsigned char> mrz) {
-    KYCResponseObject kycResponseObject;
+MRZResponseObject MRZParser::parseTD1(std::vector<unsigned char> mrz) {
+    MRZResponseObject kycResponseObject;
 
     uint8_t cursor = 2; //skip Document code
     kycResponseObject.setIso2CountryCode(std::string(mrz.data() + cursor, mrz.data() + cursor + 3));
@@ -31,8 +31,8 @@ KYCResponseObject MRZParser::parseTD1(std::vector<unsigned char> mrz) {
     cursor += 30; //skip name
 }
 
-KYCResponseObject MRZParser::parseTD2(std::vector<unsigned char> mrz) {
-    KYCResponseObject kycResponseObject;
+MRZResponseObject MRZParser::parseTD2(std::vector<unsigned char> mrz) {
+    MRZResponseObject kycResponseObject;
 
     uint8_t cursor = 2; //skip Document code
     kycResponseObject.setIso2CountryCode(std::string(mrz.data() + cursor, mrz.data() + cursor + 3));
@@ -60,10 +60,10 @@ KYCResponseObject MRZParser::parseTD2(std::vector<unsigned char> mrz) {
     //ignore the rest
 }
 
-KYCResponseObject MRZParser::parseTD3(std::vector<unsigned char> mrz) {
+MRZResponseObject MRZParser::parseTD3(std::vector<unsigned char> mrz) {
 
 }
 
-KYCResponseObject MRZParser::parse(std::vector<unsigned char> mrz) {
+MRZResponseObject MRZParser::parse(std::vector<unsigned char> mrz) {
 
 }
