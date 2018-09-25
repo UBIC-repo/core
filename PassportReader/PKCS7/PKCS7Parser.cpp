@@ -2,6 +2,8 @@
 #include <openssl/evp.h>
 #include <iostream>
 #include <openssl/x509.h>
+#include <openssl/asn1.h>
+#include <openssl/err.h>
 #include "PKCS7Parser.h"
 
 void PKCS7Parser::pkcs7MsgSigDigest(PKCS7* p7, unsigned char *dig, unsigned int *diglen) {
@@ -25,6 +27,44 @@ void PKCS7Parser::pkcs7MsgSigDigest(PKCS7* p7, unsigned char *dig, unsigned int 
     EVP_VerifyInit_ex(mdc_tmp, EVP_get_digestbynid(md_type), NULL);
     EVP_VerifyUpdate(mdc_tmp, abuf, (size_t)alen);
     EVP_DigestFinal_ex(mdc_tmp, dig, diglen);
+}
+
+std::vector<unsigned char> PKCS7Parser::getSignedPayload() {
+    unsigned char *abuf = NULL;
+    int alen;
+    STACK_OF(X509_ATTRIBUTE) *sk;
+
+    PKCS7_SIGNER_INFO *si;
+    STACK_OF(PKCS7_SIGNER_INFO) *siStack;
+    siStack = PKCS7_get_signer_info(p7);
+    si = sk_PKCS7_SIGNER_INFO_value(siStack, 0);
+
+    sk = si->auth_attr;
+    alen = ASN1_item_i2d((ASN1_VALUE *)sk, &abuf,
+                         ASN1_ITEM_rptr(PKCS7_ATTR_VERIFY));
+
+    return std::vector<unsigned char>(abuf, abuf + alen);
+
+}
+
+std::vector<unsigned char> PKCS7Parser::getLDSPayload() {
+    STACK_OF(X509) *certs = p7->d.sign->cert;
+    char *buffer = NULL;
+    BIO *bio_enc = BIO_new(BIO_s_mem());
+
+    int result = PKCS7_verify(p7, certs, NULL, NULL, bio_enc, PKCS7_NOVERIFY);
+    long length = BIO_get_mem_data(bio_enc, &buffer);
+
+    char *ret = (char *) calloc (1, 1 + length);
+    if (ret)
+        memcpy(ret, buffer, length);
+
+    BIO_set_close(bio_enc, BIO_CLOSE);
+    BIO_free(bio_enc);
+
+    ERR_print_errors_fp (stderr);
+
+    return std::vector<unsigned char>(ret, ret + length);
 }
 
 PKCS7Parser::PKCS7Parser(char* sod, size_t sodSize) {
@@ -163,4 +203,11 @@ NtpEskSignatureRequestObject* PKCS7Parser::getNtpEsk() {
     ntpEskSignatureRequestObject->setMessageHash(std::vector<unsigned char>(md_dat, md_dat +md_len));
 
     return ntpEskSignatureRequestObject;
+}
+
+int PKCS7Parser::getMdAlg() {
+    STACK_OF(X509_ALGOR) *md_algs = p7->d.sign->md_algs;
+    X509_ALGOR *md_alg = sk_X509_ALGOR_value(md_algs,0);
+
+    return OBJ_obj2nid(md_alg->algorithm);
 }
