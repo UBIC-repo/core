@@ -442,8 +442,8 @@ void PeerClient::do_write()
         return;
     }
 
-    Log(LOG_LEVEL_INFO) << "PeerClient::do_write(): " <<
-                        Hexdump::ucharToHexString((unsigned char*)write_msgs_.front().data(), (uint32_t)write_msgs_.front().length());
+    /*Log(LOG_LEVEL_INFO) << "PeerClient::do_write(): " <<
+                        Hexdump::ucharToHexString((unsigned char*)write_msgs_.front().data(), (uint32_t)write_msgs_.front().length());*/
 
     try {
         boost::asio::async_write(socket_,
@@ -510,8 +510,8 @@ void PeerClient::deliverImpl(NetworkMessage msg)
     Log(LOG_LEVEL_INFO) << "write_in_progress: " << write_in_progress;
 
     if(!write_in_progress) {
-        Log(LOG_LEVEL_INFO) << "PeerClient::do_write0(): " <<
-                            Hexdump::ucharToHexString((unsigned char*)write_msgs_.front().data(), (uint32_t)write_msgs_.front().length());
+        /*Log(LOG_LEVEL_INFO) << "PeerClient::do_write0(): " <<
+                            Hexdump::ucharToHexString((unsigned char*)write_msgs_.front().data(), (uint32_t)write_msgs_.front().length());*/
         do_write();
         return;
     }
