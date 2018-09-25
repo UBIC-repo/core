@@ -17,6 +17,9 @@
 #include "../Time.h"
 #include "../TxPool.h"
 #include "../Fixes.h"
+#include "../Scripts/PkhInScript.h"
+#include "../Scripts/AddCertificateScript.h"
+#include "../Scripts/NtpskAlreadyUsedScript.h"
 
 bool TransactionHelper::verifyNonce(std::vector<unsigned char> inAddress, uint32_t nonce) {
     AddressStore& addressStore = AddressStore::Instance();
@@ -144,6 +147,166 @@ bool TransactionHelper::isRegisterPassport(Transaction* tx) {
 
     if(tx->getTxOuts().front().getScript().getScriptType() != SCRIPT_PKH) {
         return false;
+    }
+
+    return true;
+}
+
+bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx) {
+
+    if(!TransactionHelper::isRegisterPassport(tx)) {
+        Log(LOG_LEVEL_ERROR) << "SCRIPT_REGISTER_PASSPORT is not an valid REGISTER_PASSPORT transaction";
+        return false;
+    }
+
+    TxIn txIn = tx->getTxIns().front();
+    UScript script = txIn.getScript();
+
+    if(txIn.getNonce() != 0) {
+        Log(LOG_LEVEL_ERROR) << "for SCRIPT_REGISTER_PASSPORT nonce has always to be 0";
+        return false;
+    }
+
+    CertStore& certStore = CertStore::Instance();
+    Cert* cert = certStore.getDscCertWithCertId(txIn.getInAddress());
+
+    if(cert == nullptr) {
+        Log(LOG_LEVEL_ERROR) << "CertStore returned no DCS " << txIn.getInAddress() << " match for the NtpEsk";
+        return false;
+    }
+
+    if(cert->getCurrencyId() == 0) {
+        Log(LOG_LEVEL_ERROR) << "Cannot register passport because currency id is 0";
+        return false;
+    }
+
+    if(!cert->isCertAtive()) {
+        Log(LOG_LEVEL_ERROR) << "Cert is not active " << txIn.getInAddress();
+        return false;
+    }
+
+    std::vector<unsigned char> txId = TransactionHelper::getTxId(tx);
+    CDataStream srpScript(SER_DISK, 1);
+    srpScript.write((char *) script.getScript().data(), script.getScript().size());
+
+    if((uint32_t)script.getScript().at(0) % 2 == 0) {
+        // is NtpRsk
+
+        EVP_PKEY* pkey = X509_get0_pubkey(cert->getX509());
+        RSA* rsa = EVP_PKEY_get1_RSA(pkey);
+
+        const BIGNUM* n = BN_new();
+        const BIGNUM* e = BN_new();
+        RSA_get0_key(rsa, &n, &e, nullptr);
+
+        NtpRskSignatureVerificationObject *ntpRskSignatureVerificationObject = new NtpRskSignatureVerificationObject();
+
+        try {
+            srpScript >> *ntpRskSignatureVerificationObject;
+        } catch (const std::exception& e) {
+            Log(LOG_LEVEL_ERROR) << "Failed to deserialize SCRIPT_REGISTER_PASSPORT payload";
+            return false;
+        }
+
+        ntpRskSignatureVerificationObject->setN(n);
+        ntpRskSignatureVerificationObject->setE(e);
+        ntpRskSignatureVerificationObject->setNm(ECCtools::vectorToBn(txId));
+
+        std::vector<unsigned char> em = ECCtools::bnToVector(ntpRskSignatureVerificationObject->getPaddedM());
+
+        Log(LOG_LEVEL_INFO) << "going to verify padding on: " << em;
+
+        //
+        //
+        // Begin of padding verification hack
+        //
+        //
+
+        bool verifiedPadding = false;
+
+        std::vector<unsigned char> em2;
+        em2.emplace_back((unsigned char)0x00);
+        em2.insert(em2.end(), em.begin(), em.end());
+
+        std::string asn1RSAWITHSHA256hex;
+        asn1RSAWITHSHA256hex = "3031300d060960864801650304020105000420"; // only fits for RSA2048 signatures
+
+        std::vector<unsigned char> asn1RSAWITHSHA256;
+        asn1RSAWITHSHA256 = Hexdump::hexStringToVector(asn1RSAWITHSHA256hex);
+
+        asn1RSAWITHSHA256.insert(asn1RSAWITHSHA256.end(), txId.begin(), txId.end());
+
+        if(RSA_padding_check_PKCS1_type_1(asn1RSAWITHSHA256.data(), (uint32_t)asn1RSAWITHSHA256.size(), em2.data(), (uint32_t)em2.size(), (uint32_t)em2.size()) >= 0) {
+            Log(LOG_LEVEL_INFO) << "Register passport: PKCS1_type_1 verified with SHA256 ASN1";
+            verifiedPadding = true;
+        }
+
+        if(!verifiedPadding) {
+            if(RSA_verify_PKCS1_PSS(rsa, asn1RSAWITHSHA256.data(), EVP_sha256(), em2.data(), (uint32_t)em2.size()) >= 0) {
+                Log(LOG_LEVEL_INFO) << "Register passport: PKCS1_PSS verified with SHA256 ASN1";
+                verifiedPadding = true;
+            }
+        }
+
+        //@TODO 4096 bit RSA padding
+
+        if(!verifiedPadding) {
+            Log(LOG_LEVEL_ERROR) << "Failed to verify padding";
+            Log(LOG_LEVEL_INFO) << "em : " << em;
+            Log(LOG_LEVEL_INFO) << "em2 : " << em2;
+            return false;
+        }
+
+        //
+        //
+        // end of padding verification hack
+        //
+        //
+
+        // verify proof not already used
+        DB& db = DB::Instance();
+        if(db.isInDB(DB_NTPSK_ALREADY_USED, ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM()))) {
+            Log(LOG_LEVEL_ERROR) << "NtpRsk " << ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM()) << " already used";
+            return false;
+        }
+
+        // Verify NtpEsk proof itself
+        if(!NtpRsk::verifyNtpRsk(ntpRskSignatureVerificationObject)) {
+            Log(LOG_LEVEL_ERROR) << "NtpRsk failed";
+            return false;
+        }
+
+    } else {
+        // is NtpEsk
+
+        //set PubKey and curve params from Cert store
+        EC_KEY* ecKey = EVP_PKEY_get1_EC_KEY(cert->getPubKey());
+
+        NtpEskSignatureVerificationObject *ntpEskSignatureVerificationObject = new NtpEskSignatureVerificationObject();
+        ntpEskSignatureVerificationObject->setPubKey(EC_KEY_get0_public_key(ecKey));
+        ntpEskSignatureVerificationObject->setCurveParams(EC_KEY_get0_group(ecKey));
+        ntpEskSignatureVerificationObject->setNewMessageHash(txId);
+
+        try {
+            srpScript >> *ntpEskSignatureVerificationObject;
+        } catch (const std::exception& e) {
+            Log(LOG_LEVEL_ERROR) << "Failed to deserialize SCRIPT_REGISTER_PASSPORT payload";
+            return false;
+        }
+
+        // verify proof not already used
+        DB &db = DB::Instance();
+        if (db.isInDB(DB_NTPSK_ALREADY_USED, ntpEskSignatureVerificationObject->getMessageHash())) {
+            Log(LOG_LEVEL_ERROR) << "NtpEsk " << ntpEskSignatureVerificationObject->getMessageHash()
+                                 << " already used";
+            return false;
+        }
+
+        // Verify NtpEsk proof itself
+        if(!NtpEsk::verifyNtpEsk(ntpEskSignatureVerificationObject)) {
+            Log(LOG_LEVEL_ERROR) << "NtpEsk failed";
+            return false;
+        }
     }
 
     return true;
@@ -318,162 +481,9 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                 break;
             }
             case SCRIPT_REGISTER_PASSPORT: {
-                if(txIn->getNonce() != 0) {
-                    Log(LOG_LEVEL_ERROR) << "for SCRIPT_REGISTER_PASSPORT nonce has always to be 0";
+                if(!TransactionHelper::verifyRegisterPassportTx(tx)) {
+                    Log(LOG_LEVEL_ERROR) << "Failed to verify register passport transaction";
                     return false;
-                }
-
-                if(!TransactionHelper::isRegisterPassport(tx)) {
-                    Log(LOG_LEVEL_ERROR) << "SCRIPT_REGISTER_PASSPORT is not an valid REGISTER_PASSPORT transaction";
-                    return false;
-                }
-
-                CertStore& certStore = CertStore::Instance();
-                Cert* cert = certStore.getDscCertWithCertId(txIn->getInAddress());
-
-                if(cert == nullptr) {
-                    Log(LOG_LEVEL_ERROR) << "CertStore returned no DSC " << txIn->getInAddress() << " match for the Ntpsk";
-                    return false;
-                }
-
-                if(cert->getCurrencyId() == 0) {
-                    Log(LOG_LEVEL_ERROR) << "Cannot register passport because currency id is 0";
-                    return false;
-                }
-
-                if(!cert->isCertAtive()) {
-                    Log(LOG_LEVEL_ERROR) << "Cert is not active " << txIn->getInAddress();
-                    return false;
-                }
-
-                CDataStream srpScript(SER_DISK, 1);
-                srpScript.write((char *) script.getScript().data(), script.getScript().size());
-
-                if((uint32_t)script.getScript().at(0) % 2 == 0) {
-                    // is NtpRsk
-
-                    EVP_PKEY* pkey = X509_get0_pubkey(cert->getX509());
-                    RSA* rsa = EVP_PKEY_get1_RSA(pkey);
-
-                    const BIGNUM* n = BN_new();
-                    const BIGNUM* e = BN_new();
-                    RSA_get0_key(rsa, &n, &e, nullptr);
-
-                    NtpRskSignatureVerificationObject *ntpRskSignatureVerificationObject = new NtpRskSignatureVerificationObject();
-
-                    try {
-                        srpScript >> *ntpRskSignatureVerificationObject;
-                    } catch (const std::exception& e) {
-                        Log(LOG_LEVEL_ERROR) << "Failed to deserialize SCRIPT_REGISTER_PASSPORT payload";
-                        return false;
-                    }
-
-                    ntpRskSignatureVerificationObject->setN(n);
-                    ntpRskSignatureVerificationObject->setE(e);
-                    ntpRskSignatureVerificationObject->setNm(ECCtools::vectorToBn(txId));
-
-                    std::vector<unsigned char> em = ECCtools::bnToVector(ntpRskSignatureVerificationObject->getPaddedM());
-
-                    Log(LOG_LEVEL_INFO) << "going to verify padding on: " << em;
-
-                    //
-                    //
-                    // Begin of padding verification hack
-                    //
-                    //
-
-                    bool verifiedPadding = false;
-
-                    std::vector<unsigned char> em2;
-                    em2.emplace_back((unsigned char)0x00);
-                    em2.insert(em2.end(), em.begin(), em.end());
-
-                    std::string asn1RSAWITHSHA256hex;
-                    asn1RSAWITHSHA256hex = "3031300d060960864801650304020105000420"; // only fits for RSA2048 signatures
-
-                    std::vector<unsigned char> asn1RSAWITHSHA256;
-                    asn1RSAWITHSHA256 = Hexdump::hexStringToVector(asn1RSAWITHSHA256hex);
-
-                    asn1RSAWITHSHA256.insert(asn1RSAWITHSHA256.end(), txId.begin(), txId.end());
-
-                    if(RSA_padding_check_PKCS1_type_1(asn1RSAWITHSHA256.data(), (uint32_t)asn1RSAWITHSHA256.size(), em2.data(), (uint32_t)em2.size(), (uint32_t)em2.size()) >= 0) {
-                        Log(LOG_LEVEL_INFO) << "Register passport: PKCS1_type_1 verified with SHA256 ASN1";
-                        verifiedPadding = true;
-                    }
-
-                    if(!verifiedPadding) {
-                        if(RSA_verify_PKCS1_PSS(rsa, asn1RSAWITHSHA256.data(), EVP_sha256(), em2.data(), (uint32_t)em2.size()) >= 0) {
-                            Log(LOG_LEVEL_INFO) << "Register passport: PKCS1_PSS verified with SHA256 ASN1";
-                            verifiedPadding = true;
-                        }
-                    }
-
-                    //@TODO 4096 bit RSA padding
-
-                    if(!verifiedPadding) {
-                        Log(LOG_LEVEL_ERROR) << "Failed to verify padding";
-                        Log(LOG_LEVEL_INFO) << "em : " << em;
-                        Log(LOG_LEVEL_INFO) << "em2 : " << em2;
-                        return false;
-                    }
-
-                    //
-                    //
-                    // end of padding verification hack
-                    //
-                    //
-
-                    // verify proof not already used
-                    DB& db = DB::Instance();
-                    if(db.isInDB(DB_NTPSK_ALREADY_USED, ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM()))) {
-                        Log(LOG_LEVEL_ERROR) << "NtpRsk " << ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM()) << " already used";
-                        return false;
-                    }
-
-                    // Verify NtpEsk proof itself
-                    if(!NtpRsk::verifyNtpRsk(ntpRskSignatureVerificationObject)) {
-                        Log(LOG_LEVEL_ERROR) << "NtpRsk failed";
-                        return false;
-                    }
-
-                    // verify address hasn't already a passport linked to it
-                    std::vector<unsigned char> outAddress =  AddressHelper::addressLinkFromScript(txOuts.begin()->getScript());
-                    AddressForStore addressForStore = addressStore.getAddressFromStore(outAddress);
-
-                } else {
-                    // is NtpEsk
-
-                    //set PubKey and curve params from Cert store
-                    EC_KEY* ecKey = EVP_PKEY_get1_EC_KEY(cert->getPubKey());
-
-                    NtpEskSignatureVerificationObject *ntpEskSignatureVerificationObject = new NtpEskSignatureVerificationObject();
-                    ntpEskSignatureVerificationObject->setPubKey(EC_KEY_get0_public_key(ecKey));
-                    ntpEskSignatureVerificationObject->setCurveParams(EC_KEY_get0_group(ecKey));
-                    ntpEskSignatureVerificationObject->setNewMessageHash(txId);
-
-                    try {
-                        srpScript >> *ntpEskSignatureVerificationObject;
-                    } catch (const std::exception& e) {
-                        Log(LOG_LEVEL_ERROR) << "Failed to deserialize SCRIPT_REGISTER_PASSPORT payload";
-                        return false;
-                    }
-
-                    // verify proof not already used
-                    DB& db = DB::Instance();
-                    if(db.isInDB(DB_NTPSK_ALREADY_USED, ntpEskSignatureVerificationObject->getMessageHash())) {
-                        Log(LOG_LEVEL_ERROR) << "NtpEsk " << ntpEskSignatureVerificationObject->getMessageHash() << " already used";
-                        return false;
-                    }
-
-                    // Verify NtpEsk proof itself
-                    if(!NtpEsk::verifyNtpEsk(ntpEskSignatureVerificationObject)) {
-                        Log(LOG_LEVEL_ERROR) << "NtpEsk failed";
-                        return false;
-                    }
-
-                    // verify address hasn't already a passport linked to it
-                    std::vector<unsigned char> outAddress =  AddressHelper::addressLinkFromScript(txOuts.begin()->getScript());
-                    AddressForStore addressForStore = addressStore.getAddressFromStore(outAddress);
                 }
 
                 needToPayFee = false;
