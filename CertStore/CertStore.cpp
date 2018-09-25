@@ -6,6 +6,7 @@
 #include "../Tools/Hexdump.h"
 #include "../FS/FS.h"
 #include "../Fixes.h"
+#include "../Scripts/AddCertificateScript.h"
 #include <boost/filesystem.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <openssl/x509v3.h>
