@@ -3,7 +3,8 @@
 #include "../Tools/Log.h"
 #include "../JSON/Api.h"
 #include "../Config.h"
-#include "../UScript.h"
+#include "../Scripts/UScript.h"
+#include "../Scripts/AddCertificateScript.h"
 #include <boost/asio.hpp>
 #include <thread>
 #include <regex>
@@ -58,7 +59,7 @@ std::string urlDecode(std::string str){
 }
 
 std::string getJsonPost(const std::string request) {
-
+    std::cout << "json request: " << request << '\n';
     std::regex rgx(".*json=(.*)$");
     std::smatch match;
 
@@ -134,12 +135,18 @@ std::string ApiServer::route(std::vector<std::string> urlParts, std::string json
                 if(urlParts.at(1) == "register-passport") {
                     return Api::readPassport(jsonPost);
                 }
+
+                if(urlParts.at(1) == "do-kyc") {
+                    return Api::doKYC(jsonPost);
+                }
+
+                if(urlParts.at(1) == "verify-kyc") {
+                    return Api::verifyKYC(jsonPost);
+                }
             }
             return Api::getUbi();
         } else if(urlParts.at(0) == "fees") {
             return Api::getFees();
-        } else if(urlParts.at(0) == "kyc") {
-            return Api::kyc(jsonPost);
         } else if(urlParts.at(0) == "txpool") {
             return Api::getTxPool();
         } else if(urlParts.at(0) == "incoming") {
@@ -224,15 +231,21 @@ void ApiServer::run() {
             try {
                 std::size_t bufferSize = socket.read_some(boost::asio::buffer(buffer, 65048), ec);
 
-                if(socket.available() > 0) {
-                    bufferSize += socket.read_some(boost::asio::buffer(buffer + bufferSize, 65048 - bufferSize), ec);
-
-                }
 #if defined(_WIN32)
                 Sleep(1);
 #else
                 usleep(200);
 #endif
+
+                while(socket.available() > 0) {
+                    bufferSize += socket.read_some(boost::asio::buffer(buffer + bufferSize, 65048 - bufferSize), ec);
+                    #if defined(_WIN32)
+                                        Sleep(1);
+                    #else
+                                        usleep(200);
+                    #endif
+                }
+
                 Log(LOG_LEVEL_INFO) << "socket.available():" << (uint64_t)socket.available();
 
                 if (!config.getAllowFrom().empty() &&
@@ -244,7 +257,22 @@ void ApiServer::run() {
                     continue;
                 }
 
-                std::string bufferStr(buffer, bufferSize);
+                const std::string bufferStr(buffer, bufferSize);
+                Log(LOG_LEVEL_INFO) << "bufferStr:" << bufferStr;
+
+                std::regex rgx("Expect:[    ]100*(.*)\r\n");
+                std::smatch match;
+
+                if (std::regex_search(bufferStr.begin(), bufferStr.end(), match, rgx)) { // Expect: 100-continue
+                    char *responseBuffer = (char *) malloc(1024 * sizeof(char));
+
+                    std::string response = "HTTP/1.0 100 Continue\r\n";
+                    memcpy(responseBuffer, response.c_str(), response.size());
+
+                    boost::system::error_code ignored_error;
+                    boost::asio::write(socket, boost::asio::buffer(responseBuffer,  response.size()), ignored_error);
+                }
+
                 //Log(LOG_LEVEL_INFO) << "API Incoming:" << bufferStr;
                 std::vector<std::string> urlParts = getUrlParts(bufferStr);
 
