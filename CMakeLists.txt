@@ -203,7 +203,7 @@ set(SOURCE_FILES
         Scripts/PkhInScript.h
         Scripts/DeactivateCertificateScript.h
 
-        KYC/MRZResponseOject.h
+        KYC/MRZResponseObject.h
         KYC/MRZParser.cpp
         KYC/MRZParser.h
 	)
