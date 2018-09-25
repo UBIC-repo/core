@@ -23,6 +23,7 @@
 #include "Crypto/Hash256.h"
 #include "Config.h"
 #include "Chain.h"
+#include "Scripts/PkhInScript.h"
 
 std::vector<unsigned char> Wallet::generateSeed() {
     unsigned char cRand[32];
