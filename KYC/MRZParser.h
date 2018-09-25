@@ -3,15 +3,16 @@
 #define UBICD_MRZPARSER_H
 
 
-#include "KYCResponseOject.h"
+#include <vector>
+#include "MRZResponseObject.h"
 
 class MRZParser {
 private:
-    KYCResponseObject parseTD1(std::vector<unsigned char> mrz);
-    KYCResponseObject parseTD2(std::vector<unsigned char> mrz);
-    KYCResponseObject parseTD3(std::vector<unsigned char> mrz);
+    MRZResponseObject parseTD1(std::vector<unsigned char> mrz);
+    MRZResponseObject parseTD2(std::vector<unsigned char> mrz);
+    MRZResponseObject parseTD3(std::vector<unsigned char> mrz);
 public:
-    KYCResponseObject parse(std::vector<unsigned char> mrz);
+    MRZResponseObject parse(std::vector<unsigned char> mrz);
 };
 
 
