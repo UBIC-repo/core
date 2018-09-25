@@ -1295,8 +1295,6 @@ $('#kycForm').validator().on('submit', function (e) {
 });
 
 
-
-
 $('#verifyKycModal').validator().on('submit', function (e) {
 
 	if (e.isDefaultPrevented()) {
@@ -1305,14 +1303,14 @@ $('#verifyKycModal').validator().on('submit', function (e) {
 
 		$('#verify-kyc-btn').prop("disabled",true);
 		var payload = {};
-		payload['base64'] = $('#kyc-type').val();
+		payload['base64'] = $('#kyc-proof').val();
 
 		$.ajax( {type: "POST", url:protocol + host + "/ubi/verify-kyc", data:{"json": JSON.stringify(payload)}, headers: { 'apiKey': apiKey }} ).done(function(data) {
 			$('#verify-kyc-btn').prop("disabled",false);
 			NProgress.done();
 
 			if(typeof data['success'] != "undefined" && data['success']) {
-				displaySuccess("Your passport has been registered, you'll soon receive your UBI");
+				displaySuccess("The KYC proof is valid");
 			} else {
 				displayError("Please try again, Reading failed with message:" + data['error']);
 			}
