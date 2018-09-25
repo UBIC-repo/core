@@ -370,7 +370,7 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
 
                     ntpRskSignatureVerificationObject->setN(n);
                     ntpRskSignatureVerificationObject->setE(e);
-                    ntpRskSignatureVerificationObject->setM(ECCtools::vectorToBn(txId));
+                    ntpRskSignatureVerificationObject->setNm(ECCtools::vectorToBn(txId));
 
                     std::vector<unsigned char> em = ECCtools::bnToVector(ntpRskSignatureVerificationObject->getPaddedM());
 
