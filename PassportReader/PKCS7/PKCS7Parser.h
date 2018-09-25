@@ -23,6 +23,8 @@ private:
     PKCS7* p7 = NULL;
     void pkcs7MsgSigDigest(PKCS7* p7, unsigned char *dig, unsigned int *diglen);
 public:
+    std::vector<unsigned char> getSignedPayload();
+    std::vector<unsigned char> getLDSPayload();
     PKCS7Parser(char* sod, size_t sodSize);
     X509* getDscCertificate();
     bool hasError();
@@ -30,7 +32,7 @@ public:
     bool isRSA();
     NtpRskSignatureRequestObject* getNtpRsk();
     NtpEskSignatureRequestObject* getNtpEsk();
+    int getMdAlg();
 };
-
 
 #endif //PASSPORTREADER_PKCS7PARSER_H
