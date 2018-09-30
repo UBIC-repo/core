@@ -1336,12 +1336,15 @@ std::string Api::verifyKYC(std::string json) {
 
             }
 
+            auto challenge = krs.getChallenge();
+
             ptree baseTree;
             baseTree.put("success", true);
             baseTree.put("dscID", Hexdump::vectorToHexString(cert->getId()));
             baseTree.put("currencyID", cert->getCurrencyId());
             baseTree.put("expiration", cert->getExpirationDate());
             baseTree.put("passportHash", Hexdump::vectorToHexString(passportHash));
+            baseTree.put("challenge", std::string(challenge.data(), challenge.data() + challenge.size()));
 
             if(dg1HashMatch) {
                 MRZParser mrzParser;
