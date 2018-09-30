@@ -28,6 +28,7 @@
 #include "../Scripts/KycRequestScript.h"
 #include "../Scripts/NtpskAlreadyUsedScript.h"
 #include "../KYC/MRZParser.h"
+#include "../PassportReader/LDS/Iso19794Parser.h"
 
 using boost::property_tree::ptree;
 
@@ -1162,11 +1163,9 @@ std::string Api::verifyKYC(std::string json) {
             LDSParser* tag5F1F = tag61->getTag((unsigned char *) "\x5F\x1F");
             if (tag5F1F == nullptr) return "{\"success\": false, \"error\":\"tag5F1F == nullptr\"}";
 
-            Log(LOG_LEVEL_INFO) << "DG1 content:" << tag5F1F->getContent();
+            std::vector<unsigned char> mrz = tag5F1F->getContent();
 
-            MRZParser* mrzParser = new MRZParser();
-            //mrzParser->parse()
-
+            Log(LOG_LEVEL_INFO) << "DG2: " << krs.getDg2();
             Transaction tx = krs.getTransaction();
 
             std::vector<unsigned char> txId = TransactionHelper::getTxId(&tx);
@@ -1203,7 +1202,6 @@ std::string Api::verifyKYC(std::string json) {
                 ntpEskSignatureVerificationObject->setPubKey(EC_KEY_get0_public_key(ecKey));
                 ntpEskSignatureVerificationObject->setCurveParams(EC_KEY_get0_group(ecKey));
                 ntpEskSignatureVerificationObject->setNewMessageHash(txId);
-                passportHash = ntpEskSignatureVerificationObject->getMessageHash();
 
                 try {
                     srpScript >> *ntpEskSignatureVerificationObject;
@@ -1211,12 +1209,14 @@ std::string Api::verifyKYC(std::string json) {
                     Log(LOG_LEVEL_ERROR) << "Failed to deserialize SCRIPT_REGISTER_PASSPORT payload";
                     return "{\"success\": false, \"error\":\"Failed to deserialize SCRIPT_REGISTER_PASSPORT payload\"}";
                 }
+
+                passportHash = ntpEskSignatureVerificationObject->getMessageHash();
             }
             // verify if passport already exists on the blockchain
             DB& db = DB::Instance();
 
             auto ntpEskEntry = db.getFromDB(DB_NTPSK_ALREADY_USED, passportHash);
-            if(ntpEskEntry.empty()) {
+            if(!ntpEskEntry.empty()) {
                 CDataStream neScript(SER_DISK, 1);
                 neScript.write((char *) ntpEskEntry.data(), ntpEskEntry.size());
                 NtpskAlreadyUsedScript ntpskAlreadyUsedScript;
@@ -1248,8 +1248,6 @@ std::string Api::verifyKYC(std::string json) {
 
                 LDSParser *tag04 = sequence02.at(0).getTag((unsigned char *) "\x04");
                 if (tag04 == nullptr) return "{\"success\": false, \"error\":\"tag04 == nullptr\"}";
-                Log(LOG_LEVEL_INFO) << "Hash1: " << tag04;
-
 
                 unsigned char digest[128];
                 unsigned int digestLength;
@@ -1345,6 +1343,41 @@ std::string Api::verifyKYC(std::string json) {
             baseTree.put("expiration", cert->getExpirationDate());
             baseTree.put("passportHash", Hexdump::vectorToHexString(passportHash));
 
+            if(dg1HashMatch) {
+                MRZParser mrzParser;
+                MRZResponseObject mrzResponseObject = mrzParser.parse(mrz);
+                baseTree.put("passportNumber", mrzResponseObject.getPassportNumber());
+                baseTree.put("name", mrzResponseObject.getName());
+                baseTree.put("isoCountryCode", mrzResponseObject.getIso2CountryCode());
+                baseTree.put("gender", mrzResponseObject.getGender());
+                baseTree.put("dateOfExpiry", mrzResponseObject.getDateOfExpiry());
+                baseTree.put("dateOfBirth", mrzResponseObject.getDateOfBirth());
+                baseTree.put("mrz", std::string(mrz.data(), mrz.data() + mrz.size()));
+            }
+
+            if(dg2HashMatch) {
+                LDSParser* dg2LDS = new LDSParser(krs.getDg2());
+                LDSParser* tag75 = dg2LDS->getTag((unsigned char*)"\x75");
+                if(tag75 == nullptr) { return "{\"success\": false, \"error\": \"tag75 == nullptr\"}"; }
+
+                LDSParser* tag7F61 = tag75->getTag((unsigned char*)"\x7F\x61");
+                if(tag7F61 == nullptr) { return "{\"success\": false, \"error\": \"tag7F61 == nullptr\"}"; }
+
+                LDSParser* tag7F60 = tag7F61->getTag((unsigned char*)"\x7F\x60");
+                if(tag7F60 == nullptr) { return "{\"success\": false, \"error\": \"tag7F60 == nullptr\"}"; }
+
+                std::vector<unsigned char> iso19794Bytes;
+
+                if(tag7F60->getTag((unsigned char*)"\x7F\x2E") != nullptr) {
+                    iso19794Bytes = tag7F60->getTag((unsigned char*)"\x7F\x2E")->getContent();
+                } else if(tag7F60->getTag((unsigned char*)"\x5F\x2E") != nullptr) {
+                    iso19794Bytes = tag7F60->getTag((unsigned char*)"\x5F\x2E")->getContent();
+                }
+
+                Iso19794Parser* iso19794Parser = new Iso19794Parser(iso19794Bytes);
+                auto image = iso19794Parser->getImage();
+                baseTree.put("facialImage", base64_encode(image.data(), image.size()));
+            }
             std::stringstream ss;
             boost::property_tree::json_parser::write_json(ss, baseTree);
 
