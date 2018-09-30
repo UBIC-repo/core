@@ -95,6 +95,8 @@ set(SOURCE_FILES
 
         PassportReader/LDS/LDSParser.cpp
         PassportReader/LDS/LDSParser.h
+	PassportReader/LDS/Iso19794Parser.cpp
+        PassportReader/LDS/Iso19794Parser.h
         PassportReader/PKCS7/PKCS7Parser.cpp
         PassportReader/PKCS7/PKCS7Parser.h
         PassportReader/Reader/BacKeys.cpp
