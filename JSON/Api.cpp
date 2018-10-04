@@ -903,11 +903,11 @@ std::string Api::doKYC(std::string json) {
         unsigned char sodFileId[3] = {'\x01', '\x1D', '\0'}; // SOD
 
         unsigned char dg1File[64000];
-        unsigned int dg1FileSize;
+        unsigned int dg1FileSize = 0;
         unsigned char dg1FileId[3] = {'\x01', '\x01', '\0'}; // DG1
 
         unsigned char dg2File[64000];
-        unsigned int dg2FileSize;
+        unsigned int dg2FileSize = 0;
         unsigned char dg2FileId[3] = {'\x01', '\x02', '\0'}; // DG2
 
         if(!reader->readFile(sodFileId, sodFile, &sodFileSize, sessionKeys)) {
@@ -915,14 +915,18 @@ std::string Api::doKYC(std::string json) {
             return "{\"success\": false, \"error\" : \"failed to read SOD file\"}";
         }
 
-        if(!reader->readFile(dg1FileId, dg1File, &dg1FileSize, sessionKeys)) {
-            reader->close();
-            return "{\"success\": false, \"error\" : \"failed to read DG1 file\"}";
+        if(std::stoi(type) == KYC_MODE_DG1 || std::stoi(type) == KYC_MODE_DG1_AND_DG2) {
+            if (!reader->readFile(dg1FileId, dg1File, &dg1FileSize, sessionKeys)) {
+                reader->close();
+                return "{\"success\": false, \"error\" : \"failed to read DG1 file\"}";
+            }
         }
 
-        if(!reader->readFile(dg2FileId, dg2File, &dg2FileSize, sessionKeys)) {
-            reader->close();
-            return "{\"success\": false, \"error\" : \"failed to read DG2 file\"}";
+        if(std::stoi(type) == KYC_MODE_DG1_AND_DG2) {
+            if (!reader->readFile(dg2FileId, dg2File, &dg2FileSize, sessionKeys)) {
+                reader->close();
+                return "{\"success\": false, \"error\" : \"failed to read DG2 file\"}";
+            }
         }
 
         reader->close();
