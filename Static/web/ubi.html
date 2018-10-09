@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <style>
@@ -534,6 +535,21 @@ background-color: #000;
     </div>
 </div>
 
+<div class="modal" id="doKycSuccessModal">
+	<div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Your KYC proof</h4>
+        </div>
+        <div class="modal-body">
+          	<textarea id="doKycResponseTextarea" style="width:570px; height:180px;" rows="15"></textarea>
+        </div>
+        <div class="modal-footer">
+          <a href="#" data-dismiss="modal" class="btn">close</a>
+        </div>
+      </div>
+    </div>
+</div>
 
     <!-- Bootstrap core JavaScript
     ================================================== -->
@@ -1168,7 +1184,7 @@ $('#do-kyc-btn').bind('click', function() {
 });
 
 $('#verify-kyc-btn').bind('click', function() {
-	$('#verifyKycModal').submit();
+	$('#verifyKycForm').submit();
 	return false;
 });
 
@@ -1279,7 +1295,9 @@ $('#kycForm').validator().on('submit', function (e) {
 			NProgress.done();
 
 			if(typeof data['success'] != "undefined" && data['success']) {
-				displaySuccess("Authenticqtion success");
+				displaySuccess("Authentication success");
+				$("#doKycResponseTextarea").val(data['base64']);
+				$('#doKycSuccessModal').modal('show');
 			} else {
 				displayError("Please try again, Reading failed with message:" + data['error']);
 			}
@@ -1295,7 +1313,9 @@ $('#kycForm').validator().on('submit', function (e) {
 });
 
 
-$('#verifyKycModal').validator().on('submit', function (e) {
+
+
+$('#verifyKycForm').validator().on('submit', function (e) {
 
 	if (e.isDefaultPrevented()) {
 	} else {
