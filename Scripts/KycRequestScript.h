@@ -12,7 +12,8 @@
 struct KycRequestScript {
     uint8_t mode;
     uint16_t mdAlg;
-    Transaction transaction;
+    Transaction transaction; // if the passport is not yet registered we provide the register passport transaction
+    std::vector<unsigned char> passportHash; // if the passport is already registered on the blockchain the register passport transaction is not needed
     std::vector<unsigned char> challenge;
     std::vector<unsigned char> challengeSignature;
     std::vector<unsigned char> signedPayload;
@@ -43,6 +44,14 @@ struct KycRequestScript {
 
     void setTransaction(const Transaction &transaction) {
         KycRequestScript::transaction = transaction;
+    }
+
+    const vector<unsigned char> &getPassportHash() const {
+        return passportHash;
+    }
+
+    void setPassportHash(const vector<unsigned char> &passportHash) {
+        KycRequestScript::passportHash = passportHash;
     }
 
     const std::vector<unsigned char> &getChallenge() const {
@@ -108,6 +117,7 @@ struct KycRequestScript {
         READWRITE(mode);
         READWRITE(mdAlg);
         READWRITE(transaction);
+        READWRITE(passportHash);
         READWRITE(challenge);
         READWRITE(challengeSignature);
         READWRITE(signedPayload);
