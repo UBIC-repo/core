@@ -1033,10 +1033,13 @@ std::string Api::doKYC(std::string json) {
         // verify if passport already exists on the blockchain
         DB& db = DB::Instance();
 
+        KycRequestScript kycRequestScript;
+
         auto ntpskEntry = db.getFromDB(DB_NTPSK_ALREADY_USED, passportHash);
         if(ntpskEntry.empty()) {  // if it doesn't exist we include the verification payload
             pTxIn->setScript(*pIScript);
             challengeSignature = wallet.signWithAddress(AddressHelper::addressLinkFromScript(randomWalletAddress.getScript()), challengeVector);
+            kycRequestScript.setTransaction(*registerPassportTx);
         } else {
 
             CDataStream ntpskEntryScript(SER_DISK, 1);
@@ -1048,16 +1051,14 @@ std::string Api::doKYC(std::string json) {
             UScript script;
             script.setScript(ntpskAlreadyUsedScript.getAddress());
             script.setScriptType(SCRIPT_LINK);
-            pTxOut->setScript(script);
             challengeSignature = wallet.signWithAddress(AddressHelper::addressLinkFromScript(script), challengeVector);
+            kycRequestScript.setPassportHash(passportHash);
+            kycRequestScript.setTransaction(nullptr);
         }
 
         std::vector<TxIn> pTxIns;
         pTxIns.push_back(*pTxIn);
         registerPassportTx->setTxIns(pTxIns);
-
-        KycRequestScript kycRequestScript;
-        kycRequestScript.setTransaction(*registerPassportTx);
 
         std::vector<unsigned char> dg1Vector = std::vector<unsigned char>(dg1File, dg1File + dg1FileSize);
         std::vector<unsigned char> dg2Vector = std::vector<unsigned char>(dg2File, dg2File + dg2FileSize);
