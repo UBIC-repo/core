@@ -17,6 +17,7 @@ struct KycRequestScript {
     std::vector<unsigned char> challengeSignature;
     std::vector<unsigned char> signedPayload;
     std::vector<unsigned char> ldsPayload;
+    std::vector<unsigned char> publicKey; // of the transaction address
     std::vector<unsigned char> dg1; // written information
     std::vector<unsigned char> dg2; // facial image
 
@@ -76,6 +77,14 @@ struct KycRequestScript {
         KycRequestScript::ldsPayload = ldsPayload;
     }
 
+    const vector<unsigned char> &getPublicKey() const {
+        return publicKey;
+    }
+
+    void setPublicKey(const vector<unsigned char> &publicKey) {
+        KycRequestScript::publicKey = publicKey;
+    }
+
     const std::vector<unsigned char> &getDg1() const {
         return dg1;
     }
@@ -103,6 +112,7 @@ struct KycRequestScript {
         READWRITE(challengeSignature);
         READWRITE(signedPayload);
         READWRITE(ldsPayload);
+        READWRITE(publicKey);
         READWRITE(dg1);
         READWRITE(dg2);
     }
