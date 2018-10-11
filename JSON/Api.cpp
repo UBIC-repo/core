@@ -1053,7 +1053,6 @@ std::string Api::doKYC(std::string json) {
             script.setScriptType(SCRIPT_LINK);
             challengeSignature = wallet.signWithAddress(AddressHelper::addressLinkFromScript(script), challengeVector);
             kycRequestScript.setPassportHash(passportHash);
-            kycRequestScript.setTransaction(nullptr);
         }
 
         std::vector<TxIn> pTxIns;
@@ -1199,7 +1198,7 @@ std::string Api::verifyKYC(std::string json) {
             Cert *cert;
             std::vector<unsigned char> currentAddress;
 
-            if(tx != nullptr) {
+            if(passportHash.empty()) {
                 if (!TransactionHelper::isRegisterPassport(&tx)) {
                     return "{\"success\": false, \"error\":\"Transaction is not of type register passport\"}";
                 }
