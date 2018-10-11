@@ -1052,11 +1052,8 @@ std::string Api::doKYC(std::string json) {
             script.setScript(ntpskAlreadyUsedScript.getAddress());
             script.setScriptType(SCRIPT_LINK);
             challengeSignature = wallet.signWithAddress(AddressHelper::addressLinkFromScript(script), challengeVector);
-            if(challengeSignature.empty()) {
-                return "{\"success\": false, \"error\" : \"Can not sign challenge, are you sure you are using the correct wallet?\"}";
-            }
-
             kycRequestScript.setPassportHash(passportHash);
+            kycRequestScript.setTransaction(nullptr);
         }
 
         std::vector<TxIn> pTxIns;
@@ -1195,76 +1192,94 @@ std::string Api::verifyKYC(std::string json) {
             std::vector<unsigned char> mrz = tag5F1F->getContent();
 
             Log(LOG_LEVEL_INFO) << "DG2: " << krs.getDg2();
-            Transaction tx = krs.getTransaction();
-
-            if(!TransactionHelper::isRegisterPassport(&tx)) {
-                return "{\"success\": false, \"error\":\"Transaction is not of type register passport\"}";
-            }
-
-            std::vector<unsigned char> txId = TransactionHelper::getTxId(&tx);
-            TxIn txIn = tx.getTxIns().front();
-            UScript script = txIn.getScript();
-
-            CDataStream srpScript(SER_DISK, 1);
-            srpScript.write((char *) script.getScript().data(), script.getScript().size());
 
             std::vector<unsigned char> passportHash;
+            Transaction tx = krs.getTransaction();
+            CertStore &certStore = CertStore::Instance();
+            Cert *cert;
+            std::vector<unsigned char> currentAddress;
 
-            CertStore& certStore = CertStore::Instance();
-            Cert* cert = certStore.getDscCertWithCertId(txIn.getInAddress());
-            if (cert == nullptr) return "{\"success\": false, \"error\":\"cert == nullptr\"}";
-
-            if((uint32_t)script.getScript().at(0) % 2 == 0) {
-                // is NtpRsk
-                NtpRskSignatureVerificationObject *ntpRskSignatureVerificationObject = new NtpRskSignatureVerificationObject();
-
-                try {
-                    srpScript >> *ntpRskSignatureVerificationObject;
-                } catch (const std::exception& e) {
-                    Log(LOG_LEVEL_ERROR) << "Failed to deserialize SCRIPT_REGISTER_PASSPORT payload";
-
-                    return "{\"success\": false, \"error\":\"Failed to deserialize SCRIPT_REGISTER_PASSPORT payload\"}";
+            if(tx != nullptr) {
+                if (!TransactionHelper::isRegisterPassport(&tx)) {
+                    return "{\"success\": false, \"error\":\"Transaction is not of type register passport\"}";
                 }
 
-                passportHash = ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM());
+                std::vector<unsigned char> txId = TransactionHelper::getTxId(&tx);
+                TxIn txIn = tx.getTxIns().front();
+                UScript script = txIn.getScript();
 
-            } else {
-                // is NtpEsk
-                EC_KEY* ecKey = EVP_PKEY_get1_EC_KEY(cert->getPubKey());
-                NtpEskSignatureVerificationObject *ntpEskSignatureVerificationObject = new NtpEskSignatureVerificationObject();
-                ntpEskSignatureVerificationObject->setPubKey(EC_KEY_get0_public_key(ecKey));
-                ntpEskSignatureVerificationObject->setCurveParams(EC_KEY_get0_group(ecKey));
-                ntpEskSignatureVerificationObject->setNewMessageHash(txId);
+                CDataStream srpScript(SER_DISK, 1);
+                srpScript.write((char *) script.getScript().data(), script.getScript().size());
 
-                try {
-                    srpScript >> *ntpEskSignatureVerificationObject;
-                } catch (const std::exception& e) {
-                    Log(LOG_LEVEL_ERROR) << "Failed to deserialize SCRIPT_REGISTER_PASSPORT payload";
-                    return "{\"success\": false, \"error\":\"Failed to deserialize SCRIPT_REGISTER_PASSPORT payload\"}";
+                cert = certStore.getDscCertWithCertId(txIn.getInAddress());
+                if (cert == nullptr) return "{\"success\": false, \"error\":\"cert == nullptr\"}";
+
+                if ((uint32_t) script.getScript().at(0) % 2 == 0) {
+                    // is NtpRsk
+                    NtpRskSignatureVerificationObject *ntpRskSignatureVerificationObject = new NtpRskSignatureVerificationObject();
+
+                    try {
+                        srpScript >> *ntpRskSignatureVerificationObject;
+                    } catch (const std::exception &e) {
+                        Log(LOG_LEVEL_ERROR) << "Failed to deserialize SCRIPT_REGISTER_PASSPORT payload";
+
+                        return "{\"success\": false, \"error\":\"Failed to deserialize SCRIPT_REGISTER_PASSPORT payload\"}";
+                    }
+
+                    passportHash = ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM());
+
+                } else {
+                    // is NtpEsk
+                    EC_KEY *ecKey = EVP_PKEY_get1_EC_KEY(cert->getPubKey());
+                    NtpEskSignatureVerificationObject *ntpEskSignatureVerificationObject = new NtpEskSignatureVerificationObject();
+                    ntpEskSignatureVerificationObject->setPubKey(EC_KEY_get0_public_key(ecKey));
+                    ntpEskSignatureVerificationObject->setCurveParams(EC_KEY_get0_group(ecKey));
+                    ntpEskSignatureVerificationObject->setNewMessageHash(txId);
+
+                    try {
+                        srpScript >> *ntpEskSignatureVerificationObject;
+                    } catch (const std::exception &e) {
+                        Log(LOG_LEVEL_ERROR) << "Failed to deserialize SCRIPT_REGISTER_PASSPORT payload";
+                        return "{\"success\": false, \"error\":\"Failed to deserialize SCRIPT_REGISTER_PASSPORT payload\"}";
+                    }
+
+                    passportHash = ntpEskSignatureVerificationObject->getMessageHash();
                 }
 
-                passportHash = ntpEskSignatureVerificationObject->getMessageHash();
-            }
-            // verify if passport already exists on the blockchain
-            DB& db = DB::Instance();
-
-            auto ntpEskEntry = db.getFromDB(DB_NTPSK_ALREADY_USED, passportHash);
-            if(!ntpEskEntry.empty()) {
-                CDataStream neScript(SER_DISK, 1);
-                neScript.write((char *) ntpEskEntry.data(), ntpEskEntry.size());
-                NtpskAlreadyUsedScript ntpskAlreadyUsedScript;
-                neScript >> ntpskAlreadyUsedScript;
-
-                if(ntpskAlreadyUsedScript.getAddress() != tx.getTxOuts().front().getScript().getScript()) {
-                    Log(LOG_LEVEL_ERROR) << "current register passport transaction address and the one on the blockchain mismatch";
-
-                    return "{\"success\": false, \"error\":\"current register passport transaction address and the one on the blockchain mismatch\"}";
-                }
-            } else {
                 if(!TransactionHelper::verifyRegisterPassportTx(&tx)) {
                     return "{\"success\": false, \"error\":\"Cannot verify kyc transaction\"}";
                 }
+
+                currentAddress = tx.getTxOuts().front().getScript().getScript();
+
+            } else {
+                std::vector<unsigned char> passportHash = krs.getPassportHash();
+                if(passportHash.empty()) {
+                    return "{\"success\": false, \"error\":\"Passport hash field is empty\"}";
+                }
+
+                // verify if passport already exists on the blockchain
+                DB& db = DB::Instance();
+
+                auto ntpEskEntry = db.getFromDB(DB_NTPSK_ALREADY_USED, passportHash);
+                if(!ntpEskEntry.empty()) {
+                    CDataStream neScript(SER_DISK, 1);
+                    neScript.write((char *) ntpEskEntry.data(), ntpEskEntry.size());
+                    NtpskAlreadyUsedScript ntpskAlreadyUsedScript;
+                    neScript >> ntpskAlreadyUsedScript;
+
+                    cert = certStore.getDscCertWithCertId(ntpskAlreadyUsedScript.getDscID());
+                    currentAddress = ntpskAlreadyUsedScript.getAddress();
+                    if(currentAddress != tx.getTxOuts().front().getScript().getScript()) {
+                        Log(LOG_LEVEL_ERROR) << "current register passport transaction address and the one on the blockchain mismatch";
+
+                        return "{\"success\": false, \"error\":\"current register passport transaction address and the one on the blockchain mismatch\"}";
+                    }
+                } else {
+                    return "{\"success\": false, \"error\":\"unknown passport hash\"}";
+                }
             }
+
 
             // verify challenge signature
             if(!VerifySignature::verify(krs.getChallenge(), krs.getChallengeSignature(), krs.getPublicKey())) {
@@ -1276,7 +1291,7 @@ std::string Api::verifyKYC(std::string json) {
             );
             std::vector<unsigned char> recoveredAddressVector = AddressHelper::addressLinkFromScript(recoveredAddress.getScript());
 
-            if(recoveredAddressVector != tx.getTxOuts().front().getScript().getScript()) {
+            if(recoveredAddressVector != currentAddress) {
                 return "{\"success\": false, \"error\":\"Public key doesn't match transaction address\"}";
             }
 
