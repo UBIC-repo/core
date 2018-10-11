@@ -1052,8 +1052,11 @@ std::string Api::doKYC(std::string json) {
             script.setScript(ntpskAlreadyUsedScript.getAddress());
             script.setScriptType(SCRIPT_LINK);
             challengeSignature = wallet.signWithAddress(AddressHelper::addressLinkFromScript(script), challengeVector);
+            if(challengeSignature.empty()) {
+                return "{\"success\": false, \"error\" : \"Can not sign challenge, are you sure you are using the correct wallet?\"}";
+            }
+
             kycRequestScript.setPassportHash(passportHash);
-            kycRequestScript.setTransaction(nullptr);
         }
 
         std::vector<TxIn> pTxIns;
