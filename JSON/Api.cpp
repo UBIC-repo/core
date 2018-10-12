@@ -1040,6 +1040,7 @@ std::string Api::doKYC(std::string json) {
             pTxIn->setScript(*pIScript);
             challengeSignature = wallet.signWithAddress(AddressHelper::addressLinkFromScript(randomWalletAddress.getScript()), challengeVector);
             kycRequestScript.setTransaction(*registerPassportTx);
+            kycRequestScript.setPublicKey(wallet.getPublicKeyFromAddressLink(registerPassportTx->getTxOuts().front().getScript().getScript()));
         } else {
 
             CDataStream ntpskEntryScript(SER_DISK, 1);
@@ -1050,9 +1051,10 @@ std::string Api::doKYC(std::string json) {
 
             UScript script;
             script.setScript(ntpskAlreadyUsedScript.getAddress());
-            script.setScriptType(SCRIPT_LINK);
+            script.setScriptType(SCRIPT_PKH);
             challengeSignature = wallet.signWithAddress(AddressHelper::addressLinkFromScript(script), challengeVector);
             kycRequestScript.setPassportHash(passportHash);
+            kycRequestScript.setPublicKey(wallet.getPublicKeyFromAddressLink(AddressHelper::addressLinkFromScript(script)));
         }
 
         std::vector<TxIn> pTxIns;
@@ -1070,7 +1072,6 @@ std::string Api::doKYC(std::string json) {
         kycRequestScript.setSignedPayload(signedPayload);
         kycRequestScript.setLdsPayload(ldsPayload);
         kycRequestScript.setMdAlg((uint16_t)pkcs7Parser->getMdAlg());
-        kycRequestScript.setPublicKey(wallet.getPublicKeyFromAddressLink(registerPassportTx->getTxOuts().front().getScript().getScript()));
 
         CDataStream krs(SER_DISK, 1);
         krs << kycRequestScript;
@@ -1192,7 +1193,7 @@ std::string Api::verifyKYC(std::string json) {
 
             Log(LOG_LEVEL_INFO) << "DG2: " << krs.getDg2();
 
-            std::vector<unsigned char> passportHash;
+            std::vector<unsigned char> passportHash = krs.getPassportHash();
             Transaction tx = krs.getTransaction();
             CertStore &certStore = CertStore::Instance();
             Cert *cert;
@@ -1252,10 +1253,6 @@ std::string Api::verifyKYC(std::string json) {
                 currentAddress = tx.getTxOuts().front().getScript().getScript();
 
             } else {
-                std::vector<unsigned char> passportHash = krs.getPassportHash();
-                if(passportHash.empty()) {
-                    return "{\"success\": false, \"error\":\"Passport hash field is empty\"}";
-                }
 
                 // verify if passport already exists on the blockchain
                 DB& db = DB::Instance();
@@ -1269,7 +1266,12 @@ std::string Api::verifyKYC(std::string json) {
 
                     cert = certStore.getDscCertWithCertId(ntpskAlreadyUsedScript.getDscID());
                     currentAddress = ntpskAlreadyUsedScript.getAddress();
-                    if(currentAddress != tx.getTxOuts().front().getScript().getScript()) {
+
+                    Address recoveredAddress = Wallet::addressFromPublicKey(
+                            krs.getPublicKey()
+                    );
+
+                    if(currentAddress != recoveredAddress.getScript().getScript()) {
                         Log(LOG_LEVEL_ERROR) << "current register passport transaction address and the one on the blockchain mismatch";
 
                         return "{\"success\": false, \"error\":\"current register passport transaction address and the one on the blockchain mismatch\"}";
@@ -1288,9 +1290,8 @@ std::string Api::verifyKYC(std::string json) {
             Address recoveredAddress = Wallet::addressFromPublicKey(
                     krs.getPublicKey()
             );
-            std::vector<unsigned char> recoveredAddressVector = AddressHelper::addressLinkFromScript(recoveredAddress.getScript());
 
-            if(recoveredAddressVector != currentAddress) {
+            if(recoveredAddress.getScript().getScript() != currentAddress) {
                 return "{\"success\": false, \"error\":\"Public key doesn't match transaction address\"}";
             }
 
