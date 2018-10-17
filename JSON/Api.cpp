@@ -716,7 +716,7 @@ std::string Api::readPassport(std::string json) {
         PKCS7Parser* pkcs7Parser = new PKCS7Parser((char*)sod, sodSize);
 
         if(pkcs7Parser->hasError()) {
-            Log() << "Pkcs7Parser has an error";
+            Log(LOG_LEVEL_ERROR) << "Pkcs7Parser has an error";
             return "{\"success\": false, \"error\" : \"Pkcs7Parser has an error\"}";
         }
 
@@ -954,7 +954,7 @@ std::string Api::doKYC(std::string json) {
         std::vector<unsigned char> ldsPayload = pkcs7Parser->getLDSPayload();
 
         if(pkcs7Parser->hasError()) {
-            Log() << "Pkcs7Parser has an error";
+            Log(LOG_LEVEL_ERROR) << "Pkcs7Parser has an error";
             return "{\"success\": false, \"error\" : \"Pkcs7Parser has an error\"}";
         }
 
