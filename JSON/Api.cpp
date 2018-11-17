@@ -1199,10 +1199,36 @@ std::string Api::verifyKYC(std::string json) {
             Cert *cert;
             std::vector<unsigned char> currentAddress;
 
-            if(passportHash.empty()) {
-                if (!TransactionHelper::isRegisterPassport(&tx)) {
-                    return "{\"success\": false, \"error\":\"Transaction is not of type register passport\"}";
+            if(!passportHash.empty()) {
+
+                // verify if passport already exists on the blockchain
+                DB& db = DB::Instance();
+
+                auto ntpEskEntry = db.getFromDB(DB_NTPSK_ALREADY_USED, passportHash);
+                if(!ntpEskEntry.empty()) {
+                    CDataStream neScript(SER_DISK, 1);
+                    neScript.write((char *) ntpEskEntry.data(), ntpEskEntry.size());
+                    NtpskAlreadyUsedScript ntpskAlreadyUsedScript;
+                    neScript >> ntpskAlreadyUsedScript;
+
+                    cert = certStore.getDscCertWithCertId(ntpskAlreadyUsedScript.getDscID());
+                    currentAddress = ntpskAlreadyUsedScript.getAddress();
+
+                    Address recoveredAddress = Wallet::addressFromPublicKey(
+                            krs.getPublicKey()
+                    );
+
+                    if(currentAddress != recoveredAddress.getScript().getScript()) {
+                        Log(LOG_LEVEL_ERROR) << "current register passport transaction address and the one on the blockchain mismatch";
+
+                        return "{\"success\": false, \"error\":\"current register passport transaction address and the one on the blockchain mismatch\"}";
+                    }
+                } else {
+                    return "{\"success\": false, \"error\":\"unknown passport hash\"}";
                 }
+            }
+
+            if(TransactionHelper::isRegisterPassport(&tx)) {
 
                 std::vector<unsigned char> txId = TransactionHelper::getTxId(&tx);
                 TxIn txIn = tx.getTxIns().front();
@@ -1246,21 +1272,14 @@ std::string Api::verifyKYC(std::string json) {
                     passportHash = ntpEskSignatureVerificationObject->getMessageHash();
                 }
 
-                if(!TransactionHelper::verifyRegisterPassportTx(&tx)) {
-                    return "{\"success\": false, \"error\":\"Cannot verify kyc transaction\"}";
-                }
-
-                currentAddress = tx.getTxOuts().front().getScript().getScript();
-
-            } else {
-
+                // @TODO create a function for the block bellow to simplify the code
                 // verify if passport already exists on the blockchain
                 DB& db = DB::Instance();
 
-                auto ntpEskEntry = db.getFromDB(DB_NTPSK_ALREADY_USED, passportHash);
-                if(!ntpEskEntry.empty()) {
+                auto ntpskEntry = db.getFromDB(DB_NTPSK_ALREADY_USED, passportHash);
+                if(!ntpskEntry.empty()) {
                     CDataStream neScript(SER_DISK, 1);
-                    neScript.write((char *) ntpEskEntry.data(), ntpEskEntry.size());
+                    neScript.write((char *) ntpskEntry.data(), ntpskEntry.size());
                     NtpskAlreadyUsedScript ntpskAlreadyUsedScript;
                     neScript >> ntpskAlreadyUsedScript;
 
@@ -1279,6 +1298,16 @@ std::string Api::verifyKYC(std::string json) {
                 } else {
                     return "{\"success\": false, \"error\":\"unknown passport hash\"}";
                 }
+                // @TODO End of code block
+
+                if(!TransactionHelper::verifyRegisterPassportTx(&tx)) {
+                    return "{\"success\": false, \"error\":\"Cannot verify kyc transaction\"}";
+                }
+
+                currentAddress = tx.getTxOuts().front().getScript().getScript();
+
+            } else if(passportHash.empty()) {
+                return "{\"success\": false, \"error\":\"Transaction is not of type register passport and passport hash is empty\"}";
             }
 
 
@@ -1298,17 +1327,30 @@ std::string Api::verifyKYC(std::string json) {
             bool dg1HashMatch = false, dg2HashMatch = false;
             if(krs.getMode() != KYC_MODE_ANONYMOUS) {
                 // Step 1 verify signed hash
+                Log(LOG_LEVEL_INFO) << "krs.getSignedPayload(): " << krs.getSignedPayload();
                 LDSParser *ldsParser0 = new LDSParser(krs.getSignedPayload());
                 std::vector<LDSParser> sequence0 = ldsParser0->getSequence();
 
                 if (sequence0.size() < 2) return "{\"success\": false, \"error\":\"sequence0.size() < 2\"}";
-                std::vector<LDSParser> sequence01 = sequence0.at(1).getSequence();
 
-                if (sequence01.size() < 2) return "{\"success\": false, \"error\":\"sequence01.size() < 2\"}";
-                std::vector<LDSParser> sequence02 = sequence01.at(1).getSequence();
-                if (sequence02.size() < 1) return "{\"success\": false, \"error\":\"sequence02.size() < 1\"}";
+                std::string signingTime;
+                LDSParser *tag04;
+                for(int i = 0; i < sequence0.size(); i++) {
 
-                LDSParser *tag04 = sequence02.at(0).getTag((unsigned char *) "\x04");
+                    std::vector<LDSParser> sequence01 = sequence0.at(i).getSequence();
+
+                    if(sequence01.size() > 1) { // find sequence with identifier 2A 86 48 86 F7 0D 01 09 04 (messageDigest)
+                        if(sequence01.at(0).getContent() == Hexdump::hexStringToVector("06092a864886f70d010904")) {
+                            std::vector<LDSParser> sequence02 = sequence01.at(1).getSequence();
+                            if (sequence02.size() < 1) return "{\"success\": false, \"error\":\"sequence02.size() < 1\"}";
+
+                            tag04 = sequence02.at(0).getTag((unsigned char *) "\x04");
+                        } else if(sequence01.at(0).getContent() == Hexdump::hexStringToVector("06092a864886f70d010905")) { // signing time
+                            //@TODO read signingTime
+                        }
+                    }
+                }
+
                 if (tag04 == nullptr) return "{\"success\": false, \"error\":\"tag04 == nullptr\"}";
 
                 unsigned char digest[128];
@@ -1330,6 +1372,7 @@ std::string Api::verifyKYC(std::string json) {
 
                 // Step 2 verify the payload
                 LDSParser *ldsParser = new LDSParser(krs.getLdsPayload());
+                Log(LOG_LEVEL_INFO) << "krs.getLdsPayload(): " << krs.getLdsPayload();
 
                 std::vector<LDSParser> sequence1 = ldsParser->getSequence();
 
@@ -1337,7 +1380,7 @@ std::string Api::verifyKYC(std::string json) {
 
                 LDSParser algoLDS = sequence1.at(1);
                 std::vector<LDSParser> algoSequence = algoLDS.getSequence();
-                if (algoSequence.size() < 2) return "{\"success\": false, \"error\":\"algoSequence.size() < 2\"}";
+                if (algoSequence.size() < 1) return "{\"success\": false, \"error\":\"algoSequence.size() < 1\"}";
 
                 unsigned char *content = (unsigned char *) malloc(120);
                 unsigned int contentLength = 0;
