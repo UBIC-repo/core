@@ -22,7 +22,7 @@ public:
     static bool isVote(Transaction* tx);
     static bool isRegisterPassport(Transaction* tx);
     static bool verifyTx(Transaction* tx, uint8_t isInHeader,  BlockHeader* header);
-    static bool verifyRegisterPassportTx(Transaction* tx);
+    static bool verifyRegisterPassportTx(Transaction* tx, uint32_t blockHeight);
     static bool applyTransaction(Transaction* tx, BlockHeader* blockHeader);
     static bool undoTransaction(Transaction* tx, BlockHeader* blockHeader);
     static UAmount calculateMinimumFee(Transaction* transaction, BlockHeader* header);
