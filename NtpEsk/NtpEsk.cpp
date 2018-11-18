@@ -1,6 +1,5 @@
 #include <openssl/rand.h>
 #include <iostream>
-#include <cstring>
 #include "NtpEsk.h"
 #include "../Tools/Log.h"
 
@@ -192,6 +191,8 @@ NtpEskSignatureVerificationObject *NtpEsk::signWithNtpEsk(NtpEskSignatureRequest
     response->setR(R);
     response->setRp(rp);
     response->setSp(sp);
+    response->setMdAlg(ntpEskSignatureRequestObject->getMdAlg());
+    response->setSignedPayload(ntpEskSignatureRequestObject->getSignedPayload());
 
     return response;
 }
