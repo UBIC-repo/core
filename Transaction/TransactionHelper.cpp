@@ -15,7 +15,6 @@
 #include "../NtpRsk/NtpRsk.h"
 #include "../Consensus/VoteStore.h"
 #include "../Time.h"
-#include "../TxPool.h"
 #include "../Fixes.h"
 #include "../Scripts/PkhInScript.h"
 #include "../Scripts/AddCertificateScript.h"
@@ -152,7 +151,7 @@ bool TransactionHelper::isRegisterPassport(Transaction* tx) {
     return true;
 }
 
-bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx) {
+bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx, uint32_t blockHeight) {
 
     if(!TransactionHelper::isRegisterPassport(tx)) {
         Log(LOG_LEVEL_ERROR) << "SCRIPT_REGISTER_PASSPORT is not an valid REGISTER_PASSPORT transaction";
@@ -188,22 +187,30 @@ bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx) {
     std::vector<unsigned char> txId = TransactionHelper::getTxId(tx);
     CDataStream srpScript(SER_DISK, 1);
     srpScript.write((char *) script.getScript().data(), script.getScript().size());
+    uint32_t ntpskVersion = (uint32_t) script.getScript().at(0);
 
-    if((uint32_t)script.getScript().at(0) % 2 == 0) {
+    if(blockHeight >= UPGRADE_0_2_0_BLOCK_HEIGHT && ntpskVersion < 3) {
+        Log(LOG_LEVEL_ERROR) << "After block "
+                             << UPGRADE_0_2_0_BLOCK_HEIGHT
+                             << " only ntpsk proofs with version numbers superior to 3 are accepted";
+        return false;
+    }
+
+    if(ntpskVersion % 2 == 0) {
         // is NtpRsk
 
-        EVP_PKEY* pkey = X509_get0_pubkey(cert->getX509());
-        RSA* rsa = EVP_PKEY_get1_RSA(pkey);
+        EVP_PKEY *pkey = X509_get0_pubkey(cert->getX509());
+        RSA *rsa = EVP_PKEY_get1_RSA(pkey);
 
-        const BIGNUM* n = BN_new();
-        const BIGNUM* e = BN_new();
+        const BIGNUM *n = BN_new();
+        const BIGNUM *e = BN_new();
         RSA_get0_key(rsa, &n, &e, nullptr);
 
         NtpRskSignatureVerificationObject *ntpRskSignatureVerificationObject = new NtpRskSignatureVerificationObject();
 
         try {
             srpScript >> *ntpRskSignatureVerificationObject;
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             Log(LOG_LEVEL_ERROR) << "Failed to deserialize SCRIPT_REGISTER_PASSPORT payload";
             return false;
         }
@@ -225,7 +232,7 @@ bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx) {
         bool verifiedPadding = false;
 
         std::vector<unsigned char> em2;
-        em2.emplace_back((unsigned char)0x00);
+        em2.emplace_back((unsigned char) 0x00);
         em2.insert(em2.end(), em.begin(), em.end());
 
         std::string asn1RSAWITHSHA256hex;
@@ -236,13 +243,15 @@ bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx) {
 
         asn1RSAWITHSHA256.insert(asn1RSAWITHSHA256.end(), txId.begin(), txId.end());
 
-        if(RSA_padding_check_PKCS1_type_1(asn1RSAWITHSHA256.data(), (uint32_t)asn1RSAWITHSHA256.size(), em2.data(), (uint32_t)em2.size(), (uint32_t)em2.size()) >= 0) {
+        if (RSA_padding_check_PKCS1_type_1(asn1RSAWITHSHA256.data(), (uint32_t) asn1RSAWITHSHA256.size(), em2.data(),
+                                           (uint32_t) em2.size(), (uint32_t) em2.size()) >= 0) {
             Log(LOG_LEVEL_INFO) << "Register passport: PKCS1_type_1 verified with SHA256 ASN1";
             verifiedPadding = true;
         }
 
-        if(!verifiedPadding) {
-            if(RSA_verify_PKCS1_PSS(rsa, asn1RSAWITHSHA256.data(), EVP_sha256(), em2.data(), (uint32_t)em2.size()) >= 0) {
+        if (!verifiedPadding) {
+            if (RSA_verify_PKCS1_PSS(rsa, asn1RSAWITHSHA256.data(), EVP_sha256(), em2.data(), (uint32_t) em2.size()) >=
+                0) {
                 Log(LOG_LEVEL_INFO) << "Register passport: PKCS1_PSS verified with SHA256 ASN1";
                 verifiedPadding = true;
             }
@@ -250,7 +259,7 @@ bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx) {
 
         //@TODO 4096 bit RSA padding
 
-        if(!verifiedPadding) {
+        if (!verifiedPadding) {
             Log(LOG_LEVEL_ERROR) << "Failed to verify padding";
             Log(LOG_LEVEL_INFO) << "em : " << em;
             Log(LOG_LEVEL_INFO) << "em2 : " << em2;
@@ -262,6 +271,26 @@ bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx) {
         // end of padding verification hack
         //
         //
+
+        // verify signed payload
+        if (ntpskVersion >= 3) {
+            unsigned char digest[128];
+            unsigned int digestLength;
+            EVP_MD_CTX *mdctx;
+            mdctx = EVP_MD_CTX_create();
+
+            EVP_DigestInit_ex(mdctx, EVP_get_digestbynid(ntpRskSignatureVerificationObject->getMdAlg()), NULL);
+            EVP_DigestUpdate(mdctx, ntpRskSignatureVerificationObject->getSignedPayload().data(),
+                             ntpRskSignatureVerificationObject->getSignedPayload().size());
+            EVP_DigestFinal_ex(mdctx, digest, &digestLength);
+
+            EVP_MD_CTX_destroy(mdctx);
+            std::vector<unsigned char> passportHash = ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM());
+            if (memcmp(digest, passportHash.data(), digestLength) != 0) {
+                Log(LOG_LEVEL_ERROR) << "Signed payload hash mismatch";
+                return false;
+            }
+        }
 
         // verify proof not already used
         DB& db = DB::Instance();
@@ -292,6 +321,25 @@ bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx) {
         } catch (const std::exception& e) {
             Log(LOG_LEVEL_ERROR) << "Failed to deserialize SCRIPT_REGISTER_PASSPORT payload";
             return false;
+        }
+
+        // verify signed payload
+        if (ntpskVersion >= 3) {
+            unsigned char digest[128];
+            unsigned int digestLength;
+            EVP_MD_CTX *mdctx;
+            mdctx = EVP_MD_CTX_create();
+
+            EVP_DigestInit_ex(mdctx, EVP_get_digestbynid(ntpEskSignatureVerificationObject->getMdAlg()), NULL);
+            EVP_DigestUpdate(mdctx, ntpEskSignatureVerificationObject->getSignedPayload().data(),
+                             ntpEskSignatureVerificationObject->getSignedPayload().size());
+            EVP_DigestFinal_ex(mdctx, digest, &digestLength);
+
+            EVP_MD_CTX_destroy(mdctx);
+            if (memcmp(digest, ntpEskSignatureVerificationObject->getMessageHash().data(), digestLength) != 0) {
+                Log(LOG_LEVEL_ERROR) << "Signed payload hash mismatch";
+                return false;
+            }
         }
 
         // verify proof not already used
@@ -481,7 +529,7 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                 break;
             }
             case SCRIPT_REGISTER_PASSPORT: {
-                if(!TransactionHelper::verifyRegisterPassportTx(tx)) {
+                if(!TransactionHelper::verifyRegisterPassportTx(tx, header->getBlockHeight())) {
                     Log(LOG_LEVEL_ERROR) << "Failed to verify register passport transaction";
                     return false;
                 }
