@@ -15,6 +15,8 @@ private:
     const BIGNUM *s;
     std::vector<unsigned char> messageHash;
     std::vector<unsigned char> newMessageHash;
+    uint16_t mdAlg;
+    std::vector<unsigned char> signedPayload;
 public:
     const EC_POINT* getPubKey() const {
         return pubKey;
@@ -62,6 +64,22 @@ public:
 
     void setNewMessageHash(const std::vector<unsigned char> &newMessageHash) {
         this->newMessageHash = newMessageHash;
+    }
+
+    uint16_t getMdAlg() const {
+        return mdAlg;
+    }
+
+    void setMdAlg(uint16_t mdAlg) {
+        NtpEskSignatureRequestObject::mdAlg = mdAlg;
+    }
+
+    const std::vector<unsigned char> &getSignedPayload() const {
+        return signedPayload;
+    }
+
+    void setSignedPayload(const std::vector<unsigned char> &signedPayload) {
+        NtpEskSignatureRequestObject::signedPayload = signedPayload;
     }
 };
 
