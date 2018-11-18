@@ -9,7 +9,7 @@
 
 class NtpRskSignatureVerificationObject {
 private:
-    uint8_t version = 2;
+    uint8_t version = 4;
     const BIGNUM* e;
     const BIGNUM* n;
     BIGNUM* T;
