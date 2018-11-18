@@ -21,6 +21,8 @@ private:
     BIGNUM* m;
     BIGNUM* paddedM;
     BIGNUM* nm;
+    uint16_t mdAlg;
+    std::vector<unsigned char> signedPayload;
 public:
     const BIGNUM *getE() const {
         return this->e;
@@ -110,6 +112,30 @@ public:
         this->nm = nm;
     }
 
+    uint8_t getVersion() const {
+        return version;
+    }
+
+    void setVersion(uint8_t version) {
+        NtpRskSignatureVerificationObject::version = version;
+    }
+
+    uint16_t getMdAlg() const {
+        return mdAlg;
+    }
+
+    void setMdAlg(uint16_t mdAlg) {
+        NtpRskSignatureVerificationObject::mdAlg = mdAlg;
+    }
+
+    const std::vector<unsigned char> &getSignedPayload() const {
+        return signedPayload;
+    }
+
+    void setSignedPayload(const std::vector<unsigned char> &signedPayload) {
+        NtpRskSignatureVerificationObject::signedPayload = signedPayload;
+    }
+
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
@@ -137,6 +163,11 @@ public:
         READWRITE(mVector);
         READWRITE(paddedMVector);
         READWRITE(nmVector);
+        
+        if(version >= 3) {
+            READWRITE(mdAlg);
+            READWRITE(signedPayload);
+        }
 
         if (std::is_same<Operation, CSerActionUnserialize>::value) {
             this->T = ECCtools::vectorToBn(TVector);
