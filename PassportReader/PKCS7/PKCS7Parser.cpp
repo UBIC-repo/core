@@ -163,6 +163,8 @@ NtpRskSignatureRequestObject* PKCS7Parser::getNtpRsk() {
     BN_mod_exp(m, signature, e , n, ctx);
     ntpRskSignatureRequestObject->setPaddedM(m);
     ntpRskSignatureRequestObject->setRsa(rsa);
+    ntpRskSignatureRequestObject->setMdAlg((uint16_t)this->getMdAlg());
+    ntpRskSignatureRequestObject->setSignedPayload(this->getSignedPayload());
 
     return ntpRskSignatureRequestObject;
 }
@@ -201,6 +203,8 @@ NtpEskSignatureRequestObject* PKCS7Parser::getNtpEsk() {
     ntpEskSignatureRequestObject->setR(r);
     ntpEskSignatureRequestObject->setS(s);
     ntpEskSignatureRequestObject->setMessageHash(std::vector<unsigned char>(md_dat, md_dat +md_len));
+    ntpEskSignatureRequestObject->setMdAlg((uint16_t)this->getMdAlg());
+    ntpEskSignatureRequestObject->setSignedPayload(this->getSignedPayload());
 
     return ntpEskSignatureRequestObject;
 }
