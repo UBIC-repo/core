@@ -1300,7 +1300,8 @@ std::string Api::verifyKYC(std::string json) {
                 }
                 // @TODO End of code block
 
-                if(!TransactionHelper::verifyRegisterPassportTx(&tx)) {
+                Chain& chain = Chain::Instance();
+                if(!TransactionHelper::verifyRegisterPassportTx(&tx, chain.getCurrentBlockchainHeight())) {
                     return "{\"success\": false, \"error\":\"Cannot verify kyc transaction\"}";
                 }
 
