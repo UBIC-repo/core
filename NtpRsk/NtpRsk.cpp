@@ -121,6 +121,8 @@ NtpRskSignatureVerificationObject* NtpRsk::signWithNtpRsk(NtpRskSignatureRequest
     ntpRskSignatureVerificationObject->setNm(ntpRskSignatureRequestObject->getNm());
     ntpRskSignatureVerificationObject->setE(ntpRskSignatureRequestObject->getE());
     ntpRskSignatureVerificationObject->setN(ntpRskSignatureRequestObject->getN());
+    ntpRskSignatureVerificationObject->setMdAlg(ntpRskSignatureRequestObject->getMdAlg());
+    ntpRskSignatureVerificationObject->setSignedPayload(ntpRskSignatureRequestObject->getSignedPayload());
 
 
     return ntpRskSignatureVerificationObject;
