@@ -16,6 +16,8 @@ private:
     const BIGNUM *sp;
     std::vector<unsigned char> messageHash;
     std::vector<unsigned char> newMessageHash;
+    uint16_t mdAlg;
+    std::vector<unsigned char> signedPayload;
 public:
     const EC_POINT *getPubKey() const {
         return this->pubKey;
@@ -73,6 +75,30 @@ public:
         this->newMessageHash = newMessageHash;
     }
 
+    uint8_t getVersion() const {
+        return version;
+    }
+
+    void setVersion(uint8_t version) {
+        NtpEskSignatureVerificationObject::version = version;
+    }
+
+    uint16_t getMdAlg() const {
+        return mdAlg;
+    }
+
+    void setMdAlg(uint16_t mdAlg) {
+        NtpEskSignatureVerificationObject::mdAlg = mdAlg;
+    }
+
+    const std::vector<unsigned char> &getSignedPayload() {
+        return signedPayload;
+    }
+
+    void setSignedPayload(const std::vector<unsigned char> &signedPayload) {
+        NtpEskSignatureVerificationObject::signedPayload = signedPayload;
+    }
+
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
@@ -89,6 +115,11 @@ public:
         READWRITE(rVector);
         READWRITE(rpVector);
         READWRITE(spVector);
+
+        if(version >= 3) {
+            READWRITE(mdAlg);
+            READWRITE(signedPayload);
+        }
 
         if (std::is_same<Operation, CSerActionUnserialize>::value) {
             R = ECCtools::vectorToEcPoint(curveParams, rVector);
