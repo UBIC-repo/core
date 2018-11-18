@@ -8,7 +8,7 @@
 
 class NtpEskSignatureVerificationObject {
 private:
-    uint8_t version = 1;
+    uint8_t version = 3;
     const EC_GROUP *curveParams;
     const EC_POINT *pubKey;
     const EC_POINT *R;
