@@ -15,6 +15,8 @@ private:
     BIGNUM* paddedM;
     BIGNUM* nm;
     RSA* rsa;
+    uint16_t mdAlg;
+    std::vector<unsigned char> signedPayload;
 public:
     const BIGNUM *getE() const {
         return this->e;
@@ -70,5 +72,21 @@ public:
 
     void setRsa(RSA *rsa) {
         this->rsa = rsa;
+    }
+
+    uint16_t getMdAlg() const {
+        return mdAlg;
+    }
+
+    void setMdAlg(uint16_t mdAlg) {
+        NtpRskSignatureRequestObject::mdAlg = mdAlg;
+    }
+
+    const std::vector<unsigned char> &getSignedPayload() const {
+        return signedPayload;
+    }
+
+    void setSignedPayload(const std::vector<unsigned char> &signedPayload) {
+        NtpRskSignatureRequestObject::signedPayload = signedPayload;
     }
 };
