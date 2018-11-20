@@ -21,11 +21,24 @@ uint8_t Test::getCurrencyIdFromIso2Code(char* iso2code) {
         currencyId = CURRENCY_GERMANY;
     }
 
-    if(strcmp(iso2code, "FR") == 0 || strcmp(iso2code, "fr") == 0) {
+    if(strcmp(iso2code, "FR") == 0 || strcmp(iso2code, "fr") == 0
+       || strcmp(iso2code, "Certificat HSM Document Signer G350233") == 0
+       || strcmp(iso2code, "HSM Document Signer G350259") == 0
+       || strcmp(iso2code, "Certificat HSM Document Signer H480083") == 0
+    ) {
         currencyId = CURRENCY_FRANCE;
     }
 
-    if(strcmp(iso2code, "SE") == 0 || strcmp(iso2code, "se") == 0) {
+    if(strcmp(iso2code, "SE") == 0 || strcmp(iso2code, "se") == 0
+       || strcmp(iso2code, "Swedish National ID Card Document Signer") == 0
+       || strcmp(iso2code, "Swedish Country Signing CA v2") == 0
+       || strcmp(iso2code, "Swedish Country Signing CA") == 0
+       || strcmp(iso2code, "Swedish Passport Document Signer") == 0
+       || strcmp(iso2code, "Swedish Residence Card Document Signer") == 0
+       || strcmp(iso2code, "Swedish Residence Permit Document Signer") == 0
+       || strcmp(iso2code, "Swedish Emergency Passport Document Signer") == 0
+       || strcmp(iso2code, "Swedish RP Document Signer") == 0
+            ) {
         currencyId = CURRENCY_SWEDEN;
     }
 
@@ -57,7 +70,8 @@ uint8_t Test::getCurrencyIdFromIso2Code(char* iso2code) {
         currencyId = CURRENCY_FINLAND;
     }
 
-    if(strcmp(iso2code, "LU") == 0 || strcmp(iso2code, "lu") == 0) {
+    if(strcmp(iso2code, "LU") == 0 || strcmp(iso2code, "lu") == 0
+       || strcmp(iso2code, "Grand-Duchy of Luxembourg Country Signing CA") == 0) {
         currencyId = CURRENCY_LUXEMBOURG;
     }
 
@@ -69,7 +83,8 @@ uint8_t Test::getCurrencyIdFromIso2Code(char* iso2code) {
         currencyId = CURRENCY_HUNGARY;
     }
 
-    if(strcmp(iso2code, "CZ") == 0 || strcmp(iso2code, "cz") == 0) {
+    if(strcmp(iso2code, "CZ") == 0 || strcmp(iso2code, "cz") == 0
+       || strcmp(iso2code, "STC_DS_1") == 0) {
         currencyId = CURRENCY_CZECH_REPUBLIC;
     }
 
