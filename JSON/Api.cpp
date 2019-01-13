@@ -525,7 +525,7 @@ std::string Api::getAddress(std::vector<unsigned char> address) {
         ptree dscTree;
         dscTree.put("DscCertificate", Hexdump::vectorToHexString((*it).getDscCertificate()));
         dscTree.put("DSCLinkedAtHeight", (*it).getDSCLinkedAtHeight());
-        dscsTree.push_back(std::make_pair("", voteTree));
+        dscsTree.push_back(std::make_pair("", dscTree));
         it++;
     }
     addressTree.add_child("dsc", dscsTree);
