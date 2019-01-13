@@ -520,13 +520,15 @@ std::string Api::getAddress(std::vector<unsigned char> address) {
 
     auto dscToAddressLinks = addressForStore.getDscToAddressLinks();
     auto it = dscToAddressLinks.begin();
+    ptree dscsTree;
     while (it != dscToAddressLinks.end()) {
         ptree dscTree;
         dscTree.put("DscCertificate", Hexdump::vectorToHexString((*it).getDscCertificate()));
         dscTree.put("DSCLinkedAtHeight", (*it).getDSCLinkedAtHeight());
-        addressTree.add_child("dsc", dscTree);
+        dscsTree.push_back(std::make_pair("", voteTree));
         it++;
     }
+    addressTree.add_child("dsc", dscsTree);
 
     baseTree.add_child("address", addressTree);
 
