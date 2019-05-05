@@ -71,7 +71,8 @@ uint8_t Test::getCurrencyIdFromIso2Code(char* iso2code) {
     }
 
     if(strcmp(iso2code, "LU") == 0 || strcmp(iso2code, "lu") == 0
-       || strcmp(iso2code, "Grand-Duchy of Luxembourg Country Signing CA") == 0) {
+       || strcmp(iso2code, "Grand-Duchy of Luxembourg Country Signing CA") == 0
+       || strcmp(iso2code, "Grand-Duchy of Luxembourg CSCA eTravel Documents") == 0) {
         currencyId = CURRENCY_LUXEMBOURG;
     }
 
@@ -489,5 +490,5 @@ void Test::importDSCCerts() {
             dscCounter++;
         }
     }
-    Log(LOG_LEVEL_INFO) << "added: " << dscCounter << " csca certificates";
+    Log(LOG_LEVEL_INFO) << "added: " << dscCounter << " dsc certificates";
 }
