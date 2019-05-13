@@ -460,6 +460,11 @@ UAmount BlockHelper::calculateDelegatePayout(uint32_t blockHeight) {
     amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_MONACO, (uint64_t)(CURRENCY_MONACO_DELEGATE_PAYOUT / halvingFactor)));
     amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_LIECHTENSTEIN, (uint64_t)(CURRENCY_LIECHTENSTEIN_DELEGATE_PAYOUT / halvingFactor)));
 
+    if(blockHeight >= ICELAND_ACTIVATION_BLOCK_HEIGHT) {
+        amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_ICELAND,
+                                                      (uint64_t) (CURRENCY_ICELAND_DELEGATE_PAYOUT / halvingFactor)));
+    }
+
     return amount;
 }
 
@@ -498,6 +503,12 @@ UAmount BlockHelper::calculateDevFundPayout(uint32_t blockHeight) {
     amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_MONACO, (uint64_t)(CURRENCY_MONACO_DEVELOPMENT_PAYOUT / halvingFactor)));
     amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_LIECHTENSTEIN, (uint64_t)(CURRENCY_LIECHTENSTEIN_DEVELOPMENT_PAYOUT / halvingFactor)));
 
+    if(blockHeight >= ICELAND_ACTIVATION_BLOCK_HEIGHT) {
+        amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_ICELAND,
+                                                      (uint64_t) (CURRENCY_ICELAND_DEVELOPMENT_PAYOUT /
+                                                                  halvingFactor)));
+    }
+
     return amount;
 }
 
@@ -532,6 +543,10 @@ UAmount32 BlockHelper::calculateUbiReceiverCount(Block* block, BlockHeader* prev
         newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_ESTONIA, 0));
         newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_MONACO, 0));
         newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_LIECHTENSTEIN, 0));
+
+        if(block->getHeader()->getBlockHeight() >= ICELAND_ACTIVATION_BLOCK_HEIGHT) {
+            newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_ICELAND, 0));
+        }
 
         return newUbiReceiverCount;
     }
@@ -629,7 +644,7 @@ UAmount32 BlockHelper::calculateUbiReceiverCount(Block* block, BlockHeader* prev
     return newUbiReceiverCount;
 }
 
-UAmount BlockHelper::getTotalPayout() {
+UAmount BlockHelper::getTotalPayout(uint64_t blockHeight) {
     UAmount totalPayout;
 
     totalPayout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_SWITZERLAND, (uint64_t)(CURRENCY_SWITZERLAND_EMISSION_RATE)));
@@ -657,6 +672,11 @@ UAmount BlockHelper::getTotalPayout() {
     totalPayout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_ESTONIA, (uint64_t)(CURRENCY_ESTONIA_EMISSION_RATE)));
     totalPayout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_MONACO, (uint64_t)(CURRENCY_MONACO_EMISSION_RATE)));
     totalPayout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_LIECHTENSTEIN, (uint64_t)(CURRENCY_LIECHTENSTEIN_EMISSION_RATE)));
+
+    if(blockHeight >= ICELAND_ACTIVATION_BLOCK_HEIGHT) {
+        totalPayout.map.insert(
+                std::pair<uint8_t, CAmount>(CURRENCY_ICELAND, (uint64_t) (CURRENCY_ICELAND_EMISSION_RATE)));
+    }
 
     return totalPayout;
 }
@@ -740,10 +760,15 @@ void BlockHelper::calculatePayout(Block* block, BlockHeader* previousBlockHeader
         payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_LIECHTENSTEIN, 0));
         payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_LIECHTENSTEIN, 0));
 
+        if(block->getHeader()->getBlockHeight() >= ICELAND_ACTIVATION_BLOCK_HEIGHT) {
+            payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_ICELAND, 0));
+            payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_ICELAND, 0));
+        }
+
         return;
     }
 
-    UAmount totalPayout = getTotalPayout();
+    UAmount totalPayout = getTotalPayout(block->getHeader()->getBlockHeight());
 
     totalPayout += previousBlockHeader->getPayoutRemainder();
 
@@ -997,6 +1022,18 @@ void BlockHelper::calculatePayout(Block* block, BlockHeader* previousBlockHeader
     payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_LIECHTENSTEIN, divLI));
     payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_LIECHTENSTEIN, remLI));
 
+
+    if(block->getHeader()->getBlockHeight() >= ICELAND_ACTIVATION_BLOCK_HEIGHT) {
+        // -------------------------------------------------------------------------------------------------------
+        uint64_t divICE = 0;
+        uint64_t remICE = 0;
+        if(newReceiverCount.map[CURRENCY_ICELAND] != 0) {
+            divICE = (uint64_t) totalPayout.map[CURRENCY_ICELAND] / newReceiverCount.map[CURRENCY_ICELAND];
+            remICE = (uint64_t) totalPayout.map[CURRENCY_ICELAND] % newReceiverCount.map[CURRENCY_LIECHTENSTEIN];
+        }
+        payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_ICELAND, divICE));
+        payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_ICELAND, remICE));
+    }
 }
 
 std::vector<unsigned char> BlockHelper::computeBlockHeaderHash(BlockHeader header) {
