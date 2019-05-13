@@ -33,7 +33,7 @@ public:
     static UAmount calculateDelegatePayout(uint32_t blockHeight);
     static UAmount calculateDevFundPayout(uint32_t blockHeight);
     static UAmount32 calculateUbiReceiverCount(Block* block, BlockHeader* previousBlock);
-    static UAmount getTotalPayout();
+    static UAmount getTotalPayout(uint64_t blockHeight);
     static void calculatePayout(Block* block, BlockHeader* previousBlockHeader, UAmount32 newReceiverCount, UAmount &payout, UAmount &payoutRemainder);
     static std::vector<unsigned char> computeBlockHeaderHash(BlockHeader header);
 };
