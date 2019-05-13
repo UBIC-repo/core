@@ -108,7 +108,11 @@ uint8_t Test::getCurrencyIdFromIso2Code(char* iso2code) {
     if(strcmp(iso2code, "LI") == 0 || strcmp(iso2code, "li") == 0) {
         currencyId = CURRENCY_LIECHTENSTEIN;
     }
-
+    
+    if(strcmp(iso2code, "IS") == 0 || strcmp(iso2code, "is") == 0) {
+        currencyId = CURRENCY_ICELAND;
+    }
+    
     if(strcmp(iso2code, "US") == 0 || strcmp(iso2code, "us") == 0) {
         currencyId = CURRENCY_USA;
     }
