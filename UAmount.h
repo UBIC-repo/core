@@ -394,7 +394,8 @@ public:
                  it->first == CURRENCY_UKRAINE ||
                  it->first == CURRENCY_ESTONIA ||
                  it->first == CURRENCY_MONACO ||
-                 it->first == CURRENCY_LIECHTENSTEIN
+                 it->first == CURRENCY_LIECHTENSTEIN ||
+                 it->first == CURRENCY_ICELAND
                 )) {
                 return false;
             }
