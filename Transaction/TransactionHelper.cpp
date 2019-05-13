@@ -1140,7 +1140,7 @@ UAmount TransactionHelper::calculateMinimumFee(size_t txSize, BlockHeader* heade
         return rAmount;
     }
 
-    UAmount totalPayout = BlockHelper::getTotalPayout();
+    UAmount totalPayout = BlockHelper::getTotalPayout(header->getBlockHeight());
     UAmount32 receiverCounts = header->getUbiReceiverCount();
 
     for(auto& payout : totalPayout.map) {
