@@ -89,13 +89,12 @@ struct UAmount {
         bool equal = true;
         std::map<uint8_t, CAmount> otherMap = other.map;
 
+        if(map.size() != otherMap.size()) {
+            return false;
+        }
+
         for (std::map<uint8_t, CAmount>::const_iterator it(map.begin()); it != map.end(); ++it) {
             if(it->second != otherMap[it->first]) {
-                equal = false;
-            }
-        }
-        for (std::map<uint8_t, CAmount>::const_iterator it(otherMap.begin()); it != otherMap.end(); ++it) {
-            if(it->second != map[it->first]) {
                 equal = false;
             }
         }
@@ -107,13 +106,12 @@ struct UAmount {
         bool notEqual = false;
         std::map<uint8_t, CAmount> otherMap = other.map;
 
+        if(map.size() != otherMap.size()) {
+            return true;
+        }
+
         for (std::map<uint8_t, CAmount>::const_iterator it(map.begin()); it != map.end(); ++it) {
             if(it->second != otherMap[it->first]) {
-                notEqual = true;
-            }
-        }
-        for (std::map<uint8_t, CAmount>::const_iterator it(otherMap.begin()); it != otherMap.end(); ++it) {
-            if(it->second != map[it->first]) {
                 notEqual = true;
             }
         }
@@ -261,13 +259,12 @@ struct UAmount32 {
         bool equal = true;
         std::map<uint8_t, CAmount32> otherMap = other.map;
 
+        if(map.size() != otherMap.size()) {
+            return false;
+        }
+
         for (std::map<uint8_t, CAmount32>::const_iterator it(map.begin()); it != map.end(); ++it) {
             if(it->second != otherMap[it->first]) {
-                equal = false;
-            }
-        }
-        for (std::map<uint8_t, CAmount32>::const_iterator it(otherMap.begin()); it != otherMap.end(); ++it) {
-            if(it->second != map[it->first]) {
                 equal = false;
             }
         }
@@ -279,13 +276,12 @@ struct UAmount32 {
         bool notEqual = false;
         std::map<uint8_t, CAmount32> otherMap = other.map;
 
+        if(map.size() != otherMap.size()) {
+            return true;
+        }
+
         for (std::map<uint8_t, CAmount32>::const_iterator it(map.begin()); it != map.end(); ++it) {
             if(it->second != otherMap[it->first]) {
-                notEqual = true;
-            }
-        }
-        for (std::map<uint8_t, CAmount32>::const_iterator it(otherMap.begin()); it != otherMap.end(); ++it) {
-            if(it->second != map[it->first]) {
                 notEqual = true;
             }
         }
