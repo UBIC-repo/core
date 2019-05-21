@@ -170,7 +170,7 @@ bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx, uint32_t block
     Cert* cert = certStore.getDscCertWithCertId(txIn.getInAddress());
 
     if(cert == nullptr) {
-        Log(LOG_LEVEL_ERROR) << "CertStore returned no DCS " << txIn.getInAddress() << " match for the NtpEsk";
+        Log(LOG_LEVEL_ERROR) << "CertStore returned no DSC " << txIn.getInAddress() << " match for the NtpEsk";
         return false;
     }
 
