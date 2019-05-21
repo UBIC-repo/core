@@ -29,6 +29,7 @@ public:
         static CertStore instance;
         return instance;
     }
+    void clear();
     void loadFromFS();
     void persistToFS(const char* type, std::vector<unsigned char> certId);
 
