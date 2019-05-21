@@ -65,6 +65,26 @@ bool FS::deleteDir(std::vector<unsigned char> path) {
     return boost::filesystem::remove_all(cPath);
 }
 
+bool FS::recursive_copy(const boost::filesystem::path &src, const boost::filesystem::path &dst)
+{
+        if (boost::filesystem::exists(dst)){
+        throw std::runtime_error(dst.generic_string() + " exists");
+    }
+
+    if (boost::filesystem::is_directory(src)) {
+        boost::filesystem::create_directories(dst);
+        for (boost::filesystem::directory_entry& item : boost::filesystem::directory_iterator(src)) {
+            recursive_copy(item.path(), dst/item.path().filename());
+        }
+    }
+    else if (boost::filesystem::is_regular_file(src)) {
+        boost::filesystem::copy(src, dst);
+    }
+    else {
+        throw std::runtime_error(dst.generic_string() + " not dir or file");
+    }
+}
+
 bool FS::copyDir(std::vector<unsigned char> pathFrom, std::vector<unsigned char> pathDest) {
     char cPathFrom[512];
     FS::charPathFromVectorPath(cPathFrom, pathFrom);
@@ -72,7 +92,9 @@ bool FS::copyDir(std::vector<unsigned char> pathFrom, std::vector<unsigned char>
     char cPathDest[512];
     FS::charPathFromVectorPath(cPathDest, pathDest);
 
-    boost::filesystem::copy_directory(cPathFrom, cPathDest);
+
+    Log(LOG_LEVEL_INFO) << "Copy " << cPathFrom << " to " << cPathDest;
+    FS::recursive_copy(cPathFrom, cPathDest);
 
     return true;
 }
