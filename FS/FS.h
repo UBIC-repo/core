@@ -78,7 +78,10 @@ public:
 
     static bool touchFile(std::vector<unsigned char> path);
     static bool deleteFile(std::vector<unsigned char> path);
+    static bool deleteDir(std::vector<unsigned char> path);
+    static bool copyDir(std::vector<unsigned char> pathFrom, std::vector<unsigned char> pathDest);
     static bool fileExists(std::vector<unsigned char> path);
+
     static uint64_t getEofPosition(std::vector<unsigned char> path);
     static std::vector<unsigned char> readFile(std::vector<unsigned char> path);
     static std::vector<unsigned char> readFile(std::vector<unsigned char> path, uint64_t startPosition, uint64_t size);
@@ -87,15 +90,19 @@ public:
     static bool createDirectory(std::vector<unsigned char> path);
     static std::vector<unsigned char> getBasePath();
     static std::vector<unsigned char> getLockPath();
+    static std::vector<unsigned char> getGenesisPath();
     static std::vector<unsigned char> getWebBasePath();
     static std::vector<unsigned char> getX509DirectoryPath();
     static std::vector<unsigned char> getCertDirectoryPath();
+    static std::vector<unsigned char> getGenesisX509DirectoryPath();
+    static std::vector<unsigned char> getGenesisCertDirectoryPath();
     static std::vector<unsigned char> getImportDirectoryPath();
     static std::vector<unsigned char> getBlockDatDirectoryPath();
     static std::vector<unsigned char> getBlockDatPath();
     static std::vector<unsigned char> getBlockHeadersPath();
     static std::vector<unsigned char> getMyTransactionsPath();
     static std::vector<unsigned char> getVotesPath();
+    static std::vector<unsigned char> getGenesisVotesPath();
     static std::vector<unsigned char> getBestBlockHeadersPath();
     static std::vector<unsigned char> getWalletPath();
     static std::vector<unsigned char> getAddressStorePath();
