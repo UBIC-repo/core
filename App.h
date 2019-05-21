@@ -12,6 +12,7 @@ class App {
 private:
     bool terminateSignal = false;
     bool reindexing = false;
+    uint32_t reindexingHeight = 0;
 public:
     static App& Instance(){
         static App instance;
@@ -48,6 +49,14 @@ public:
 
     bool setReindexing(bool value) {
         this->reindexing = value;
+    }
+
+    uint32_t getReindexingHeight() {
+        return reindexingHeight;
+    }
+
+    void setReindexingHeight(uint32_t reindexingHeight) {
+        this->reindexingHeight = reindexingHeight;
     }
 };
 
