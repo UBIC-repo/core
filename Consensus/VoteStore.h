@@ -56,6 +56,11 @@ public:
         return this->allDelegates;
     }
 
+    void clear() {
+        this->activeDelegates.clear();
+        this->allDelegates.clear();
+    }
+
     bool loadDelegates() {
         DB& db = DB::Instance();
         for(std::vector<unsigned char> key : db.getAllKeys(DB_VOTES)) {
