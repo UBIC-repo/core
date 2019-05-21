@@ -3,6 +3,7 @@
 #define TX_FS_H
 
 #include <vector>
+#include <boost/filesystem/path.hpp>
 #include "../streams.h"
 #include "../Tools/Log.h"
 #include "../ChainParams.h"
@@ -79,6 +80,7 @@ public:
     static bool touchFile(std::vector<unsigned char> path);
     static bool deleteFile(std::vector<unsigned char> path);
     static bool deleteDir(std::vector<unsigned char> path);
+    static bool recursive_copy(const boost::filesystem::path &src, const boost::filesystem::path &dst);
     static bool copyDir(std::vector<unsigned char> pathFrom, std::vector<unsigned char> pathDest);
     static bool fileExists(std::vector<unsigned char> path);
 
