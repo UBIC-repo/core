@@ -443,6 +443,12 @@ bool CertStore::deactivateDSC(std::vector<unsigned char> certId, BlockHeader* bl
     }
 }
 
+void CertStore::clear() {
+    this->RootList.clear();
+    this->CSCAList.clear();
+    this->DSCList.clear();
+}
+
 void CertStore::loadFromFS() {
 
     std::vector<unsigned char> path = FS::getCertDirectoryPath();
