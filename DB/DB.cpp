@@ -128,11 +128,11 @@ bool DB::putInDB(uint8_t store, std::string key, std::vector<unsigned char> valu
     leveldb::Status status = db->Put(writeOptions, key, valueString);
 
     if(!status.ok()) {
-        Log(LOG_LEVEL_ERROR) << "Failed to write to Store: " << store;
+        Log(LOG_LEVEL_ERROR) << "Failed to write to Store: " << store << " error: " << status.ToString();
         return false;
     }
 
-    Log(LOG_LEVEL_INFO) << "wrote key:" << key << " Store:" << store << " Value:" << value;
+    //Log(LOG_LEVEL_INFO) << "wrote key:" << key << " Store:" << store << " Value:" << value;
 
     return true;
 }
