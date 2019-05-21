@@ -86,7 +86,6 @@ struct UAmount {
     }
 
     inline bool operator==(const UAmount& other) {
-        bool equal = true;
         std::map<uint8_t, CAmount> otherMap = other.map;
 
         if(map.size() != otherMap.size()) {
@@ -95,15 +94,14 @@ struct UAmount {
 
         for (std::map<uint8_t, CAmount>::const_iterator it(map.begin()); it != map.end(); ++it) {
             if(it->second != otherMap[it->first]) {
-                equal = false;
+                return false;
             }
         }
 
-        return equal;
+        return true;
     }
 
     inline bool operator!=(const UAmount& other) {
-        bool notEqual = false;
         std::map<uint8_t, CAmount> otherMap = other.map;
 
         if(map.size() != otherMap.size()) {
@@ -112,11 +110,11 @@ struct UAmount {
 
         for (std::map<uint8_t, CAmount>::const_iterator it(map.begin()); it != map.end(); ++it) {
             if(it->second != otherMap[it->first]) {
-                notEqual = true;
+                return true;
             }
         }
 
-        return notEqual;
+        return false;
     }
 
     inline bool operator==(CAmount other) const {
@@ -128,27 +126,23 @@ struct UAmount {
     }
 
     inline bool operator<=(const UAmount& other) {
-        bool result = true;
-
         for (std::map<uint8_t, CAmount>::const_iterator it(other.map.begin()); it != other.map.end(); ++it) {
             if(map.find(it->first) == map.end() || map[it->first] > it->second) {
-                result = false;
+                return false;
             }
         }
 
-        return result;
+        return true;
     }
 
     inline bool operator>=(const UAmount& other) {
-        bool result = true;
-
         for (std::map<uint8_t, CAmount>::const_iterator it(other.map.begin()); it != other.map.end(); ++it) {
             if(map.find(it->first) == map.end() || map[it->first] < it->second) {
-                result = false;
+                return false;
             }
         }
 
-        return result;
+        return true;
     }
 
     inline bool operator<(CAmount other) const {
@@ -256,7 +250,6 @@ struct UAmount32 {
     }
 
     inline bool operator==(const UAmount32& other) {
-        bool equal = true;
         std::map<uint8_t, CAmount32> otherMap = other.map;
 
         if(map.size() != otherMap.size()) {
@@ -265,15 +258,14 @@ struct UAmount32 {
 
         for (std::map<uint8_t, CAmount32>::const_iterator it(map.begin()); it != map.end(); ++it) {
             if(it->second != otherMap[it->first]) {
-                equal = false;
+                return false;
             }
         }
 
-        return equal;
+        return true;
     }
 
     inline bool operator!=(const UAmount32& other) {
-        bool notEqual = false;
         std::map<uint8_t, CAmount32> otherMap = other.map;
 
         if(map.size() != otherMap.size()) {
@@ -282,11 +274,11 @@ struct UAmount32 {
 
         for (std::map<uint8_t, CAmount32>::const_iterator it(map.begin()); it != map.end(); ++it) {
             if(it->second != otherMap[it->first]) {
-                notEqual = true;
+                return true;
             }
         }
 
-        return notEqual;
+        return false;
     }
 
     inline bool operator==(CAmount32 other) const {
@@ -298,27 +290,23 @@ struct UAmount32 {
     }
 
     inline bool operator<=(const UAmount32& other) {
-        bool result = true;
-
         for (std::map<uint8_t, CAmount32>::const_iterator it(other.map.begin()); it != other.map.end(); ++it) {
             if(map.find(it->first) == map.end() || map[it->first] > it->second) {
-                result = false;
+                return false;
             }
         }
 
-        return result;
+        return true;
     }
 
     inline bool operator>=(const UAmount32& other) {
-        bool result = true;
-
         for (std::map<uint8_t, CAmount32>::const_iterator it(other.map.begin()); it != other.map.end(); ++it) {
             if(map.find(it->first) == map.end() || map[it->first] < it->second) {
-                result = false;
+                return false;
             }
         }
 
-        return result;
+        return true;
     }
 
     inline bool operator<(CAmount32 other) const {
