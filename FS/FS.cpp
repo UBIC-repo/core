@@ -58,6 +58,25 @@ bool FS::deleteFile(std::vector<unsigned char> path) {
     return !std::remove(cPath);
 }
 
+bool FS::deleteDir(std::vector<unsigned char> path) {
+    char cPath[512];
+    FS::charPathFromVectorPath(cPath, path);
+
+    return boost::filesystem::remove_all(cPath);
+}
+
+bool FS::copyDir(std::vector<unsigned char> pathFrom, std::vector<unsigned char> pathDest) {
+    char cPathFrom[512];
+    FS::charPathFromVectorPath(cPathFrom, pathFrom);
+
+    char cPathDest[512];
+    FS::charPathFromVectorPath(cPathDest, pathDest);
+
+    boost::filesystem::copy_directory(cPathFrom, cPathDest);
+
+    return true;
+}
+
 bool FS::fileExists(std::vector<unsigned char> path) {
     char cPath[512];
     FS::charPathFromVectorPath(cPath, path);
@@ -146,6 +165,10 @@ std::vector<unsigned char> FS::getLockPath() {
     return FS::concatPaths(FS::getBasePath(), ".lock");
 }
 
+std::vector<unsigned char> FS::getGenesisPath() {
+    return FS::concatPaths(FS::getBasePath(), "genesis/");
+}
+
 std::vector<unsigned char> FS::getWebBasePath() {
     const char *t = BASE_WEB_PATH;
     return std::vector<unsigned char>(t, t + strlen(t));
@@ -157,6 +180,14 @@ std::vector<unsigned char> FS::getX509DirectoryPath() {
 
 std::vector<unsigned char> FS::getCertDirectoryPath() {
     return FS::concatPaths(FS::getBasePath(), "certs/");
+}
+
+std::vector<unsigned char> FS::getGenesisX509DirectoryPath() {
+    return FS::concatPaths(FS::getGenesisPath(), "x509/");
+}
+
+std::vector<unsigned char> FS::getGenesisCertDirectoryPath() {
+    return FS::concatPaths(FS::getGenesisPath(), "certs/");
 }
 
 std::vector<unsigned char> FS::getImportDirectoryPath() {
@@ -229,6 +260,10 @@ std::vector<unsigned char> FS::getMyTransactionsPath() {
 
 std::vector<unsigned char> FS::getVotesPath() {
     return FS::concatPaths(FS::getBasePath(), "votes.mdb");
+}
+
+std::vector<unsigned char> FS::getGenesisVotesPath() {
+    return FS::concatPaths(FS::getGenesisPath(), "votes.mdb");
 }
 
 std::vector<unsigned char> FS::getBestBlockHeadersPath() {
