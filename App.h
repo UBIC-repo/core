@@ -11,6 +11,7 @@
 class App {
 private:
     bool terminateSignal = false;
+    bool reindexing = false;
 public:
     static App& Instance(){
         static App instance;
@@ -39,6 +40,14 @@ public:
 
     bool getTerminateSignal() {
         return this->terminateSignal;
+    }
+
+    bool isReindexing() {
+        return this->reindexing;
+    }
+
+    bool setReindexing(bool value) {
+        this->reindexing = value;
     }
 };
 
