@@ -16,5 +16,6 @@ cp -R ./Static/web /var/ubic/
 cp -R ./Static/genesis/certs /var/ubic/
 cp -R ./Static/genesis/x509 /var/ubic/
 cp -R ./Static/genesis/votes.mdb /var/ubic/
+cp -R ./Static/genesis /var/ubic/genesis
 
 chmod 777 -R /var/ubic/
