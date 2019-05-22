@@ -162,6 +162,25 @@ int main(int argc, char *argv[]) {
 
     }
 
+    // --- reindex
+    if (strcmp(argv[1], "reindex") == 0) {
+        char clientInput;
+        do {
+            std::cout << "Are you sure to start the reindex? [y/n]";
+            std::cin >> clientInput;
+        } while( !cin.fail() && clientInput!='y' && clientInput!='n' );
+
+        if(clientInput == 'n') {
+            return 0;
+        }
+
+        response = client->get("/reindex/start", ApiKey::getApiKey());
+        if(response.empty()) {
+            return 0;
+        }
+
+    }
+
     // --- Balance
 /*
     response = client->get("/wallet", ApiKey::getApiKey());
