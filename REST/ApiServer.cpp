@@ -151,6 +151,16 @@ std::string ApiServer::route(std::vector<std::string> urlParts, std::string json
             return Api::getTxPool();
         } else if(urlParts.at(0) == "incoming") {
             return Api::getIncomingTx();
+        } else if(urlParts.at(0) == "reindex") {
+            if(urlParts.size() == 2) {
+                if (urlParts.at(1) == "start") {
+                    return Api::reindex();
+                }
+
+                if (urlParts.at(1) == "status") {
+                    return Api::reindexStatus();
+                }
+            }
         } else if(urlParts.at(0) == "delegates") {
             if(urlParts.size() == 1) {
                 return Api::getDelegates();
