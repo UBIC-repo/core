@@ -29,6 +29,8 @@
 #include "../Scripts/NtpskAlreadyUsedScript.h"
 #include "../KYC/MRZParser.h"
 #include "../PassportReader/LDS/Iso19794Parser.h"
+#include "../App.h"
+#include "../Loader.h"
 
 using boost::property_tree::ptree;
 
@@ -1787,6 +1789,93 @@ std::string Api::getIncomingTx() {
     boost::property_tree::json_parser::write_json(ss, baseTree);
 
     return ss.str();
+}
+
+void Api::reapplyAllBlocks() {
+
+    App& app = App::Instance();
+    int blockHeight = 1;
+    Chain& chain = Chain::Instance();
+
+    do {
+        BlockHeader* blockHeader = chain.getBlockHeader(blockHeight);
+
+        if(blockHeader == nullptr) {
+            break;
+        }
+
+        Block* block = BlockStore::getBlock(blockHeader->getHeaderHash());
+        if(block == nullptr) {
+            break;
+        }
+        Log(LOG_LEVEL_INFO) << "BlockHelper::applyBlock(" << blockHeight << ")";
+        BlockHelper::applyBlock(block);
+
+        blockHeight++;
+        app.setReindexingHeight(blockHeight);
+        delete blockHeader;
+        delete block;
+    } while(true);
+
+    app.setReindexing(false);
+}
+
+std::string Api::reindex() {
+    // Suspend all other activities
+    App& app = App::Instance();
+
+    if(app.isReindexing()) {
+        return "{\"error\": \"already reindexing\"}";
+    }
+
+    app.setReindexing(true);
+    app.setReindexingHeight(0);
+
+    #if defined(_WIN32)
+        Sleep(2000);
+    #else
+        sleep(2);
+    #endif
+
+    // Reset current state to genesis
+    FS::deleteDir(FS::getVotesPath());
+    FS::deleteDir(FS::getMyTransactionsPath());
+    FS::deleteDir(FS::getAddressStorePath());
+    FS::deleteDir(FS::getNTPSKStorePath());
+    FS::deleteDir(FS::getDSCCounterStorePath());
+    FS::deleteDir(FS::getX509DirectoryPath());
+    FS::deleteDir(FS::getCertDirectoryPath());
+
+    FS::copyDir(FS::getGenesisVotesPath(), FS::getVotesPath());
+    FS::copyDir(FS::getGenesisX509DirectoryPath(), FS::getX509DirectoryPath());
+    FS::copyDir(FS::getGenesisCertDirectoryPath(), FS::getCertDirectoryPath());
+
+    Loader::createTouchFilesAndDirectories();
+
+    CertStore& certStore = CertStore::Instance();
+    certStore.clear();
+    certStore.loadFromFS();
+
+    VoteStore& voteStore = VoteStore::Instance();
+    voteStore.clear();
+    voteStore.loadDelegates();
+
+    // Reapply all blocks
+    std::thread t1(&Api::reapplyAllBlocks);
+    t1.detach();
+
+    return "{\"success\": \"started\"}";
+}
+
+std::string Api::reindexStatus() {
+    App& app = App::Instance();
+    Chain& chain = Chain::Instance();
+    uint32_t reindexHeight = app.getReindexingHeight();
+    uint32_t currentBlockchainHeight = chain.getCurrentBlockchainHeight();
+    bool isReindexing = app.isReindexing();
+    char response[128];
+    sprintf(response, "{\"isReindexing\": %s, \"reindexHeight\": \"%i\", \"currentBlockchainHeight\" : \"%i\"}", ((isReindexing)? "true": "false"), reindexHeight, currentBlockchainHeight);
+    return response;
 }
 
 std::string Api::getBlock(uint32_t blockHeight) {
