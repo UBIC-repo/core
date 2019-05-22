@@ -83,6 +83,7 @@ public:
     static bool recursive_copy(const boost::filesystem::path &src, const boost::filesystem::path &dst);
     static bool copyDir(std::vector<unsigned char> pathFrom, std::vector<unsigned char> pathDest);
     static bool fileExists(std::vector<unsigned char> path);
+    static bool renameFile(std::vector<unsigned char> pathFrom, std::vector<unsigned char> pathDest);
 
     static uint64_t getEofPosition(std::vector<unsigned char> path);
     static std::vector<unsigned char> readFile(std::vector<unsigned char> path);
