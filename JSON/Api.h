@@ -36,6 +36,9 @@ public:
     static std::string getTxPool();
     static std::string getFees();
     static std::string getIncomingTx();
+    static void reapplyAllBlocks();
+    static std::string reindex();
+    static std::string reindexStatus();
     static std::string getBlock(uint32_t blockHeight);
     static std::string getBlock(std::vector<unsigned char> blockHeaderHash);
     static std::string getIndex();
