@@ -323,7 +323,7 @@ bool BlockHelper::applyBlock(Block* block) {
             if(it->second.getExpirationDate() > previousBlockHeader->getTimestamp()
                && it->second.getExpirationDate() <= block->getHeader()->getTimestamp()) {
 
-                certStore.deactivateDSC(it->second.getId(), block->getHeader()); // the certificate might already have been deactivated but that isn't an issue
+                certStore.deactivateDSC(it->second.getId(), block->getHeader()); // the certificate might already have been deactivated but this isn't an issue
 
                 Log(LOG_LEVEL_INFO) << "DSC with id:"
                                     << it->second.getId()
@@ -544,14 +544,14 @@ UAmount32 BlockHelper::calculateUbiReceiverCount(Block* block, BlockHeader* prev
         newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_MONACO, 0));
         newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_LIECHTENSTEIN, 0));
 
-        if(block->getHeader()->getBlockHeight() >= ICELAND_ACTIVATION_BLOCK_HEIGHT) {
-            newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_ICELAND, 0));
-        }
-
         return newUbiReceiverCount;
     }
 
     UAmount32 newUbiReceiverCount = previousBlockHeader->getUbiReceiverCount();
+
+    if(block->getHeader()->getBlockHeight() == ICELAND_ACTIVATION_BLOCK_HEIGHT) {
+        newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_ICELAND, 0));
+    }
 
     CertStore& certStore = CertStore::Instance();
     std::unordered_map<std::string, Cert>* dscList = certStore.getDSCList();
