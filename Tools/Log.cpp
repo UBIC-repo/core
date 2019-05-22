@@ -15,7 +15,24 @@ Log::Log(uint8_t level) {
     switch (this->logLevel) {
         case LOG_LEVEL_ERROR: {
 
-            FS::charPathFromVectorPath(cPath, FS::concatPaths(FS::getLogPath(), "ERROR.txt"));
+            auto logErrorPath = FS::concatPaths(FS::getLogPath(), "ERROR.txt");
+
+            if((rand()) % 100 == 10) {
+                if(FS::getEofPosition(logErrorPath) > LOG_MAX_SIZE) {
+                    //rotate logs
+                    if(FS::fileExists(FS::concatPaths(FS::getLogPath(), "INFO.2.txt"))) {
+                        FS::deleteFile(FS::concatPaths(FS::getLogPath(), "INFO.2.txt"));
+                    }
+
+                    if(FS::fileExists(FS::concatPaths(FS::getLogPath(), "INFO.1.txt"))) {
+                        FS::renameFile(FS::concatPaths(FS::getLogPath(), "INFO.1.txt"),FS::concatPaths(FS::getLogPath(), "INFO.2.txt"));
+                    }
+
+                    FS::renameFile(FS::concatPaths(FS::getLogPath(), "INFO.txt"),FS::concatPaths(FS::getLogPath(), "INFO.1.txt"));
+                }
+            }
+
+            FS::charPathFromVectorPath(cPath, logErrorPath);
 
             fb.open(cPath, std::ios_base::app);
             std::ostream newStream(&fb);
@@ -29,7 +46,23 @@ Log::Log(uint8_t level) {
         }
         case LOG_LEVEL_INFO: {
 
-            FS::charPathFromVectorPath(cPath, FS::concatPaths(FS::getLogPath(), "INFO.txt"));
+            auto logInfoPath = FS::concatPaths(FS::getLogPath(), "INFO.txt");
+            if((rand()) % 100 == 10) {
+                if(FS::getEofPosition(logInfoPath) > LOG_MAX_SIZE) {
+                    //rotate logs
+                    if(FS::fileExists(FS::concatPaths(FS::getLogPath(), "INFO.2.txt"))) {
+                        FS::deleteFile(FS::concatPaths(FS::getLogPath(), "INFO.2.txt"));
+                    }
+
+                    if(FS::fileExists(FS::concatPaths(FS::getLogPath(), "INFO.1.txt"))) {
+                        FS::renameFile(FS::concatPaths(FS::getLogPath(), "INFO.1.txt"),FS::concatPaths(FS::getLogPath(), "INFO.2.txt"));
+                    }
+
+                    FS::renameFile(FS::concatPaths(FS::getLogPath(), "INFO.txt"),FS::concatPaths(FS::getLogPath(), "INFO.1.txt"));
+                }
+            }
+
+            FS::charPathFromVectorPath(cPath, logInfoPath);
 
             fb.open(cPath, std::ios_base::app);
             std::ostream newStream(&fb);
