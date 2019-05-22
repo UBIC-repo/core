@@ -8,7 +8,7 @@ using boost::property_tree::ptree;
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
-        std::cout << "Missing parameter, options are: status, start-minting, stop-minting" << std::endl;
+        std::cout << "Missing parameter, options are: web, status, start-minting, stop-minting, add-peer, peers, reindex" << std::endl;
         return 0;
     }
 
@@ -18,6 +18,8 @@ int main(int argc, char *argv[]) {
     // --- Web interface
     if (strcmp(argv[1], "web") == 0) {
         std::cout << "Web interface: http://127.0.01:6789#" << ApiKey::getApiKey() << std::endl;
+
+        return 0;
     }
 
     // --- Status
@@ -60,6 +62,8 @@ int main(int argc, char *argv[]) {
         std::cout << "Blockchain height: " << height << std::endl;
         std::cout << "Best block hash: " << hash << std::endl;
         std::cout << "Connected to " << peersCount << " peer(s)" << std::endl;
+
+        return 0;
     }
 
     // --- Stop minting
@@ -78,6 +82,8 @@ int main(int argc, char *argv[]) {
                 std::cout << "Stopped minting" << std::endl;
             }
         }
+
+        return 0;
     }
 
 
@@ -97,6 +103,8 @@ int main(int argc, char *argv[]) {
                 std::cout << "Started minting" << std::endl;
             }
         }
+
+        return 0;
     }
 
     // --- add peer
@@ -127,8 +135,10 @@ int main(int argc, char *argv[]) {
                 }
             }
         }
+
+        return 0;
     }
-    
+
     // --- Peers
     if (strcmp(argv[1], "peers") == 0) {
         response = client->get("/peers", ApiKey::getApiKey());
@@ -160,24 +170,64 @@ int main(int argc, char *argv[]) {
             }
         }
 
+        return 0;
     }
 
     // --- reindex
     if (strcmp(argv[1], "reindex") == 0) {
         char clientInput;
         do {
-            std::cout << "Are you sure to start the reindex? [y/n]";
+            std::cout << "Are you sure to start the reindex? [y/n]" <<  std::endl;
             std::cin >> clientInput;
-        } while( !cin.fail() && clientInput!='y' && clientInput!='n' );
+        } while( !std::cin.fail() && clientInput!='y' && clientInput!='n' );
 
         if(clientInput == 'n') {
             return 0;
         }
 
+        std::cout << "starting reindexation..." <<  std::endl;
+
         response = client->get("/reindex/start", ApiKey::getApiKey());
         if(response.empty()) {
             return 0;
         }
+
+        std::string isReindexing = "true";
+
+        do {
+            response = client->get("/reindex/status", ApiKey::getApiKey());
+            if (response.empty()) {
+                return 0;
+            }
+
+            std::stringstream ss(response);
+            boost::property_tree::ptree pt;
+            boost::property_tree::read_json(ss, pt);
+
+            std::string reindexHeight;
+            std::string currentBlockchainHeight;
+
+            for (boost::property_tree::ptree::value_type &v : pt) {
+                if (strcmp(v.first.data(), "reindexHeight") == 0) {
+                    reindexHeight = v.second.data();
+                }
+
+                if (strcmp(v.first.data(), "currentBlockchainHeight") == 0) {
+                    currentBlockchainHeight = v.second.data();
+                }
+
+                if (strcmp(v.first.data(), "isReindexing") == 0) {
+                    isReindexing = v.second.data();
+                }
+            }
+
+            std::cout << "[" << reindexHeight << "/" << currentBlockchainHeight <<  "] blocks reindexated" <<  std::endl;
+            sleep(2);
+        } while(isReindexing != "false");
+
+        std::cout << "Done!" <<  std::endl;
+
+        return 0;
 
     }
 
@@ -186,6 +236,8 @@ int main(int argc, char *argv[]) {
     response = client->get("/wallet", ApiKey::getApiKey());
     std::cout << response << std::endl;
 */
+
+    std::cout << "Missing parameter, options are: web, status, start-minting, stop-minting, add-peer, peers, reindex" << std::endl;
 
     return 0;
 }
