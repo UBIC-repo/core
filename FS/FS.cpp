@@ -110,6 +110,20 @@ bool FS::fileExists(std::vector<unsigned char> path) {
     }
 }
 
+bool FS::renameFile(std::vector<unsigned char> pathFrom, std::vector<unsigned char> pathDest) {
+    char cPathFrom[512];
+    FS::charPathFromVectorPath(cPathFrom, pathFrom);
+
+    char cPathDest[512];
+    FS::charPathFromVectorPath(cPathDest, pathDest);
+
+    boost::system::error_code ec;
+
+    boost::filesystem::rename(cPathFrom, cPathDest, ec);
+
+    return ec.value() == 0;
+}
+
 std::vector<unsigned char> FS::readFile(std::vector<unsigned char> path) {
     char cPath[512];
     FS::charPathFromVectorPath(cPath, path);
