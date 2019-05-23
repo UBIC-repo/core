@@ -7,6 +7,7 @@ if [ ! -d "/var/ubic/" ]; then
 	mkdir /var/ubic/
 else
 	cp -R ./Static/web /var/ubic/
+	cp -R ./Static/genesis /var/ubic/genesis
 	exit 1
 fi
 
