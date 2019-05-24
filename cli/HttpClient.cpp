@@ -2,6 +2,7 @@
 #include "HttpClient.h"
 #include <boost/asio/ssl.hpp>
 #include <iostream>
+#include <boost/asio.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/connect.hpp>
 #include <boost/asio/streambuf.hpp>
