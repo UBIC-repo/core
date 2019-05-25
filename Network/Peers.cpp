@@ -428,12 +428,14 @@ void PeerClient::do_read_body()
 
 void PeerClient::do_write()
 {
+
+    Log(LOG_LEVEL_INFO) << "PeerClient::write_msgs_.size(): " << (int)PeerClient::write_msgs_.size();
     if(PeerClient::write_msgs_.empty()) {
         Log(LOG_LEVEL_INFO) << "write_msgs_.empty()";
         return;
     }
 
-    if((uint32_t)write_msgs_.front().length() == 0) {
+    if((uint32_t)PeerClient::write_msgs_.front().length() == 0) {
         Log(LOG_LEVEL_ERROR) << "PeerClient::do_write(): message length is 0";
         return;
     }
