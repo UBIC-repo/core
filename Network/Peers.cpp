@@ -101,7 +101,7 @@ void PeerServer::do_read_header()
                                         }
                                     } else {
                                         if(ec == boost::asio::error::eof) {
-                                            do_connect();
+                                            //do_connect();
                                         } else {
                                             Log(LOG_LEVEL_ERROR) << "PeerServer::do_read_header() " << ip
                                                                  << " terminated with error: " << ec.message();
