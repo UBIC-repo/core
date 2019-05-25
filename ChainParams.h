@@ -151,6 +151,7 @@
 
 #define BLOCK_FILES_MAX_SIZE (1800 * 1000 * 1000) /* in bytes */
 #define LOG_MAX_SIZE (100 * 1000 * 1000) /* in bytes */
+#define MAX_NETWORK_MESSAGE_SIZE (2000 * 1000 * 1000)
 
 #define SERIALIZATION_VERSION 1
 #define BLOCK_SIZE_MAX 1900000
