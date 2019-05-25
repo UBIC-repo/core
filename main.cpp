@@ -91,7 +91,11 @@ int main() {
         return 0;
     }
 
+    App& app = App::Instance();
+    app.setIsStarting(true);
 
+    std::thread t0(&getMyIP);
+    std::thread t1(&startApiServer);
 
 #if defined(__linux__)
 
@@ -145,14 +149,14 @@ int main() {
     Loader::loadPathSum();
     Loader::loadWallet();
 
+    app.setIsStarting(false);
+
     Mint& mint = Mint::Instance();
     TxPool& txPool = TxPool::Instance();
     Wallet& wallet = Wallet::Instance();
 
     Log(LOG_LEVEL_INFO) << "Final balance : " << wallet.getBalance();
-    
-    std::thread t0(&getMyIP);
-    std::thread t1(&startApiServer);
+
     std::thread t2(&startServer);
     std::thread t3(&startWebInterface);
     std::thread t4(&startMinting);
