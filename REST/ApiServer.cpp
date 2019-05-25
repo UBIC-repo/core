@@ -5,6 +5,7 @@
 #include "../Config.h"
 #include "../Scripts/UScript.h"
 #include "../Scripts/AddCertificateScript.h"
+#include "../App.h"
 #include <boost/asio.hpp>
 #include <thread>
 #include <regex>
@@ -83,6 +84,13 @@ std::string getApiKey(const std::string request) {
 }
 
 std::string ApiServer::route(std::vector<std::string> urlParts, std::string jsonPost) {
+
+    App& app = App::Instance();
+
+    if(app.isStarting()) {
+        return "{\"success\": false, \"status\": \"starting\"}";
+    }
+
     if(urlParts.size() >= 1) {
         if(urlParts.at(0) == "certificates") {
             if(urlParts.size() >= 2) {
