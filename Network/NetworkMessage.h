@@ -8,6 +8,8 @@
 #include <boost/asio/ip/tcp.hpp>
 #include "../streams.h"
 #include "../Tools/Hexdump.h"
+#include "../ChainParams.h"
+#include "../Tools/Log.h"
 
 using boost::asio::ip::tcp;
 
@@ -16,6 +18,10 @@ typedef std::string ip_t; // ip type
 class NetworkMessage {
 public:
     NetworkMessage(const NetworkMessage &other) {
+            if(other.data_ == nullptr || sizeof(other.data_) == 0) {
+                return;
+            }
+
             this->data_ = (char*)malloc(header_length + other.body_length_);
             this->body_length_ = other.body_length_;
             std::memcpy(this->data_, other.data_, header_length + other.body_length_);
@@ -32,12 +38,11 @@ public:
 
     char* data_;
     const static uint8_t header_length = 4;
-    const static uint32_t max_body_length = 2000000;
 
     NetworkMessage()
             : body_length_(0)
     {
-        data_ = (char*)malloc(header_length + max_body_length);
+        data_ = (char*)malloc(header_length + MAX_NETWORK_MESSAGE_SIZE);
     }
     
     NetworkMessage(size_t dataSize)
@@ -75,20 +80,23 @@ public:
     void body_length(std::size_t new_length)
     {
         body_length_ = (uint32_t)new_length;
-        if (body_length_ > max_body_length)
-            body_length_ = max_body_length;
+        if (body_length_ > MAX_NETWORK_MESSAGE_SIZE)
+            body_length_ = MAX_NETWORK_MESSAGE_SIZE;
     }
 
     bool decode_header()
     {
         char header[header_length + 1] = "";
+        if(data_ == nullptr) {
+            return false;
+        }
         std::memcpy(header, data_, header_length);
 
         CDataStream s(SER_DISK, 1);
         s.write(header, header_length);
         s >> body_length_;
 
-        if (body_length_ > max_body_length)
+        if (body_length_ > MAX_NETWORK_MESSAGE_SIZE)
         {
             body_length_ = 0;
             return false;
