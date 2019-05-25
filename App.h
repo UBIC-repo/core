@@ -2,6 +2,9 @@
 #ifndef TX_APP_H
 #define TX_APP_H
 
+
+#include "FS/FS.h"
+
 #if defined(_WIN32)
 #include <synchapi.h>
 #else
@@ -12,6 +15,7 @@ class App {
 private:
     bool terminateSignal = false;
     bool reindexing = false;
+    bool starting = false;
     uint32_t reindexingHeight = 0;
 public:
     static App& Instance(){
@@ -57,6 +61,14 @@ public:
 
     void setReindexingHeight(uint32_t reindexingHeight) {
         this->reindexingHeight = reindexingHeight;
+    }
+
+    bool isStarting() {
+        return this->starting;
+    }
+
+    void setIsStarting(bool isStarting) {
+        this->starting = isStarting;
     }
 };
 
