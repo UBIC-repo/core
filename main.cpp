@@ -91,12 +91,6 @@ int main() {
         return 0;
     }
 
-    App& app = App::Instance();
-    app.setIsStarting(true);
-
-    std::thread t0(&getMyIP);
-    std::thread t1(&startApiServer);
-
 #if defined(__linux__)
 
     //daemonize
@@ -139,6 +133,12 @@ int main() {
     SetConsoleCtrlHandler(signalHandler, TRUE);
 #endif
 
+    App& app = App::Instance();
+    app.setIsStarting(true);
+
+    std::thread t0(&getMyIP);
+    std::thread t1(&startApiServer);
+    
     // @TODO add a lock
     //Loader::lock();
     Loader::createTouchFilesAndDirectories();
