@@ -37,7 +37,10 @@ bool Peers::isPeerAlreadyInList(ip_t ip) {
 }
 
 bool Peers::appendPeer(PeerInterfacePtr peer) {
-    //@TODO: return false for IPs 127.xx.xx.xx
+    if(peer->getIp().substr(0, 3) == "127") {
+        return false;
+    }
+
     BanList& banList = BanList::Instance();
 
     Log(LOG_LEVEL_INFO) << "Trying to append peer:" << peer->getIp();
