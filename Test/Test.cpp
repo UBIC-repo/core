@@ -393,6 +393,7 @@ void Test::importDSCCerts() {
                strcmp((char*)countryStr, "HU") == 0 || strcmp((char*)countryStr, "hu") == 0 ||
                strcmp((char*)countryStr, "LI") == 0 || strcmp((char*)countryStr, "li") == 0 ||
                strcmp((char*)countryStr, "CH") == 0 || strcmp((char*)countryStr, "ch") == 0 ||
+               strcmp((char*)countryStr, "IS") == 0 || strcmp((char*)countryStr, "is") == 0 ||
                strcmp((char*)countryStr, "FR") == 0 || strcmp((char*)countryStr, "fr") == 0) {
                 maxValidity = tenYears;
             }
