@@ -176,6 +176,8 @@ Block Mint::mintBlock() {
     blockHeader->setMerkleRootHash(merkleTreeRootHash);
     blockHeader->setVotes(voteList);
 
+    blockHeader->setBlockHeight(chain.getCurrentBlockchainHeight() + 1);
+
     block->setHeader(blockHeader);
 
     UAmount32 ubiReceiverCount = BlockHelper::calculateUbiReceiverCount(block, previousBlockHeader);
@@ -188,8 +190,6 @@ Block Mint::mintBlock() {
 
     blockHeader->setPayout(payout);
     blockHeader->setPayoutRemainder(payoutRemainder);
-
-    blockHeader->setBlockHeight(chain.getCurrentBlockchainHeight() + 1);
 
     std::vector<unsigned char> headerHash = BlockHelper::computeBlockHeaderHash(*blockHeader);
 
