@@ -191,6 +191,10 @@ std::string ApiServer::route(std::vector<std::string> urlParts, std::string json
                     return Api::createTransaction(jsonPost);
                 } else if(urlParts.at(1) == "send") {
                     return Api::sendTransaction(jsonPost);
+                } else if(urlParts.at(1) == "generate-key-pair") {
+                    return Api::generateKeyPair();
+                } else if(urlParts.at(1) == "create-transaction-with-private-key") {
+                    return Api::createTransactionWithPrivateKey(jsonPost);
                 }
             }
             return Api::getWallet();
