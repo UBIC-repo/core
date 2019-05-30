@@ -31,6 +31,7 @@
 #include "../PassportReader/LDS/Iso19794Parser.h"
 #include "../App.h"
 #include "../Loader.h"
+#include "../Crypto/Hash256.h"
 
 using boost::property_tree::ptree;
 
@@ -1159,6 +1160,96 @@ std::string Api::pay(std::string json) {
     return "{\"success\": false}";
 }
 
+std::string Api::createTransactionWithPrivateKey(std::string json) {
+    Wallet &wallet = Wallet::Instance();
+
+    if (json.empty()) {
+        return "{\"error\": \"empty json\"}";
+    }
+
+
+    std::stringstream ss(json);
+    boost::property_tree::ptree pt;
+    boost::property_tree::read_json(ss, pt);
+
+    std::vector<TxOut> txOuts;
+    std::string privateKeyString;
+
+    for (boost::property_tree::ptree::value_type &v : pt) {
+        if (strcmp(v.first.data(), "privateKey") == 0) {
+            privateKeyString = v.second.data();
+        }
+
+        if (strcmp(v.first.data(), "txOut") == 0) {
+
+            for (boost::property_tree::ptree::value_type &v2 : v.second) {
+                TxOut txOut;
+                if(!wallet.verifyReadableAddressChecksum(v2.first.data())) {
+                    return "{\"error\": \"invalid address\"}";
+                }
+                std::vector<unsigned char> vectorAddress = wallet.readableAddressToVectorAddress(v2.first.data());
+                Address address;
+                CDataStream s(SER_DISK, 1);
+                s.write((char *) vectorAddress.data(), vectorAddress.size());
+                s >> address;
+
+                txOut.setScript(address.getScript());
+
+                std::cout << v2.first.data() << std::endl;
+                UAmount uAmountAggregated;
+                for (boost::property_tree::ptree::value_type &v3 : v2.second) {
+                    std::cout << v3.first.data() << std::endl;
+                    std::cout << v3.second.get_value<uint64_t>() << std::endl;
+
+                    UAmount uAmount;
+                    uAmount.map.insert(std::make_pair((uint8_t) atoi(v3.first.data()), v3.second.get_value<uint64_t>()));
+                    uAmountAggregated += uAmount;
+                }
+                txOut.setAmount(uAmountAggregated);
+                txOuts.push_back(txOut);
+            }
+        }
+    }
+
+    if(privateKeyString.empty()) {
+        return "{\"error\": \"missing privateKey\"}";
+    }
+
+    std::vector<unsigned char> privateKeyVector = Hexdump::hexStringToVector(privateKeyString);
+    std::vector<unsigned char> hashedPrivateKeyVector =  Hash256::hash256(FS::concatPaths(privateKeyVector, privateKeyVector));
+
+    EVP_PKEY* evpPrivateKey = EVP_PKEY_new();
+
+    Wallet::privateKeyFromVector(evpPrivateKey, hashedPrivateKeyVector);
+
+    Address senderAddress = Wallet::addressFromPrivateKey(evpPrivateKey);
+    AddressStore &addressStore = AddressStore::Instance();
+    AddressForStore senderAddressForStore = addressStore.getAddressFromStore(
+            AddressHelper::addressLinkFromScript(senderAddress.getScript())
+    );
+
+    UScript dummyScript;
+    dummyScript.setScript(Hexdump::hexStringToVector("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
+    std::vector<TxIn> txInputs;
+    TxIn txIn;
+    txIn.setNonce(senderAddressForStore.getNonce());
+    txIn.setAmount(txOuts.front().getAmount());
+    txIn.setInAddress(AddressHelper::addressLinkFromScript(senderAddress.getScript()));
+    txIn.setScript(dummyScript);
+    txInputs.emplace_back(txIn);
+
+    Transaction* transaction = new Transaction();
+    transaction->setTxOuts(txOuts);
+    transaction->setTxIns(txInputs);
+    transaction->setNetwork(NET_CURRENT);
+
+    Chain& chain = Chain::Instance();
+    TransactionHelper::calculateMinimumFee(transaction, chain.getBestBlockHeader());
+
+    std::vector<unsigned char> txId = TransactionHelper::getTxId(transaction);
+
+}
+
 std::string Api::verifyKYC(std::string json) {
 
     if (json.empty()) {
@@ -2194,4 +2285,26 @@ std::string Api::removeCert(std::string json, uint8_t type) {
     }
 
     return "{\"success\": false}";
+}
+
+std::string Api::generateKeyPair() {
+    Wallet& wallet = Wallet::Instance();
+    EVP_PKEY* evpPrivateKey = EVP_PKEY_new();
+
+    std::vector<unsigned char> privateKeyVector = wallet.generateSeed();
+    std::vector<unsigned char> hashedPrivateKeyVector =  Hash256::hash256(FS::concatPaths(privateKeyVector, privateKeyVector));
+    Wallet::privateKeyFromVector(evpPrivateKey, hashedPrivateKeyVector);
+    Address address = Wallet::addressFromPrivateKey(evpPrivateKey);
+    std::string readableAddress = Wallet::readableAddressFromAddress(address);
+
+    ptree baseTree;
+
+    baseTree.put("warning", "this key is not stored in the UBIC wallet");
+    baseTree.put("privateKey", Hexdump::vectorToHexString(privateKeyVector));
+    baseTree.put("readableAddress", readableAddress);
+
+    std::stringstream ss;
+    boost::property_tree::json_parser::write_json(ss, baseTree);
+
+    return ss.str();
 }
