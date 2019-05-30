@@ -26,6 +26,7 @@ public:
     static std::string doKYC(std::string json);
     static std::string verifyKYC(std::string json);
     static std::string pay(std::string json);
+    static std::string createTransactionWithPrivateKey(std::string json);
     static std::string createTransaction(std::string json);
     static std::string sendTransaction(std::string json);
     static std::string startMint();
@@ -49,6 +50,7 @@ public:
     static std::string getDSCCertificates();
     static std::string addCert(std::string json, uint8_t type);
     static std::string removeCert(std::string json, uint8_t type);
+    static std::string generateKeyPair();
 };
 
 
