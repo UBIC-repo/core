@@ -66,12 +66,6 @@ std::vector<LDSParser> LDSParser::getSequence() {
 
 LDSParser* LDSParser::getTag(unsigned char *tag)
 {
-    int tagLength = 1;
-
-    if(tag[0] == 0x7F || tag[0] == 0x5F) {
-        tagLength = 2;
-    }
-
     unsigned int cursor = 0;
     unsigned char currentTag[2];
 
