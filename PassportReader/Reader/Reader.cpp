@@ -250,9 +250,6 @@ bool Reader::selectFile(unsigned char* fileId, SessionKeys* sessionKeys)
     memcpy(n, sequenceCounter, 8);
     memcpy(n + 8, m, (size_t)(do87Length + 8));
 
-    int lengthOfN;
-    PassportCrypto::paddMessage(n, (do87Length + paddedCommandHeaderLength + 8), n, &lengthOfN);
-
     unsigned char mac[8];
     PassportCrypto::calculate3DESMAC(mac, macKey1, macKey2, n, do87Length + paddedCommandHeaderLength + 8);
     unsigned char do8e[10];
