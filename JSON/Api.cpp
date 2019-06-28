@@ -2161,8 +2161,6 @@ std::string Api::getCSCACertificate(std::string cscaIdString) {
     BIO_set_close(mem, BIO_CLOSE);
     BIO_free(mem);
 
-    cert.put("x509", (std::string)(x509Buffer));
-
     X509_NAME *name = X509_get_issuer_name(csca->getX509());
 
     char* charName = X509_NAME_oneline(name, NULL, 0);
