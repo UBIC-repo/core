@@ -14,7 +14,6 @@ private:
     std::vector< std::vector<unsigned char> > publicKeys;
     std::vector< std::vector<unsigned char> > addressesScript;
     std::vector< std::vector<unsigned char> > addressesLink;
-    std::vector<unsigned char> generateSeed();
     bool generateWallet();
 public:
     static Wallet& Instance(){
@@ -25,6 +24,7 @@ public:
     bool loadSeedFromFS();
     bool persistSeedToFS();
     UAmount getBalance();
+    std::vector<unsigned char> generateSeed();
 
     std::vector<std::vector<unsigned char> > getAddressesScript();
     std::vector<std::vector<unsigned char> > getAddressesLink();
@@ -49,6 +49,7 @@ public:
     static bool verifyReadableAddressChecksum(std::string readableAddress);
     static EC_GROUP *getDefaultEcGroup();
     static bool generatePrivateKey(EVP_PKEY* privateKey);
+    static bool privateKeyFromVector(EVP_PKEY* privateKey, std::vector<unsigned char> privateVector);
     std::vector<TransactionForStore> getMyTransactions();
 
     ADD_SERIALIZE_METHODS;
