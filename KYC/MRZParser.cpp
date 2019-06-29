@@ -25,7 +25,7 @@ MRZResponseObject MRZParser::parseTD1(std::vector<unsigned char> mrz) {
     cursor++; //skip check digit
     cursor += 15; //skip optional parameters
 
-    kycResponseObject.setDateOfBirth(formatClean(std::string(mrz.data() + cursor, mrz.data() + cursor + 6));
+    kycResponseObject.setDateOfBirth(formatClean(std::string(mrz.data() + cursor, mrz.data() + cursor + 6)));
     cursor += 6; //skip date of birth
     cursor++; //skip check digit
 
