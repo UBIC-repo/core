@@ -220,33 +220,33 @@ Transaction* Wallet::payToTxOutputs(std::vector<TxOut> txOutputs) {
 
         for(auto cFee :nMinimumTransactionFees.map) {
 
-                    // we add a virtual tx output that represents the transaction fee
-                    std::vector <TxOut> txOuts = tx->getTxOuts();
-                    UAmount virtualAmount;
-                    virtualAmount.map.insert(std::make_pair(cFee.first, cFee.second));
-                    TxOut virtualTxOut;
-                    UScript virtualScript;
-                    virtualTxOut.setScript(virtualScript);
-                    virtualTxOut.setAmount(virtualAmount);
-                    Log(LOG_LEVEL_INFO) << "Virtualamount: " << virtualAmount;
-                    txOuts.emplace_back(virtualTxOut);
+            // we add a virtual tx output that represents the transaction fee
+            std::vector <TxOut> txOuts = tx->getTxOuts();
+            UAmount virtualAmount;
+            virtualAmount.map.insert(std::make_pair(cFee.first, cFee.second));
+            TxOut virtualTxOut;
+            UScript virtualScript;
+            virtualTxOut.setScript(virtualScript);
+            virtualTxOut.setAmount(virtualAmount);
+            Log(LOG_LEVEL_INFO) << "Virtualamount: " << virtualAmount;
+            txOuts.emplace_back(virtualTxOut);
 
-                    Transaction* txTemp = payToTxOutputsWithoutFees(txOuts);
-                    if(txTemp != nullptr) {
-                        // remove the virtual tx output
-                        txOuts.pop_back();
-                        txTemp->setTxOuts(txOuts);
+            Transaction* txTemp = payToTxOutputsWithoutFees(txOuts);
+            if(txTemp != nullptr) {
+                // remove the virtual tx output
+                txOuts.pop_back();
+                txTemp->setTxOuts(txOuts);
 
-                        // sign the transaction again because of the removed transaction output
-                        txTemp = this->signTransaction(txTemp);
+                // sign the transaction again because of the removed transaction output
+                txTemp = this->signTransaction(txTemp);
 
-                        // try again
-                        if (TransactionHelper::verifyTx(txTemp, IS_NOT_IN_HEADER, chain.getBestBlockHeader())) {
-                            return txTemp;
-                        } else {
-                            Log(LOG_LEVEL_INFO) << "Wallet::payToTxOutputs() failed for amount:" << nMinimumTransactionFees;
-                        }
-                    }
+                // try again
+                if (TransactionHelper::verifyTx(txTemp, IS_NOT_IN_HEADER, chain.getBestBlockHeader())) {
+                    return txTemp;
+                } else {
+                    Log(LOG_LEVEL_INFO) << "Wallet::payToTxOutputs() failed for amount:" << nMinimumTransactionFees;
+                }
+            }
         }
     }
 
@@ -379,10 +379,6 @@ Address Wallet::addressFromPublicKey(std::vector<unsigned char> publicKey) {
 Address Wallet::addressFromPrivateKey(EVP_PKEY *privateKey) {
 
     EC_KEY *privateEcKey = EVP_PKEY_get1_EC_KEY(privateKey);
-    const BIGNUM* privateKeyBN = EC_KEY_get0_private_key(privateEcKey);
-    unsigned char privateKeyChar[256];
-    int length = BN_bn2bin(privateKeyBN, privateKeyChar);
-
     const EC_POINT* pubKeyPoint = EC_KEY_get0_public_key(privateEcKey);
 
     std::vector<unsigned char> pubkeyVector = ECCtools::ecPointToVector(Wallet::getDefaultEcGroup(), pubKeyPoint);
@@ -474,6 +470,23 @@ bool Wallet::generatePrivateKey(EVP_PKEY *privateKey) {
     EC_KEY_set_group(ecKey, Wallet::getDefaultEcGroup());
     EC_KEY_generate_key(ecKey);
     EVP_PKEY_assign_EC_KEY(privateKey,ecKey);
+
+    return true;
+}
+
+bool Wallet::privateKeyFromVector(EVP_PKEY* privateKey, std::vector<unsigned char> privateVector) {
+    BIGNUM* keyBn = BN_new();
+    BN_bin2bn(privateVector.data(), (int)privateVector.size(), keyBn);
+    EC_KEY* ecKey = EC_KEY_new();
+    EC_KEY_set_group(ecKey, Wallet::getDefaultEcGroup());
+    EC_KEY_set_private_key(ecKey, keyBn);
+
+    EC_POINT* pubKey = EC_POINT_new(Wallet::getDefaultEcGroup());
+    BN_CTX* ctx = BN_CTX_new();
+    EC_POINT_mul(Wallet::getDefaultEcGroup(), pubKey, keyBn, NULL, NULL, ctx);
+    EC_KEY_set_public_key(ecKey, pubKey);
+
+    EVP_PKEY_assign_EC_KEY(privateKey, ecKey);
 
     return true;
 }
