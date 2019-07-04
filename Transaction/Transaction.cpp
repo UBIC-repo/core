@@ -34,3 +34,11 @@ uint8_t Transaction::getNetwork() const {
 void Transaction::setNetwork(uint8_t network) {
     Transaction::network = network;
 }
+
+uint32_t Transaction::getTimestamp() {
+    return this->timestamp;
+}
+
+void Transaction::setTimestamp(uint32_t timestamp) {
+    this->timestamp = timestamp;
+}
