@@ -123,6 +123,9 @@ ptree txToPtree(Transaction transaction, bool checkIsMine) {
     transactionTree.push_back(std::make_pair("fee", uamountToPtree(inAmount - outAmount)));
     transactionTree.push_back(std::make_pair("txIn", txInTree));
     transactionTree.push_back(std::make_pair("txOut", txOutTree));
+    if(transaction.getTimestamp() != 0) {
+        transactionTree.put("timestamp", transaction.getTimestamp());
+    }
 
     return transactionTree;
 }
