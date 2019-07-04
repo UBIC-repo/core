@@ -16,6 +16,7 @@ private:
     uint8_t network; // To avoid a transaction from the testnet being broadcasted on the main net
     std::vector<TxIn> txIns;
     std::vector<TxOut> txOuts;
+    uint32_t timestamp; // only used within the transaction pool
 public:
     void addTxIn(TxIn txIn);
     void setTxIns(std::vector<TxIn> txIns);
@@ -25,6 +26,8 @@ public:
     std::vector <TxOut> getTxOuts();
     uint8_t getNetwork() const;
     void setNetwork(uint8_t network);
+    uint32_t getTimestamp();
+    void setTimestamp(uint32_t timestamp);
 
     ADD_SERIALIZE_METHODS;
 
