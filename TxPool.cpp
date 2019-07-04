@@ -6,6 +6,7 @@
 #include "Network/NetworkMessage.h"
 #include "Chain.h"
 #include "Network/Network.h"
+#include "Time.h"
 
 bool TxPool::isTxInputPresent(TxIn txIn) {
     if(txIn.getInAddress().empty()) {
@@ -77,6 +78,8 @@ bool TxPool::appendTransaction(Transaction transaction) {
         Log(LOG_LEVEL_WARNING) << "cannot append transaction to txpool because one of it's input has another transaction pending";
         return false;
     }
+
+    transaction.setTimestamp(Time::getCurrentTimestamp());
 
     this->transactionList.insert(
             std::pair<std::string, Transaction>(
