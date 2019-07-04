@@ -16,7 +16,7 @@ private:
     uint8_t network; // To avoid a transaction from the testnet being broadcasted on the main net
     std::vector<TxIn> txIns;
     std::vector<TxOut> txOuts;
-    uint32_t timestamp; // only used within the transaction pool
+    uint32_t timestamp = 0; // only used within the transaction pool
 public:
     void addTxIn(TxIn txIn);
     void setTxIns(std::vector<TxIn> txIns);
