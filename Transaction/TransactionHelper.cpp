@@ -848,10 +848,6 @@ bool TransactionHelper::applyTransaction(Transaction* tx, BlockHeader* blockHead
 
                 cert->setX509(x509);
 
-                Currency *currency = new Currency();
-                currency->setError(false);
-                currency->setCurrencyId(Fixes::fixCertificateCurrencyID(cert->getId(), addCertificateScript.currency));
-                cert->setCurrency(currency);
                 cert->setCurrencyId(addCertificateScript.currency);
                 cert->setExpirationDate(addCertificateScript.expirationDate);
                 cert->setRootSignature(addCertificateScript.rootSignature);
