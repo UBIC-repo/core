@@ -84,8 +84,6 @@ set(SOURCE_FILES
         Crypto/PassportCrypto.cpp
         Crypto/PassportCrypto.h
 
-        Countries/Currency.h
-
         support/allocators/zeroafterfree.h
         support/cleanse.h
         support/clease.cpp
