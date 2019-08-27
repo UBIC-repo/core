@@ -49,11 +49,6 @@ std::string Cert::getIdAsHexString() {
 
 void Cert::prepareForSerialization(const char* certType) {
     this->calculateId();
-    if(this->currency != NULL) {
-        this->currencyId = this->currency->getCurrencyId();
-    } else {
-        this->currencyId = 0;
-    }
 
     std::vector<unsigned char> path = FS::getX509DirectoryPath();
 
