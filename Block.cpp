@@ -574,10 +574,6 @@ UAmount32 BlockHelper::calculateUbiReceiverCount(Block* block, BlockHeader* prev
 
                 if(addCertificateScript.isDSC()) {
                     Cert *cert = new Cert();
-                    Currency *currency = new Currency();
-                    currency->setError(false);
-                    currency->setCurrencyId(addCertificateScript.currency);
-                    cert->setCurrency(currency);
                     cert->setCurrencyId(addCertificateScript.currency);
                     cert->setExpirationDate(addCertificateScript.expirationDate);
                     cert->setRootSignature(addCertificateScript.rootSignature);
