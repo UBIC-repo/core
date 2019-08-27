@@ -15,7 +15,6 @@ private:
     X509* x509;
     std::vector<unsigned char> id;
     uint64_t expirationDate = 0;
-    Currency* currency;
     std::vector<unsigned char> rootSignature;
     uint8_t currencyId;
     uint32_t nonce = 0;
@@ -51,14 +50,6 @@ public:
 
     void setExpirationDate(uint64_t expirationDate) {
         Cert::expirationDate = expirationDate;
-    }
-
-    Currency *getCurrency() {
-        return currency;
-    }
-
-    void setCurrency(Currency *currency) {
-        Cert::currency = currency;
     }
 
     std::vector<unsigned char> getRootSignature() {
