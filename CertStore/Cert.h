@@ -2,7 +2,6 @@
 #define PASSPORTREADER_CERT_H
 
 #include <openssl/x509.h>
-#include "../Countries/Currency.h"
 #include "../serialize.h"
 #include <boost/serialization/split_member.hpp>
 #include <cstdint>
