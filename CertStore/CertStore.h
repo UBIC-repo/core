@@ -12,7 +12,6 @@
 #include <cstdint>
 #include <unordered_map>
 #include "../NtpEsk/NtpEsk.h"
-#include "../Countries/Currency.h"
 #include "Cert.h"
 #include "../BlockHeader.h"
 
