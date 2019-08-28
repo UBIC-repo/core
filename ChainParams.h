@@ -9,6 +9,7 @@
 #include <openssl/ec.h>
 
 #define VERSION "0.3.0"
+#define VERSION_16BITS 30
 
 #define CURRENCY_SWITZERLAND 1
 #define CURRENCY_GERMANY 2
