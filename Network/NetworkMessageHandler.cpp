@@ -305,7 +305,10 @@ void NetworkMessageHandler::handleAskForBestBlockHeader(PeerInterfacePtr recipie
 }
 
 void NetworkMessageHandler::handleAskForVersion(PeerInterfacePtr recipient) {
+    TransmitVersion* transmitVersion =  new TransmitVersion();
+    transmitVersion->version = VERSION_16BITS;
 
+    recipient->deliver(NetworkMessageHelper::serializeToNetworkMessage(*transmitVersion));
 }
 
 void NetworkMessageHandler::handleAskForStatus(PeerInterfacePtr recipient) {
@@ -464,8 +467,7 @@ void NetworkMessageHandler::handleTransmitBestBlockHeader(TransmitBestBlockHeade
 }
 
 void NetworkMessageHandler::handleTransmitVersion(TransmitVersion *transmitVersion, PeerInterfacePtr recipient) {
-    std::string ip = recipient->getIp();
-    Peers &peers = Peers::Instance();
+    recipient->setVersion(transmitVersion->version);
 }
 
 void NetworkMessageHandler::handleTransmitStatus(TransmitStatus *transmitStatus, PeerInterfacePtr recipient) {
