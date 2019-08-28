@@ -144,6 +144,8 @@ public:
     virtual void setDonationAddress(std::string donationAddress) = 0;
     virtual uint64_t getLastAsked() = 0;
     virtual void setLastAsked(uint64_t lastAsked) = 0;
+    virtual void setVersion(uint16_t version) = 0;
+    virtual uint16_t getVersion() = 0;
 };
 
 
