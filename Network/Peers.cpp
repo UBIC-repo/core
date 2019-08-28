@@ -309,14 +309,6 @@ void PeerServer::setStatus(uint8_t status) {
     this->status = status;
 }
 
-uint16_t PeerServer::getVersion() {
-    return version;
-}
-
-void PeerServer::setVersion(uint16_t version) {
-    this->version = version;
-}
-
 uint32_t PeerServer::getBlockHeight() {
     return blockHeight;
 }
@@ -564,14 +556,6 @@ uint8_t PeerClient::getStatus() {
 
 void PeerClient::setStatus(uint8_t status) {
     this->status = status;
-}
-
-uint16_t PeerClient::getVersion() {
-    return version;
-}
-
-void PeerClient::setVersion(uint16_t version) {
-    this->version = version;
 }
 
 uint32_t PeerClient::getBlockHeight() {
