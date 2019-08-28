@@ -88,6 +88,14 @@ public:
         this->lastAsked = lastAsked;
     }
 
+    virtual void setVersion(uint16_t version) {
+        this->version = version;
+    }
+
+    virtual uint16_t getVersion() {
+        return version;
+    }
+
     void start();
     void close();
     void deliver(NetworkMessage msg);
@@ -100,8 +108,6 @@ public:
     void setName(const std::vector<unsigned char> &name);
     uint8_t getStatus();
     void setStatus(uint8_t status);
-    uint16_t getVersion();
-    void setVersion(uint16_t version);
     uint32_t getBlockHeight();
     void setBlockHeight(uint32_t blockHeight);
     uint64_t getClock();
@@ -119,7 +125,7 @@ private:
     uint16_t port;
     std::vector<unsigned char> name;
     uint8_t status;
-    uint16_t version;
+    uint16_t version = 0;
     uint32_t blockHeight;
     uint64_t clock;
     std::string donationAddress;
@@ -169,6 +175,14 @@ public:
         this->lastAsked = lastAsked;
     }
 
+    virtual void setVersion(uint16_t version) {
+        this->version = version;
+    }
+
+    virtual uint16_t getVersion() {
+        return version;
+    }
+
     void deliver(NetworkMessage msg);
     void deliverImpl(NetworkMessage msg);
     void close();
@@ -180,8 +194,6 @@ public:
     void setName(const std::vector<unsigned char> &name);
     uint8_t getStatus();
     void setStatus(uint8_t status);
-    uint16_t getVersion();
-    void setVersion(uint16_t version);
     uint32_t getBlockHeight();
     void setBlockHeight(uint32_t blockHeight);
     uint64_t getClock();
