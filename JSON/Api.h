@@ -36,6 +36,7 @@ public:
     static std::string getWallet();
     static std::string getTxPool();
     static std::string getFees();
+    static std::string getCurrencies();
     static std::string getIncomingTx();
     static void reapplyAllBlocks();
     static std::string reindex();
