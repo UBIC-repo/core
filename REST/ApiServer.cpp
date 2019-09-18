@@ -230,6 +230,10 @@ std::string ApiServer::route(std::vector<std::string> urlParts, std::string json
             if(urlParts.size() == 2) {
                 return Api::getAddress(Hexdump::hexStringToVector(urlParts.at(1)));
             }
+        } else if(urlParts.at(0) == "currencies") {
+            if(urlParts.size() == 1) {
+                return Api::getCurrencies();
+            }
         }
     }
     return Api::getIndex();
@@ -246,7 +250,7 @@ void ApiServer::run() {
         for (;;) {
             tcp::socket socket(io_service);
             acceptor.accept(socket);
-	    boost::system::error_code ec;
+	        boost::system::error_code ec;
 
             char *buffer = (char *) malloc(65048 * 2 * sizeof(char));
 
