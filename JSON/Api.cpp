@@ -32,6 +32,7 @@
 #include "../App.h"
 #include "../Loader.h"
 #include "../Crypto/Hash256.h"
+#include "../Scripts/PkhInScript.h"
 
 using boost::property_tree::ptree;
 
@@ -1232,7 +1233,7 @@ std::string Api::createTransactionWithPrivateKey(std::string json) {
     );
 
     UScript dummyScript;
-    dummyScript.setScript(Hexdump::hexStringToVector("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
+    dummyScript.setScript(Hexdump::hexStringToVector("000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"));
     std::vector<TxIn> txInputs;
     TxIn txIn;
     txIn.setNonce(senderAddressForStore.getNonce());
@@ -1247,9 +1248,59 @@ std::string Api::createTransactionWithPrivateKey(std::string json) {
     transaction->setNetwork(NET_CURRENT);
 
     Chain& chain = Chain::Instance();
-    TransactionHelper::calculateMinimumFee(transaction, chain.getBestBlockHeader());
+    UAmount minFees = TransactionHelper::calculateMinimumFee(transaction, chain.getBestBlockHeader());
+    UAmount minFee;
+
+    for (std::map<uint8_t, CAmount>::const_iterator it(minFees.map.begin()); it != minFees.map.end(); ++it) {
+        if(txOuts.front().getAmount().map.begin()->first == it->first) {
+            minFee.map[it->first] = it->second;
+            break;
+        }
+    }
+
+    txIn.setAmount(txOuts.front().getAmount() + minFee);
+    txInputs.clear();
+    txInputs.emplace_back(txIn);
+    transaction->setTxIns(txInputs);
 
     std::vector<unsigned char> txId = TransactionHelper::getTxId(transaction);
+    std::vector<unsigned char> signature = CreateSignature::sign(evpPrivateKey, txId);
+
+    EC_KEY *privateEcKey = EVP_PKEY_get1_EC_KEY(evpPrivateKey);
+    const EC_POINT* pubKeyPoint = EC_KEY_get0_public_key(privateEcKey);
+
+    std::vector<unsigned char> pubkeyVector = ECCtools::ecPointToVector(Wallet::getDefaultEcGroup(), pubKeyPoint);
+
+    PkhInScript pkhInScript;
+    pkhInScript.setPublicKey(pubkeyVector);
+    pkhInScript.setSignature(signature);
+    pkhInScript.setVersion(PKH_SECP256K1_VERSION);
+    CDataStream s(SER_DISK, 1);
+    s << pkhInScript;
+
+    UScript script;
+    script.setScriptType(SCRIPT_PKH);
+    script.setScript(std::vector<unsigned char>(s.data(), s.data() + s.size()));
+    txIn.setScript(script);
+
+    txInputs.clear();
+    txInputs.emplace_back(txIn);
+    transaction->setTxIns(txInputs);
+
+    CDataStream s2(SER_DISK, 1);
+
+    s2 << *transaction;
+    std::string tx64 = base64_encode((unsigned char*)s2.str().data(), (uint32_t)s2.str().size());
+    ptree baseTree;
+
+    baseTree.put("success", true);
+    baseTree.push_back(std::make_pair("transaction", txToPtree(*transaction, false)));
+    baseTree.put("base64", tx64);
+
+    std::stringstream ss2;
+    boost::property_tree::json_parser::write_json(ss2, baseTree);
+
+    return ss2.str();
 
 }
 
@@ -1855,6 +1906,45 @@ std::string Api::getFees() {
     ptree baseTree;
     baseTree.put("description", "Fees for 1MB (1000 bytes)");
     baseTree.push_back(std::make_pair("fees", uamountToPtree(feeFor1000bytes)));
+
+    std::stringstream ss;
+    boost::property_tree::json_parser::write_json(ss, baseTree);
+
+    return ss.str();
+}
+
+std::string Api::getCurrencies() {
+    ptree baseTree;
+
+    ptree currencyCodes;
+    currencyCodes.put(std::to_string(CURRENCY_SWITZERLAND), "UCH");
+    currencyCodes.put(std::to_string(CURRENCY_GERMANY), "UDE");
+    currencyCodes.put(std::to_string(CURRENCY_AUSTRIA), "UAT");
+    currencyCodes.put(std::to_string(CURRENCY_UNITED_KINGDOM), "UUK");
+    currencyCodes.put(std::to_string(CURRENCY_IRELAND), "UIR");
+    currencyCodes.put(std::to_string(CURRENCY_USA), "UUS");
+    currencyCodes.put(std::to_string(CURRENCY_AUSTRALIA), "UAU");
+    currencyCodes.put(std::to_string(CURRENCY_CHINA), "UCN");
+    currencyCodes.put(std::to_string(CURRENCY_SWEDEN), "USE");
+    currencyCodes.put(std::to_string(CURRENCY_FRANCE), "UFR");
+    currencyCodes.put(std::to_string(CURRENCY_CANADA), "UCA");
+    currencyCodes.put(std::to_string(CURRENCY_JAPAN), "UJP");
+    currencyCodes.put(std::to_string(CURRENCY_THAILAND), "UTH");
+    currencyCodes.put(std::to_string(CURRENCY_NEW_ZEALAND), "UNZ");
+    currencyCodes.put(std::to_string(CURRENCY_UNITED_ARAB_EMIRATES), "UAE");
+    currencyCodes.put(std::to_string(CURRENCY_FINLAND), "UFI");
+    currencyCodes.put(std::to_string(CURRENCY_LUXEMBOURG), "ULU");
+    currencyCodes.put(std::to_string(CURRENCY_SINGAPORE), "USG");
+    currencyCodes.put(std::to_string(CURRENCY_HUNGARY), "UHU");
+    currencyCodes.put(std::to_string(CURRENCY_CZECH_REPUBLIC), "UCZ");
+    currencyCodes.put(std::to_string(CURRENCY_MALAYSIA), "UMY");
+    currencyCodes.put(std::to_string(CURRENCY_UKRAINE), "UUA");
+    currencyCodes.put(std::to_string(CURRENCY_ESTONIA), "UES");
+    currencyCodes.put(std::to_string(CURRENCY_MONACO), "UMC");
+    currencyCodes.put(std::to_string(CURRENCY_LIECHTENSTEIN), "ULI");
+    currencyCodes.put(std::to_string(CURRENCY_ICELAND), "UIS");
+
+    baseTree.push_back(std::make_pair("currencyCodes", currencyCodes));
 
     std::stringstream ss;
     boost::property_tree::json_parser::write_json(ss, baseTree);
