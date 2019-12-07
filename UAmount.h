@@ -379,7 +379,9 @@ public:
                  it->first == CURRENCY_ESTONIA ||
                  it->first == CURRENCY_MONACO ||
                  it->first == CURRENCY_LIECHTENSTEIN ||
-                 it->first == CURRENCY_ICELAND
+                 it->first == CURRENCY_ICELAND ||
+                 it->first == CURRENCY_HONG_KONG ||
+                 it->first == CURRENCY_SPAIN
                 )) {
                 return false;
             }
