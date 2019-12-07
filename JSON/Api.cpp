@@ -1943,6 +1943,8 @@ std::string Api::getCurrencies() {
     currencyCodes.put(std::to_string(CURRENCY_MONACO), "UMC");
     currencyCodes.put(std::to_string(CURRENCY_LIECHTENSTEIN), "ULI");
     currencyCodes.put(std::to_string(CURRENCY_ICELAND), "UIS");
+    currencyCodes.put(std::to_string(CURRENCY_HONG_KONG), "UHK");
+    currencyCodes.put(std::to_string(CURRENCY_SPAIN), "USP");
 
     baseTree.push_back(std::make_pair("currencyCodes", currencyCodes));
 
