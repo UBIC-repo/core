@@ -19,9 +19,10 @@ private:
     static void handleAskForVersion(PeerInterfacePtr recipient);
     static void handleAskForStatus(PeerInterfacePtr recipient);
     static void handleAskForDonationAddress(PeerInterfacePtr recipient);
-
+    static void handleTransmitBlock(std::vector<unsigned char> block, PeerInterfacePtr recipient);
     static void handleTransmitTransactions(TransmitTransactions *transmitBlocks, PeerInterfacePtr recipient);
-    static void handleTransmitBlocks(TransmitBlock *transmitBlocks, PeerInterfacePtr recipient);
+    static void handleTransmitBlock(TransmitBlock *transmitBlock, PeerInterfacePtr recipient);
+    static void handleTransmitBlocks(TransmitBlocks *transmitBlocks, PeerInterfacePtr recipient);
     static void handleTransmitPeers(TransmitPeers *transmitPeers, PeerInterfacePtr recipient);
     static void handleTransmitBlockchainHeight(TransmitBlockchainHeight *transmitBlockchainHeight, PeerInterfacePtr recipient);
     static void handleTransmitBestBlockHeader(TransmitBestBlockHeader *transmitBestBlockHeader, PeerInterfacePtr recipient);
