@@ -108,7 +108,11 @@ To register a passport go to the "My UBI" tab and click "Register passport", the
 Make sure your NFC reader is plugged and ready, put the passport on top of it. To help you on some readers a green light appears when it found a tag.
 Click "Register passport", if it doesnt work try again by turning your passport, opening it. If it still doesn't work open an issue on Github.
 
-Note that to work your node should ideally be synced.
+Note that to work your node should be synced.
+
+An easier way is to use the Android Wallet App either from the [play store](https://play.google.com/store/apps/details?id=network.ubic.ubic&hl=de) or from [F-Droid](https://f-droid.org/en/packages/network.ubic.ubic/).
+
+Whatever option you choose, please make sure to backup your private keys.
 
 # Command line interface
 
