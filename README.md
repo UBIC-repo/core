@@ -8,9 +8,9 @@ UBIC is a crypto-project that is meant to democratize currency creation minting 
 
 UBIC works like basic income on a blockchain, but can also be implemented by other projects for KYC-applications. UBIC will soon allow reliable pseudonymous voting (one person, one vote) and other applications as well that require a functionality to avoid sybil attacks.
 
-Sybil attacks - people receiving multiple basic incomes at once - are harder on UBIC than elsewhere because you are required to proof your uniqueness with a Non-transferable proof of Signatur-Knowledge connected to your unique E-Passport. 
+Sybil attacks - people receiving multiple basic incomes at once - are harder on UBIC than elsewhere because you are required to prove your uniqueness with a -Non-transferable proof of Signatur-Knowledge- of your E-Passport. 
 
-Your identity is NOT revealed that way to other participants of the system. 
+Your identity is NOT revealed to other participants of the system. 
 
 The UBIC-Wallet is still in an early stage but does provide all basic functionalities a Wallet requires. You can send transactions, receive them and register a passport in order to get your UBIC cryptoUBI.
 
