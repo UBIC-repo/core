@@ -10,8 +10,9 @@
 #define ASK_FOR_VERSION_COMMAND 0x06
 #define ASK_FOR_STATUS_COMMAND 0x07
 #define ASK_FOR_DONATION_ADDRESS_COMMAND 0x08
+#define ASK_FOR_BLOCKS_USING_DATA_PACKET_SIZE 0x09
 #define TRANSMIT_TRANSACTIONS_COMMAND 0x11
-#define TRANSMIT_BLOCKS_COMMAND 0x12
+#define TRANSMIT_BLOCK_COMMAND 0x12
 #define TRANSMIT_PEERS_COMMAND 0x13
 #define TRANSMIT_BEST_BLOCK_HEADER_COMMAND 0x14
 #define TRANSMIT_BLOCKCHAIN_HEIGHT_COMMAND 0x15
@@ -19,6 +20,7 @@
 #define TRANSMIT_STATUS_COMMAND 0x17
 #define TRANSMIT_LEAVE_COMMAND 0x18
 #define TRANSMIT_DONATION_ADDRESS_COMMAND 0x19
+#define TRANSMIT_BLOCKS_COMMAND 0x20
 
 #include <cstdint>
 #include <vector>
@@ -120,6 +122,23 @@ struct AskForDonationAddress {
     }
 };
 
+struct AskForBlocksUsingDataPacket {
+    uint8_t command = ASK_FOR_BLOCKS_USING_DATA_PACKET_SIZE;
+    uint32_t height;
+    uint32_t offset;
+    uint32_t size;
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action) {
+        READWRITE(command);
+        READWRITE(height);
+        READWRITE(offset);
+        READWRITE(size);
+    }
+};
+
 struct TransmitTransactions {
     uint8_t command = TRANSMIT_TRANSACTIONS_COMMAND;
     std::vector<Transaction> transactions;
@@ -134,7 +153,7 @@ struct TransmitTransactions {
 };
 
 struct TransmitBlock {
-    uint8_t command = TRANSMIT_BLOCKS_COMMAND;
+    uint8_t command = TRANSMIT_BLOCK_COMMAND;
     std::vector<unsigned char> block;
 
     ADD_SERIALIZE_METHODS;
@@ -143,6 +162,19 @@ struct TransmitBlock {
     inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(command);
         READWRITE(block);
+    }
+};
+
+struct TransmitBlocks {
+    uint8_t command = TRANSMIT_BLOCKS_COMMAND;
+    std::vector<std::vector<unsigned char> > blocks;
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action) {
+        READWRITE(command);
+        READWRITE(blocks);
     }
 };
 
