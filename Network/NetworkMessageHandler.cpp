@@ -98,12 +98,25 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
             delete transmitTransactions;
             break;
         }
+        case TRANSMIT_BLOCK_COMMAND: {
+            TransmitBlock *transmitBlock = new TransmitBlock();
+            try {
+                s >> *transmitBlock;
+            } catch (const std::exception& e) {
+                Log(LOG_LEVEL_ERROR) << "Error while deserializing TRANSMIT_BLOCK_COMMAND from peer: " << recipient->getIp()
+                                     << " terminated with exception: " << e.what();
+                banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
+            }
+            NetworkMessageHandler::handleTransmitBlock(transmitBlock, recipient);
+            delete transmitBlock;
+            break;
+        }
         case TRANSMIT_BLOCKS_COMMAND: {
-            TransmitBlock *transmitBlocks = new TransmitBlock();
+            TransmitBlocks *transmitBlocks = new TransmitBlocks();
             try {
                 s >> *transmitBlocks;
             } catch (const std::exception& e) {
-                Log(LOG_LEVEL_ERROR) << "Error while deserializing TRANSMIT_BLOCKS_COMMAND from peer: " << recipient->getIp()
+                Log(LOG_LEVEL_ERROR) << "Error while deserializing TRANSMIT_BLOCK_COMMAND from peer: " << recipient->getIp()
                                      << " terminated with exception: " << e.what();
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
@@ -331,7 +344,7 @@ void NetworkMessageHandler::handleTransmitTransactions(TransmitTransactions *tra
     }
 }
 
-void NetworkMessageHandler::handleTransmitBlocks(TransmitBlock *transmitBlocks, PeerInterfacePtr recipient) {
+void NetworkMessageHandler::handleTransmitBlock(std::vector<unsigned char> blockVector, PeerInterfacePtr recipient) {
     BlockCache& blockCache = BlockCache::Instance();
     Chain& chain = Chain::Instance();
     Network& network = Network::Instance();
@@ -339,14 +352,14 @@ void NetworkMessageHandler::handleTransmitBlocks(TransmitBlock *transmitBlocks, 
 
     try {
         CDataStream s(SER_DISK, 1);
-        s.write((const char*)transmitBlocks->block.data(), transmitBlocks->block.size());
+        s.write((const char*)blockVector.data(), blockVector.size());
         s >> block;
     } catch (const std::exception& e) {
         Log(LOG_LEVEL_ERROR) << "Error while deserializing block from peer: " << recipient->getIp()
                              << ", terminated with exception: " << e.what()
-                             << ", transmitted block size:" << (uint64_t)transmitBlocks->block.size()
+                             << ", transmitted block size:" << (uint64_t)blockVector.size()
                              << ", content:"
-                             << transmitBlocks->block;
+                             << blockVector;
         BanList& banList = BanList::Instance();
         banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_BLOCK);
         return;
@@ -363,6 +376,16 @@ void NetworkMessageHandler::handleTransmitBlocks(TransmitBlock *transmitBlocks, 
     }
 
     blockCache.appendBlock(recipient, &block);
+}
+
+void NetworkMessageHandler::handleTransmitBlock(TransmitBlock *transmitBlock, PeerInterfacePtr recipient) {
+    NetworkMessageHandler::handleTransmitBlock(transmitBlock->block, recipient);
+}
+
+void NetworkMessageHandler::handleTransmitBlocks(TransmitBlocks *transmitBlocks, PeerInterfacePtr recipient) {
+    for(auto blockVector: transmitBlocks->blocks) {
+        NetworkMessageHandler::handleTransmitBlock(blockVector, recipient);
+    }
 }
 
 void NetworkMessageHandler::handleTransmitPeers(TransmitPeers *transmitPeers, PeerInterfacePtr recipient) {
