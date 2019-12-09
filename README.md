@@ -1,3 +1,7 @@
+[![GitHub license](https://img.shields.io/github/license/UBIC-repo/core)](https://github.com/UBIC-repo/core/blob/master/LICENSE)
+[![GitHub release](https://img.shields.io/github/release/UBIC-repo/core)](https://github.com/UBIC-repo/core/releases/)
+
+
 # Overview
 
 UBIC is a crypto-project that is meant to democratize currency creation minting new currency in favor of everyone, not only in favor of banks. 
