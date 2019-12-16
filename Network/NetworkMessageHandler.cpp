@@ -226,30 +226,82 @@ void NetworkMessageHandler::handleAskForBlocks(AskForBlocks *askForBlocks, PeerI
 
     Log(LOG_LEVEL_INFO) << "Peer asked for " << askForBlocks->count << " starting from " << askForBlocks->startBlockHeight;
 
-    for(uint64_t blockHeight = startBlockHeight; blockHeight <= endBlockHeight; blockHeight++) {
+    if(recipient.get()->getVersion() >= 32) {
+        uint64_t currentNetworkMessageSize = 1000;
+        TransmitBlocks* transmitBlocks = new TransmitBlocks();
 
-        TransmitBlock* transmitBlock = new TransmitBlock();
-        BlockHeader* blockHeader = chain.getBlockHeader(blockHeight);
+        // the node supports packaging multiple blocks into one network command
+        for(uint64_t blockHeight = startBlockHeight; blockHeight <= endBlockHeight; blockHeight++) {
 
-        if(blockHeader != nullptr) {
+            BlockHeader* blockHeader = chain.getBlockHeader(blockHeight);
 
-            std::vector<unsigned char> headerHash = blockHeader->getHeaderHash();
-            transmitBlock->block = blockStore->getRawBlockVector(headerHash);
+            if(blockHeader != nullptr) {
 
-            CDataStream s(SER_DISK, 1);
-            s << *transmitBlock;
+                std::vector<unsigned char> headerHash = blockHeader->getHeaderHash();
+                auto blockVector = blockStore->getRawBlockVector(headerHash);
 
-            NetworkMessage msg;
-            msg.body_length(s.size());
-            std::memcpy(msg.body(), s.data(), s.size());
-            s.clear();
-            msg.encode_header();
+                if(currentNetworkMessageSize + blockVector.size() > MAX_NETWORK_MESSAGE_SIZE) {
+                    CDataStream s(SER_DISK, 1);
+                    s << *transmitBlocks;
 
-            recipient->deliver(msg);
+                    NetworkMessage msg;
+                    msg.body_length(s.size());
+                    std::memcpy(msg.body(), s.data(), s.size());
+                    s.clear();
+                    msg.encode_header();
+
+                    recipient->deliver(msg);
+
+                    transmitBlocks = new TransmitBlocks();
+                    transmitBlocks->blocks.push_back(blockVector);
+                    currentNetworkMessageSize += blockVector.size();
+                } else {
+                    transmitBlocks->blocks.push_back(blockVector);
+                    currentNetworkMessageSize += blockVector.size();
+                }
+            }
+
+            delete blockHeader;
         }
-        
-        delete blockHeader;
-        delete transmitBlock;
+
+        CDataStream s(SER_DISK, 1);
+        s << *transmitBlocks;
+
+        NetworkMessage msg;
+        msg.body_length(s.size());
+        std::memcpy(msg.body(), s.data(), s.size());
+        s.clear();
+        msg.encode_header();
+
+        recipient->deliver(msg);
+        delete transmitBlocks;
+    } else {
+        // the node only supports sending one block at the time
+        for(uint64_t blockHeight = startBlockHeight; blockHeight <= endBlockHeight; blockHeight++) {
+
+            TransmitBlock* transmitBlock = new TransmitBlock();
+            BlockHeader* blockHeader = chain.getBlockHeader(blockHeight);
+
+            if(blockHeader != nullptr) {
+
+                std::vector<unsigned char> headerHash = blockHeader->getHeaderHash();
+                transmitBlock->block = blockStore->getRawBlockVector(headerHash);
+
+                CDataStream s(SER_DISK, 1);
+                s << *transmitBlock;
+
+                NetworkMessage msg;
+                msg.body_length(s.size());
+                std::memcpy(msg.body(), s.data(), s.size());
+                s.clear();
+                msg.encode_header();
+
+                recipient->deliver(msg);
+            }
+
+            delete blockHeader;
+            delete transmitBlock;
+        }
     }
 }
 
