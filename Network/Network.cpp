@@ -276,6 +276,15 @@ void Network::syncBlockchain() {
     Log(LOG_LEVEL_INFO) << "Node is synced";
 
     isSyncing = false;
+
+    // try to sync blockchain again after 20 seconds timeout
+    #if defined(_WIN32)
+        Sleep(20000);
+    #else
+        sleep(20);
+    #endif
+
+    Network::syncBlockchain();
 }
 
 void Network::askForBlocks(PeerInterfacePtr peer, AskForBlocks askForBlocks) {
