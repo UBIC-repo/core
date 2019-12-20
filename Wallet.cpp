@@ -97,6 +97,11 @@ bool Wallet::generateWallet() {
 }
 
 bool Wallet::initWallet() {
+    this->privateKeys = std::vector< std::vector<unsigned char> >();
+    this->publicKeys = std::vector< std::vector<unsigned char> >();
+    this->addressesScript = std::vector< std::vector<unsigned char> >();
+    this->addressesLink = std::vector< std::vector<unsigned char> >();
+    
     return this->generateWallet();
 }
 
