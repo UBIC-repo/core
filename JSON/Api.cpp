@@ -220,7 +220,7 @@ std::string Api::vote(std::string json) {
             Chain& chain = Chain::Instance();
             if(TransactionHelper::verifyTx(transaction, IS_IN_HEADER, chain.getBestBlockHeader())) {
                 TransactionForNetwork transactionForNetwork;
-                transactionForNetwork.setTransaction(*transaction)
+                transactionForNetwork.setTransaction(*transaction);
                 txPool.appendTransaction(transactionForNetwork);
             } else {
                 success = false;
@@ -315,7 +315,9 @@ std::string Api::unvote(std::string json) {
 
             Chain& chain = Chain::Instance();
             if(TransactionHelper::verifyTx(transaction, IS_IN_HEADER, chain.getBestBlockHeader())) {
-                txPool.appendTransaction(*transaction);
+                TransactionForNetwork transactionForNetwork;
+                transactionForNetwork.setTransaction(*transaction);
+                txPool.appendTransaction(transactionForNetwork);
             } else {
                 success = false;
             }
@@ -1173,14 +1175,14 @@ std::string Api::pay(std::string json) {
         return "{\"success\": false}";
     }
 
-    TransactionForNetwork* txForNetwork = TransactionForNetwork();
-    txForNetwork->setTransaction(*tx);
+    TransactionForNetwork txForNetwork;
+    txForNetwork.setTransaction(*tx);
 
     TxPool &txPool = TxPool::Instance();
-    if (txPool.appendTransaction(*txForNetwork)) {
+    if (txPool.appendTransaction(txForNetwork)) {
 
         Network &network = Network::Instance();
-        network.broadCastTransaction(*txForNetwork);
+        network.broadCastTransaction(txForNetwork);
 
         return "{\"success\": true}";
     }
@@ -2398,7 +2400,9 @@ std::string Api::removeCert(std::string json, uint8_t type) {
             txIns.emplace_back(*txIn);
             tx->setTxIns(txIns2);
 
-            txPool.appendTransaction(*tx);
+            TransactionForNetwork transactionForNetwork;
+            transactionForNetwork.setTransaction(*tx);
+            txPool.appendTransaction(transactionForNetwork);
         }
     }
 
