@@ -17,14 +17,16 @@ bool TxPool::isTxInputPresent(TxIn txIn) {
     return txInIt != this->txInputs.end();
 }
 
-bool TxPool::isTxInputPresent(Transaction* transaction) {
-    if(TransactionHelper::isRegisterPassport(transaction)) {
-        std::vector<unsigned char> passportHash = TransactionHelper::getPassportHash(transaction);
+bool TxPool::isTxInputPresent(TransactionForNetwork* transactionForNetwork) {
+    Transaction transaction = transactionForNetwork->getTransaction();
+
+    if(TransactionHelper::isRegisterPassport(&transaction)) {
+        std::vector<unsigned char> passportHash = TransactionHelper::getPassportHash(&transaction);
 
         std::unordered_map<std::string, TxIn>::iterator txInIt = this->txInputs.find(Hexdump::vectorToHexString(passportHash));
         return txInIt != this->txInputs.end();
     } else {
-        for (TxIn txIn: transaction->getTxIns()) {
+        for (TxIn txIn: transaction.getTxIns()) {
             if (this->isTxInputPresent(txIn)) {
                 return true;
             }
@@ -34,26 +36,27 @@ bool TxPool::isTxInputPresent(Transaction* transaction) {
     return false;
 }
 
-std::unordered_map<std::string, Transaction> TxPool::getTransactionList() {
+std::unordered_map<std::string, TransactionForNetwork> TxPool::getTransactionList() {
     return this->transactionList;
 }
 
-void TxPool::setTransactionList(std::unordered_map<std::string, Transaction> transactionList) {
+void TxPool::setTransactionList(std::unordered_map<std::string, TransactionForNetwork> transactionList) {
     this->transactionList = transactionList;
 }
 
 void TxPool::popTransaction(std::vector<unsigned char> txId) {
-    std::unordered_map<std::string, Transaction>::iterator txIt = this->transactionList.find(Hexdump::vectorToHexString(txId));
-    if(txIt != this->transactionList.end()) {
-        if(TransactionHelper::isRegisterPassport(&txIt->second)) {
-            std::vector<unsigned char> passportHash = TransactionHelper::getPassportHash(&txIt->second);
+    std::unordered_map<std::string, TransactionForNetwork>::iterator txForNetworkIt = this->transactionList.find(Hexdump::vectorToHexString(txId));
+    if(txForNetworkIt != this->transactionList.end()) {
+        Transaction transaction = txForNetworkIt->second.getTransaction();
+        if(TransactionHelper::isRegisterPassport(&transaction)) {
+            std::vector<unsigned char> passportHash = TransactionHelper::getPassportHash(&transaction);
 
             auto found = this->txInputs.find(Hexdump::vectorToHexString(passportHash));
             if (found != this->txInputs.end()) {
                 this->txInputs.erase(found);
             }
         } else {
-            for (TxIn txIn: txIt->second.getTxIns()) {
+            for (TxIn txIn: transaction.getTxIns()) {
                 auto found = this->txInputs.find(Hexdump::vectorToHexString(txIn.getInAddress()));
                 if (found != this->txInputs.end()) {
                     this->txInputs.erase(found);
@@ -67,14 +70,15 @@ void TxPool::popTransaction(std::vector<unsigned char> txId) {
     }
 }
 
-bool TxPool::appendTransaction(Transaction transaction) {
+bool TxPool::appendTransaction(TransactionForNetwork transactionForNetwork) {
     Chain& chain = Chain::Instance();
+    Transaction transaction = transactionForNetwork.getTransaction();
     if(!TransactionHelper::verifyTx(&transaction, IGNORE_IS_IN_HEADER, chain.getBestBlockHeader())) {
         Log(LOG_LEVEL_ERROR) << "cannot append transaction to txpool because it isn't valid";
         return false;
     }
 
-    if(this->isTxInputPresent(&transaction)) {
+    if(this->isTxInputPresent(&transactionForNetwork)) {
         Log(LOG_LEVEL_WARNING) << "cannot append transaction to txpool because one of it's input has another transaction pending";
         return false;
     }
@@ -82,9 +86,9 @@ bool TxPool::appendTransaction(Transaction transaction) {
     transaction.setTimestamp(Time::getCurrentTimestamp());
 
     this->transactionList.insert(
-            std::pair<std::string, Transaction>(
+            std::pair<std::string, TransactionForNetwork>(
                     Hexdump::vectorToHexString(TransactionHelper::getTxId(&transaction)),
-                    transaction
+                    transactionForNetwork
             )
     );
 
@@ -105,11 +109,15 @@ bool TxPool::appendTransaction(Transaction transaction) {
 
 void TxPool::appendTransactionsFromBlock(Block* block) {
     for(auto tx : block->getTransactions()) {
-        this->appendTransaction(tx);
+        TransactionForNetwork transactionForNetwork;
+        transactionForNetwork.setTransaction(tx);
+        this->appendTransaction(transactionForNetwork);
     }
 
     for(auto tx : block->getHeader()->getVotes()) {
-        this->appendTransaction(tx);
+        TransactionForNetwork transactionForNetwork;
+        transactionForNetwork.setTransaction(tx);
+        this->appendTransaction(transactionForNetwork);
     }
 }
 
@@ -117,16 +125,16 @@ uint32_t TxPool::getTxCount() {
     return (uint32_t)this->transactionList.size();
 }
 
-Transaction* TxPool::popTransaction() {
+TransactionForNetwork* TxPool::popTransaction() {
     if(getTxCount() == 0) {
         return nullptr;
     }
     auto tb = this->transactionList.begin();
-    Transaction* rval = new Transaction();
+    TransactionForNetwork* rval = new TransactionForNetwork();
     *rval = tb->second;
     this->transactionList.erase(tb->first);
 
-    for(TxIn txIn: rval->getTxIns()) {
+    for(TxIn txIn: rval->getTransaction().getTxIns()) {
         this->txInputs.erase(Hexdump::vectorToHexString(txIn.getInAddress()));
     }
 
