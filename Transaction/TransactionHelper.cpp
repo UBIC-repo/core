@@ -606,7 +606,7 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                     }
                 }
 
-                if(!certStore.isCertSignedByUBICrootCert(cert, true, addCertificateScript.type)) {
+                if(addCertificateScript.type == TYPE_CSCA && !certStore.isCertSignedByUBICrootCert(cert, true, addCertificateScript.type)) {
                     Log(LOG_LEVEL_ERROR) << "cert: " << cert->getId() << " is not signed by UBIC root Cert";
                     return false;
                 }
