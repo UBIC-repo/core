@@ -117,7 +117,7 @@ uint8_t Test::getCurrencyIdFromIso2Code(char* iso2code) {
         currencyId = CURRENCY_HONG_KONG;
     }
 
-    if(strcmp(iso2code, "SP") == 0 || strcmp(iso2code, "sp") == 0) {
+    if(strcmp(iso2code, "ES") == 0 || strcmp(iso2code, "es") == 0) {
         currencyId = CURRENCY_SPAIN;
     }
     
