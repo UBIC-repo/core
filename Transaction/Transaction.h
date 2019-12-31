@@ -42,7 +42,7 @@ public:
 class TransactionForNetwork {
 private:
     Transaction transaction;
-    std::vector<unsigned char> additionalPayload; // is intended to contain the DSC certificate for register passport transactions
+    std::vector<unsigned char> additionalPayload = std::vector<unsigned char>(); // is intended to contain the DSC certificate for register passport transactions
 public:
     void setTransaction(Transaction transaction) {
         this->transaction = transaction;
