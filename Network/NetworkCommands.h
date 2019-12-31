@@ -141,7 +141,7 @@ struct AskForBlocksUsingDataPacket {
 
 struct TransmitTransactions {
     uint8_t command = TRANSMIT_TRANSACTIONS_COMMAND;
-    std::vector<Transaction> transactions;
+    std::vector<TransactionForNetwork> transactions;
 
     ADD_SERIALIZE_METHODS;
 
