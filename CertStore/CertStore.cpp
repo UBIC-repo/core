@@ -255,7 +255,7 @@ bool CertStore::addCSCA(Cert* cert, uint32_t blockHeight) {
 }
 
 bool CertStore::addDSC(Cert* cert, uint32_t blockHeight) {
-    if(this->isCertSignedByUBICrootCert(cert, true, TYPE_DSC)) {
+    //if(this->isCertSignedByUBICrootCert(cert, true, TYPE_DSC)) {
         if(this->isCertSignedByCSCA(cert, blockHeight)) {
 
             Cert* existingCert = this->getDscCertWithCertId(cert->getId());
@@ -285,7 +285,7 @@ bool CertStore::addDSC(Cert* cert, uint32_t blockHeight) {
             return true;
         }
         return false;
-    }
+    //}
     Log(LOG_LEVEL_ERROR) << "Cert " << cert->getId() << " is not signed by UBICrootCert";
     return false;
 }
@@ -310,7 +310,7 @@ bool CertStore::verifyAddCSCA(Cert* cert) {
 }
 
 bool CertStore::verifyAddDSC(Cert* cert, uint32_t blockHeight) {
-    if(this->isCertSignedByUBICrootCert(cert, true, TYPE_DSC)) {
+    //if(this->isCertSignedByUBICrootCert(cert, true, TYPE_DSC)) {
         if(this->isCertSignedByCSCA(cert, blockHeight)) {
 
             Cert* existingCert = this->getDscCertWithCertId(cert->getId());
@@ -326,7 +326,7 @@ bool CertStore::verifyAddDSC(Cert* cert, uint32_t blockHeight) {
             return true;
         }
         return false;
-    }
+    //}
     Log(LOG_LEVEL_ERROR) << "Cert " << cert->getId() << " is not signed by UBICrootCert";
     return false;
 }
