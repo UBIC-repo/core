@@ -71,32 +71,34 @@ Block Mint::mintBlock() {
 
     // add a new transaction until the block is full
     while(true) {
-        Transaction* ntx = txPool.popTransaction();
+        TransactionForNetwork* ntxForNetwork = txPool.popTransaction();
 
-        if(ntx == nullptr) {
+        if(ntxForNetwork == nullptr) {
             break;
         }
 
+        Transaction ntx = ntxForNetwork->getTransaction();
+
         // if transaction is invalid
-        if(!TransactionHelper::verifyTx(ntx, IGNORE_IS_IN_HEADER, blockHeader)) {
+        if(!TransactionHelper::verifyTx(&ntx, IGNORE_IS_IN_HEADER, blockHeader)) {
             Log(LOG_LEVEL_ERROR) << "Had to remove one transaction that became invalid";
             continue;
         }
 
-        blockSize += TransactionHelper::getTxSize(ntx);
+        blockSize += TransactionHelper::getTxSize(&ntx);
 
         // Block shouldn't be over 2mb, header shouldn't be over 20kb
         if(blockSize > (BLOCK_SIZE_MAX - 20000)) {
             Log(LOG_LEVEL_INFO) << "Minted Block is full";
             //push back transaction
-            txPool.appendTransaction(*ntx);
+            txPool.appendTransaction(*ntxForNetwork);
             break;
         }
 
-        if(TransactionHelper::isVote(ntx)) {
-            voteList.emplace_back(*ntx);
+        if(TransactionHelper::isVote(&ntx)) {
+            voteList.emplace_back(ntx);
         } else {
-            transactionList.emplace_back(*ntx);
+            transactionList.emplace_back(ntx);
         }
     }
 
@@ -119,8 +121,10 @@ Block Mint::mintBlock() {
         }
 
         if(doRemove) {
+            TransactionForNetwork transactionForNetwork;
+            transactionForNetwork.setTransaction(*it);
             // remove transaction from list and push it back to the TxPool
-            txPool.appendTransaction(*it);
+            txPool.appendTransaction(transactionForNetwork);
             it = transactionList.erase(it);
         } else {
             it++;
@@ -162,8 +166,10 @@ Block Mint::mintBlock() {
         }
 
         if(doRemove) {
+            TransactionForNetwork transactionForNetwork;
+            transactionForNetwork.setTransaction(*it);
             // remove transaction from list and push it back to the TxPool
-            txPool.appendTransaction(*it);
+            txPool.appendTransaction(transactionForNetwork);
             it = voteList.erase(it);
         } else {
             it++;
