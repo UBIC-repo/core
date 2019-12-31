@@ -343,18 +343,20 @@ bool BlockHelper::undoBlock(Block* block) {
     std::vector<Transaction> transactions = block->getTransactions();
     for(Transaction transaction: transactions) {
         TransactionHelper::undoTransaction(&transaction, block->getHeader());
-
+        TransactionForNetwork transactionForNetwork;
+        transactionForNetwork.setTransaction(transaction);
         // add transaction from transaction pool
-        txPool.appendTransaction(transaction);
+        txPool.appendTransaction(transactionForNetwork);
     }
 
     // undo votes
     std::vector<Transaction> votes = block->getHeader()->getVotes();
     for(Transaction vote: votes) {
         TransactionHelper::undoTransaction(&vote, block->getHeader());
-
+        TransactionForNetwork transactionForNetwork;
+        transactionForNetwork.setTransaction(vote);
         // add vote from transaction pool
-        txPool.appendTransaction(vote);
+        txPool.appendTransaction(transactionForNetwork);
     }
 
     // undo payouts to PathSum
