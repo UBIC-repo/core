@@ -316,7 +316,10 @@ void Test::importCACerts() {
             tx->setNetwork(NET_CURRENT);
             tx->setTxIns(txIns);
 
-            txPool.appendTransaction(*tx);
+            TransactionForNetwork transactionForNetwork;
+            transactionForNetwork.setTransaction(*tx);
+
+            txPool.appendTransaction(transactionForNetwork);
             cscaCounter++;
             //certStore.addCSCA(ca, header);
         }
@@ -497,7 +500,10 @@ void Test::importDSCCerts() {
             tx->setNetwork(NET_CURRENT);
             tx->setTxIns(txIns);
 
-            if(txPool.appendTransaction(*tx)) {
+            TransactionForNetwork transactionForNetwork;
+            transactionForNetwork.setTransaction(*tx);
+
+            if(txPool.appendTransaction(transactionForNetwork)) {
                 Log(LOG_LEVEL_INFO) << "appended ADD Certificate to transactions";
             }
             dscCounter++;
