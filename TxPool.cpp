@@ -101,7 +101,7 @@ bool TxPool::appendTransaction(TransactionForNetwork transactionForNetwork) {
         }
     }
 
-    std::thread t1(&Network::broadCastTransaction, transaction);
+    std::thread t1(&Network::broadCastTransaction, transactionForNetwork);
     t1.detach();
 
     return true;
