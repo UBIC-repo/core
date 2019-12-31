@@ -42,6 +42,7 @@ public:
 class TransactionForNetwork {
 private:
     Transaction transaction;
+    uint8_t additionalPayloadType = 0;
     std::vector<unsigned char> additionalPayload = std::vector<unsigned char>(); // is intended to contain the DSC certificate for register passport transactions
 public:
     void setTransaction(Transaction transaction) {
@@ -56,11 +57,24 @@ public:
         this->additionalPayload = additionalPayload;
     }
 
+    std::vector<unsigned char> getAdditionalPayload() {
+        return this->additionalPayload;
+    }
+
+    void setAdditionalPayloadType(uint8_t additionalPayloadType) {
+        this->additionalPayloadType = additionalPayloadType;
+    }
+
+    uint8_t getAdditionalPayloadType() {
+        return this->additionalPayloadType;
+    }
+
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(transaction);
+        READWRITE(additionalPayloadType);
         READWRITE(additionalPayload);
     }
 };
