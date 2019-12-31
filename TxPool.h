@@ -10,24 +10,24 @@
 
 class TxPool {
 private:
-    std::unordered_map<std::string, Transaction> transactionList;
+    std::unordered_map<std::string, TransactionForNetwork> transactionList;
     std::unordered_map<std::string, TxIn> txInputs;
 
     bool isTxInputPresent(TxIn txIn);
-    bool isTxInputPresent(Transaction* transaction);
+    bool isTxInputPresent(TransactionForNetwork* transaction);
 public:
     static TxPool& Instance(){
         static TxPool instance;
         return instance;
     }
 
-    std::unordered_map<std::string, Transaction> getTransactionList();
-    void setTransactionList(std::unordered_map<std::string, Transaction> transactionList);
+    std::unordered_map<std::string, TransactionForNetwork> getTransactionList();
+    void setTransactionList(std::unordered_map<std::string, TransactionForNetwork> transactionList);
     void popTransaction(std::vector<unsigned char> txId);
-    bool appendTransaction(Transaction transaction);
+    bool appendTransaction(TransactionForNetwork transaction);
     void appendTransactionsFromBlock(Block* block);
     uint32_t getTxCount();
-    Transaction* popTransaction();
+    TransactionForNetwork* popTransaction();
 };
 
 
