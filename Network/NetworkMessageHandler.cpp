@@ -391,7 +391,7 @@ void NetworkMessageHandler::handleAskForDonationAddress(PeerInterfacePtr recipie
 void NetworkMessageHandler::handleTransmitTransactions(TransmitTransactions *transmitBlocks, PeerInterfacePtr recipient) {
     TxPool &txPool = TxPool::Instance();
 
-    for(Transaction tx : transmitBlocks->transactions) {
+    for(TransactionForNetwork tx : transmitBlocks->transactions) {
         txPool.appendTransaction(tx);
     }
 }
