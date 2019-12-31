@@ -1741,7 +1741,7 @@ std::string Api::createTransaction(std::string json) {
     }
 
     TransactionForNetwork transactionForNetwork;
-    transactionForNetwork.setTransaction(tx);
+    transactionForNetwork.setTransaction(*tx);
 
     s2 << transactionForNetwork;
     std::string txForNetwork64 = base64_encode((unsigned char*)s2.str().data(), (uint32_t)s2.str().size());
