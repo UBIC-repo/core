@@ -219,7 +219,9 @@ std::string Api::vote(std::string json) {
 
             Chain& chain = Chain::Instance();
             if(TransactionHelper::verifyTx(transaction, IS_IN_HEADER, chain.getBestBlockHeader())) {
-                txPool.appendTransaction(*transaction);
+                TransactionForNetwork transactionForNetwork;
+                transactionForNetwork.setTransaction(*transaction)
+                txPool.appendTransaction(transactionForNetwork);
             } else {
                 success = false;
             }
@@ -826,10 +828,29 @@ std::string Api::readPassport(std::string json) {
         printf("register passport tx: ");
         Hexdump::dump((unsigned char*)spTx.data(), (uint16_t)spTx.size());
 
+
+        BIO *mem = BIO_new(BIO_s_mem());
+        X509_print(mem, pkcs7Parser->getDscCertificate());
+        char* x509Buffer;
+        long x509BufferLength = BIO_get_mem_data(mem, &x509Buffer);
+
+        char* x509BufferCopy;
+        std::memcpy(x509BufferCopy, x509Buffer, x509BufferLength);
+        BIO_set_close(mem, BIO_CLOSE);
+        BIO_free(mem);
+
+        std::vector<unsigned char> x509Vector(x509BufferCopy, x509BufferCopy + x509BufferLength);
+
         TxPool& txPool = TxPool::Instance();
-        if(txPool.appendTransaction(*registerPassportTx)) {
+
+        TransactionForNetwork registerPassportTxForNetwork;
+        registerPassportTxForNetwork.setTransaction(*registerPassportTx);
+        registerPassportTxForNetwork.setAdditionalPayload(
+                x509Vector
+        );
+        if(txPool.appendTransaction(registerPassportTxForNetwork)) {
             Network &network = Network::Instance();
-            network.broadCastTransaction(*registerPassportTx);
+            network.broadCastTransaction(registerPassportTxForNetwork);
             return "{\"success\": true}";
         } else {
             return "{\"success\": false, \"error\" : \"Cannot append transaction to txPool, may be this passport is already registered\"}";
@@ -1152,11 +1173,14 @@ std::string Api::pay(std::string json) {
         return "{\"success\": false}";
     }
 
+    TransactionForNetwork* txForNetwork = TransactionForNetwork();
+    txForNetwork->setTransaction(*tx);
+
     TxPool &txPool = TxPool::Instance();
-    if (txPool.appendTransaction(*tx)) {
+    if (txPool.appendTransaction(*txForNetwork)) {
 
         Network &network = Network::Instance();
-        network.broadCastTransaction(*tx);
+        network.broadCastTransaction(*txForNetwork);
 
         return "{\"success\": true}";
     }
@@ -1714,13 +1738,16 @@ std::string Api::createTransaction(std::string json) {
         return "{\"success\": false}";
     }
 
-    s2 << *tx;
-    std::string tx64 = base64_encode((unsigned char*)s2.str().data(), (uint32_t)s2.str().size());
+    TransactionForNetwork transactionForNetwork;
+    transactionForNetwork.setTransaction(tx);
+
+    s2 << transactionForNetwork;
+    std::string txForNetwork64 = base64_encode((unsigned char*)s2.str().data(), (uint32_t)s2.str().size());
     ptree baseTree;
 
     baseTree.put("success", true);
     baseTree.push_back(std::make_pair("transaction", txToPtree(*tx, false)));
-    baseTree.put("base64", tx64);
+    baseTree.put("base64", txForNetwork64);
 
     std::stringstream ss2;
     boost::property_tree::json_parser::write_json(ss2, baseTree);
@@ -1745,19 +1772,19 @@ std::string Api::sendTransaction(std::string json) {
             std::string txString = base64_decode(v.second.data());
             s.write(txString.c_str(), txString.length());
 
-            Transaction tx;
+            TransactionForNetwork txForNetwork;
             try {
-                s >> tx;
+                s >> txForNetwork;
             } catch (const std::exception& e) {
                 Log(LOG_LEVEL_ERROR) << "Cannot deserialize base64 encoded transaction";
                 return "{\"success\": false, \"error\":\"Cannot deserialize base64 encoded transaction\"}";
             }
 
             TxPool &txPool = TxPool::Instance();
-            if (txPool.appendTransaction(tx)) {
+            if (txPool.appendTransaction(txForNetwork)) {
 
                 Network &network = Network::Instance();
-                network.broadCastTransaction(tx);
+                network.broadCastTransaction(txForNetwork);
 
                 return "{\"success\": true}";
             } else {
@@ -1886,7 +1913,7 @@ std::string Api::getTxPool() {
     ptree baseTree;
     ptree transactionsTree;
     for(auto transaction: txPool.getTransactionList()) {
-        transactionsTree.push_back(std::make_pair("", txToPtree(transaction.second, true)));
+        transactionsTree.push_back(std::make_pair("", txToPtree(transaction.second.getTransaction(), true)));
     }
 
     baseTree.add_child("transactions", transactionsTree);
@@ -1944,7 +1971,7 @@ std::string Api::getCurrencies() {
     currencyCodes.put(std::to_string(CURRENCY_LIECHTENSTEIN), "ULI");
     currencyCodes.put(std::to_string(CURRENCY_ICELAND), "UIS");
     currencyCodes.put(std::to_string(CURRENCY_HONG_KONG), "UHK");
-    currencyCodes.put(std::to_string(CURRENCY_SPAIN), "USP");
+    currencyCodes.put(std::to_string(CURRENCY_SPAIN), "UES");
 
     baseTree.push_back(std::make_pair("currencyCodes", currencyCodes));
 
@@ -1961,9 +1988,9 @@ std::string Api::getIncomingTx() {
     ptree baseTree;
     ptree transactionsTree;
     for(auto transaction: txPool.getTransactionList()) {
-        for(auto txOut : transaction.second.getTxOuts()) {
+        for(auto txOut : transaction.second.getTransaction().getTxOuts()) {
             if(wallet.isMine(txOut.getScript())) {
-                transactionsTree.push_back(std::make_pair("", txToPtree(transaction.second, true)));
+                transactionsTree.push_back(std::make_pair("", txToPtree(transaction.second.getTransaction(), true)));
                 break;
             }
         }
