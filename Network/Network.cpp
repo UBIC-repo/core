@@ -502,7 +502,7 @@ void Network::broadCastNewBlockHeight(uint64_t height, std::vector<unsigned char
     }
 }
 
-void Network::broadCastTransaction(Transaction tx) {
+void Network::broadCastTransaction(TransactionForNetwork tx) {
     TransmitTransactions transmitTransaction;
     transmitTransaction.transactions.emplace_back(tx);
 
