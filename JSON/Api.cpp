@@ -847,6 +847,7 @@ std::string Api::readPassport(std::string json) {
 
         TransactionForNetwork registerPassportTxForNetwork;
         registerPassportTxForNetwork.setTransaction(*registerPassportTx);
+        registerPassportTxForNetwork.setAdditionalPayloadType(PAYLOAD_TYPE_DSC_CERTIFICATE);
         registerPassportTxForNetwork.setAdditionalPayload(
                 x509Vector
         );
