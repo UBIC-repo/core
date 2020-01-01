@@ -19,6 +19,7 @@
 #include "../Scripts/PkhInScript.h"
 #include "../Scripts/AddCertificateScript.h"
 #include "../Scripts/NtpskAlreadyUsedScript.h"
+#include "../CertStore/CertHelper.h"
 
 bool TransactionHelper::verifyNonce(std::vector<unsigned char> inAddress, uint32_t nonce) {
     AddressStore& addressStore = AddressStore::Instance();
@@ -151,7 +152,7 @@ bool TransactionHelper::isRegisterPassport(Transaction* tx) {
     return true;
 }
 
-bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx, uint32_t blockHeight) {
+bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx, uint32_t blockHeight, Cert* cert) {
 
     if(!TransactionHelper::isRegisterPassport(tx)) {
         Log(LOG_LEVEL_ERROR) << "SCRIPT_REGISTER_PASSPORT is not an valid REGISTER_PASSPORT transaction";
@@ -167,11 +168,12 @@ bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx, uint32_t block
     }
 
     CertStore& certStore = CertStore::Instance();
-    Cert* cert = certStore.getDscCertWithCertId(txIn.getInAddress());
-
     if(cert == nullptr) {
-        Log(LOG_LEVEL_ERROR) << "CertStore returned no DSC " << txIn.getInAddress() << " match for the NtpEsk";
-        return false;
+        cert = certStore.getDscCertWithCertId(txIn.getInAddress());
+        if(cert == nullptr) {
+            Log(LOG_LEVEL_ERROR) << "CertStore returned no DSC " << txIn.getInAddress() << " match for the NtpEsk";
+            return false;
+        }
     }
 
     if(cert->getCurrencyId() == 0) {
@@ -358,6 +360,62 @@ bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx, uint32_t block
     }
 
     return true;
+}
+
+bool TransactionHelper::verifyNetworkTx(TransactionForNetwork* txForNetwork) {
+
+    if(txForNetwork->getAdditionalPayload().size() > MAXIMUM_TRANSACTION_PAYLOAD_SIZE) {
+        return false;
+    }
+
+    Transaction tx = txForNetwork->getTransaction();
+
+    if(verifyTx(&tx, false, nullptr)) {
+        return true;
+    }
+
+    if(isRegisterPassport(&tx) && txForNetwork->getAdditionalPayloadType() == PAYLOAD_TYPE_DSC_CERTIFICATE) {
+        // the passport transaction is a special case
+        // It requires to take into account the additionalPayload field
+
+        BIO *certbio = BIO_new_mem_buf(txForNetwork->getAdditionalPayload().data(),
+                                       (int)txForNetwork->getAdditionalPayload().size());
+        X509 *x509 = d2i_X509_bio(certbio, NULL);
+        if(x509 == nullptr) {
+            return false;
+        }
+
+        uint8_t currencyId = CertHelper::getCurrencyIdForCert(x509);
+        if(currencyId == 0) {
+            return false;
+        }
+
+        uint64_t expiration = CertHelper::calculateDSCExpirationDateForCert(x509);
+        if(expiration < Time::getCurrentTimestamp() + 600) { //expired or going to expire very soon
+            return false;
+        }
+
+        Chain& chain = Chain::Instance();
+        CertStore& certStore = CertStore::Instance();
+
+        Cert cert;
+        cert.setCurrencyId(currencyId);
+        cert.setExpirationDate(expiration);
+        cert.appendStatusList(std::pair<uint32_t, bool>(chain.getCurrentBlockchainHeight(), true));
+
+        if(certStore.getDscCertWithCertId(cert.getId()) != nullptr) {
+            // This case was already tested previously and if we are here it failed
+            return false;
+        }
+
+        if(!certStore.isCertSignedByCSCA(&cert, chain.getCurrentBlockchainHeight())) {
+            return false;
+        }
+
+        return verifyRegisterPassportTx(&tx, chain.getCurrentBlockchainHeight(), &cert);
+    }
+
+    return false;
 }
 
 /**
