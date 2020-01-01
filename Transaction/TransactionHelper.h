@@ -8,6 +8,7 @@
 #include "TxOut.h"
 #include "../BlockHeader.h"
 #include "../Scripts/DeactivateCertificateScript.h"
+#include "../CertStore/Cert.h"
 
 class TransactionHelper {
 private:
@@ -21,8 +22,9 @@ public:
     static std::vector<unsigned char> getPassportHash(Transaction* tx);
     static bool isVote(Transaction* tx);
     static bool isRegisterPassport(Transaction* tx);
+    static bool verifyNetworkTx(TransactionForNetwork* tx);
     static bool verifyTx(Transaction* tx, uint8_t isInHeader,  BlockHeader* header);
-    static bool verifyRegisterPassportTx(Transaction* tx, uint32_t blockHeight);
+    static bool verifyRegisterPassportTx(Transaction* tx, uint32_t blockHeight, Cert* cert);
     static bool applyTransaction(Transaction* tx, BlockHeader* blockHeader);
     static bool undoTransaction(Transaction* tx, BlockHeader* blockHeader);
     static UAmount calculateMinimumFee(Transaction* transaction, BlockHeader* header);
