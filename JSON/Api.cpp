@@ -1779,8 +1779,8 @@ std::string Api::sendTransaction(std::string json) {
                 s >> txForNetwork;
             } catch (const std::exception& e) {
                 try {
-                    // this might be an old transaction type wihout the additional payload field
-                    // we try again this time deserealizing it as a Transaction not a TransactionForNetwork
+                    // this might be an old transaction type without the additional payload field
+                    // we try again this time deserializing it as a Transaction not a TransactionForNetwork
                     Transaction tx;
                     s >> tx;
                     txForNetwork.setTransaction(tx);
