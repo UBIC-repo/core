@@ -1778,8 +1778,16 @@ std::string Api::sendTransaction(std::string json) {
             try {
                 s >> txForNetwork;
             } catch (const std::exception& e) {
-                Log(LOG_LEVEL_ERROR) << "Cannot deserialize base64 encoded transaction";
-                return "{\"success\": false, \"error\":\"Cannot deserialize base64 encoded transaction\"}";
+                try {
+                    // this might be an old transaction type wihout the additional payload field
+                    // we try again this time deserealizing it as a Transaction not a TransactionForNetwork
+                    Transaction tx;
+                    s >> tx;
+                    txForNetwork.setTransaction(tx);
+                } catch (const std::exception& e) {
+                    Log(LOG_LEVEL_ERROR) << "Cannot deserialize base64 encoded transaction";
+                    return "{\"success\": false, \"error\":\"Cannot deserialize base64 encoded transaction\"}";
+                }
             }
 
             TxPool &txPool = TxPool::Instance();
