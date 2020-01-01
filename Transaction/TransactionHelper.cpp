@@ -587,7 +587,7 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                 break;
             }
             case SCRIPT_REGISTER_PASSPORT: {
-                if(!TransactionHelper::verifyRegisterPassportTx(tx, header->getBlockHeight())) {
+                if(!TransactionHelper::verifyRegisterPassportTx(tx, header->getBlockHeight(), nullptr)) {
                     Log(LOG_LEVEL_ERROR) << "Failed to verify register passport transaction";
                     return false;
                 }
