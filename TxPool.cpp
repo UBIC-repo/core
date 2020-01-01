@@ -73,7 +73,7 @@ void TxPool::popTransaction(std::vector<unsigned char> txId) {
 bool TxPool::appendTransaction(TransactionForNetwork transactionForNetwork) {
     Chain& chain = Chain::Instance();
     Transaction transaction = transactionForNetwork.getTransaction();
-    if(!TransactionHelper::verifyTx(&transaction, IGNORE_IS_IN_HEADER, chain.getBestBlockHeader())) {
+    if(!TransactionHelper::verifyNetworkTx(&transactionForNetwork)) {
         Log(LOG_LEVEL_ERROR) << "cannot append transaction to txpool because it isn't valid";
         return false;
     }
@@ -84,6 +84,7 @@ bool TxPool::appendTransaction(TransactionForNetwork transactionForNetwork) {
     }
 
     transaction.setTimestamp(Time::getCurrentTimestamp());
+    transactionForNetwork.setTransaction(transaction);
 
     this->transactionList.insert(
             std::pair<std::string, TransactionForNetwork>(
