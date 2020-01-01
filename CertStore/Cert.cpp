@@ -105,10 +105,6 @@ void Cert::finishDeserialization(const char* certType) {
     BIO_free(certbio);
 }
 
-void Cert::setId(vector<unsigned char> id) {
-    Cert::id = id;
-}
-
 uint8_t Cert::getCurrencyId() {
     return currencyId;
 }
