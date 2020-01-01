@@ -76,14 +76,16 @@ set(SOURCE_FILES
         Crypto/Hash160.h
         Crypto/Hash256.cpp
         Crypto/Hash256.h
-
+        Crypto/PassportCrypto.cpp
+        Crypto/PassportCrypto.h
+	
         CertStore/Cert.cpp
         CertStore/Cert.h
         CertStore/CertStore.cpp
         CertStore/CertStore.h
-        Crypto/PassportCrypto.cpp
-        Crypto/PassportCrypto.h
-
+	CertStore/CertHelper.cpp
+        CertStore/CertHelper.h
+	
         support/allocators/zeroafterfree.h
         support/cleanse.h
         support/clease.cpp
@@ -205,8 +207,7 @@ set(SOURCE_FILES
 
         KYC/MRZResponseObject.h
         KYC/MRZParser.cpp
-        KYC/MRZParser.h
-	)
+        KYC/MRZParser.h)
 add_executable(ubicd ${SOURCE_FILES})
 
 set(SOURCE_FILES_CLI
