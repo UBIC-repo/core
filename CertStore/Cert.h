@@ -61,7 +61,6 @@ public:
 
     uint32_t getNonce();
     void setNonce(uint32_t nonce);
-    void setId(std::vector<unsigned char> id);
     uint8_t getCurrencyId();
     void setCurrencyId(uint8_t currencyId);
     std::vector<std::pair<uint32_t, bool> > getStatusList();
