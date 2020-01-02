@@ -221,7 +221,7 @@ std::string Api::vote(std::string json) {
             if(TransactionHelper::verifyTx(transaction, IS_IN_HEADER, chain.getBestBlockHeader())) {
                 TransactionForNetwork transactionForNetwork;
                 transactionForNetwork.setTransaction(*transaction);
-                txPool.appendTransaction(transactionForNetwork);
+                txPool.appendTransaction(transactionForNetwork, BROADCAST_TRANSACTION);
             } else {
                 success = false;
             }
@@ -317,7 +317,7 @@ std::string Api::unvote(std::string json) {
             if(TransactionHelper::verifyTx(transaction, IS_IN_HEADER, chain.getBestBlockHeader())) {
                 TransactionForNetwork transactionForNetwork;
                 transactionForNetwork.setTransaction(*transaction);
-                txPool.appendTransaction(transactionForNetwork);
+                txPool.appendTransaction(transactionForNetwork, BROADCAST_TRANSACTION);
             } else {
                 success = false;
             }
@@ -851,7 +851,7 @@ std::string Api::readPassport(std::string json) {
         registerPassportTxForNetwork.setAdditionalPayload(
                 x509Vector
         );
-        if(txPool.appendTransaction(registerPassportTxForNetwork)) {
+        if(txPool.appendTransaction(registerPassportTxForNetwork, BROADCAST_TRANSACTION)) {
             Network &network = Network::Instance();
             network.broadCastTransaction(registerPassportTxForNetwork);
             return "{\"success\": true}";
@@ -1180,7 +1180,7 @@ std::string Api::pay(std::string json) {
     txForNetwork.setTransaction(*tx);
 
     TxPool &txPool = TxPool::Instance();
-    if (txPool.appendTransaction(txForNetwork)) {
+    if (txPool.appendTransaction(txForNetwork, BROADCAST_TRANSACTION)) {
 
         Network &network = Network::Instance();
         network.broadCastTransaction(txForNetwork);
@@ -1792,7 +1792,7 @@ std::string Api::sendTransaction(std::string json) {
             }
 
             TxPool &txPool = TxPool::Instance();
-            if (txPool.appendTransaction(txForNetwork)) {
+            if (txPool.appendTransaction(txForNetwork, BROADCAST_TRANSACTION)) {
 
                 Network &network = Network::Instance();
                 network.broadCastTransaction(txForNetwork);
@@ -2411,7 +2411,7 @@ std::string Api::removeCert(std::string json, uint8_t type) {
 
             TransactionForNetwork transactionForNetwork;
             transactionForNetwork.setTransaction(*tx);
-            txPool.appendTransaction(transactionForNetwork);
+            txPool.appendTransaction(transactionForNetwork, BROADCAST_TRANSACTION);
         }
     }
 
