@@ -24,7 +24,7 @@ public:
     std::unordered_map<std::string, TransactionForNetwork> getTransactionList();
     void setTransactionList(std::unordered_map<std::string, TransactionForNetwork> transactionList);
     void popTransaction(std::vector<unsigned char> txId);
-    bool appendTransaction(TransactionForNetwork transaction);
+    bool appendTransaction(TransactionForNetwork transaction, bool broadcast);
     void appendTransactionsFromBlock(Block* block);
     uint32_t getTxCount();
     TransactionForNetwork* popTransaction();
