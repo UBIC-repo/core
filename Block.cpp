@@ -346,7 +346,7 @@ bool BlockHelper::undoBlock(Block* block) {
         TransactionForNetwork transactionForNetwork;
         transactionForNetwork.setTransaction(transaction);
         // add transaction from transaction pool
-        txPool.appendTransaction(transactionForNetwork);
+        txPool.appendTransaction(transactionForNetwork, NO_BROADCAST_TRANSACTION);
     }
 
     // undo votes
@@ -356,7 +356,7 @@ bool BlockHelper::undoBlock(Block* block) {
         TransactionForNetwork transactionForNetwork;
         transactionForNetwork.setTransaction(vote);
         // add vote from transaction pool
-        txPool.appendTransaction(transactionForNetwork);
+        txPool.appendTransaction(transactionForNetwork, NO_BROADCAST_TRANSACTION);
     }
 
     // undo payouts to PathSum
