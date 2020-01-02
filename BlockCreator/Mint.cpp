@@ -91,7 +91,7 @@ Block Mint::mintBlock() {
         if(blockSize > (BLOCK_SIZE_MAX - 20000)) {
             Log(LOG_LEVEL_INFO) << "Minted Block is full";
             //push back transaction
-            txPool.appendTransaction(*ntxForNetwork);
+            txPool.appendTransaction(*ntxForNetwork, NO_BROADCAST_TRANSACTION);
             break;
         }
 
@@ -124,7 +124,7 @@ Block Mint::mintBlock() {
             TransactionForNetwork transactionForNetwork;
             transactionForNetwork.setTransaction(*it);
             // remove transaction from list and push it back to the TxPool
-            txPool.appendTransaction(transactionForNetwork);
+            txPool.appendTransaction(transactionForNetwork, NO_BROADCAST_TRANSACTION);
             it = transactionList.erase(it);
         } else {
             it++;
@@ -169,7 +169,7 @@ Block Mint::mintBlock() {
             TransactionForNetwork transactionForNetwork;
             transactionForNetwork.setTransaction(*it);
             // remove transaction from list and push it back to the TxPool
-            txPool.appendTransaction(transactionForNetwork);
+            txPool.appendTransaction(transactionForNetwork, NO_BROADCAST_TRANSACTION);
             it = voteList.erase(it);
         } else {
             it++;
