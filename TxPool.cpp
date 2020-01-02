@@ -70,16 +70,17 @@ void TxPool::popTransaction(std::vector<unsigned char> txId) {
     }
 }
 
-bool TxPool::appendTransaction(TransactionForNetwork transactionForNetwork) {
-    Chain& chain = Chain::Instance();
+bool TxPool::appendTransaction(TransactionForNetwork transactionForNetwork, bool broadcast) {
+    Chain &chain = Chain::Instance();
     Transaction transaction = transactionForNetwork.getTransaction();
-    if(!TransactionHelper::verifyNetworkTx(&transactionForNetwork)) {
+    if (!TransactionHelper::verifyNetworkTx(&transactionForNetwork)) {
         Log(LOG_LEVEL_ERROR) << "cannot append transaction to txpool because it isn't valid";
         return false;
     }
 
-    if(this->isTxInputPresent(&transactionForNetwork)) {
-        Log(LOG_LEVEL_WARNING) << "cannot append transaction to txpool because one of it's input has another transaction pending";
+    if (this->isTxInputPresent(&transactionForNetwork)) {
+        Log(LOG_LEVEL_WARNING)
+                << "cannot append transaction to txpool because one of it's input has another transaction pending";
         return false;
     }
 
@@ -93,7 +94,7 @@ bool TxPool::appendTransaction(TransactionForNetwork transactionForNetwork) {
             )
     );
 
-    if(TransactionHelper::isRegisterPassport(&transaction)) {
+    if (TransactionHelper::isRegisterPassport(&transaction)) {
         std::vector<unsigned char> passportHash = TransactionHelper::getPassportHash(&transaction);
         this->txInputs.insert(std::make_pair(Hexdump::vectorToHexString(passportHash), transaction.getTxIns().front()));
     } else {
@@ -102,8 +103,10 @@ bool TxPool::appendTransaction(TransactionForNetwork transactionForNetwork) {
         }
     }
 
-    std::thread t1(&Network::broadCastTransaction, transactionForNetwork);
-    t1.detach();
+    if (broadcast) {
+        std::thread t1(&Network::broadCastTransaction, transactionForNetwork);
+        t1.detach();
+    }
 
     return true;
 }
@@ -112,13 +115,13 @@ void TxPool::appendTransactionsFromBlock(Block* block) {
     for(auto tx : block->getTransactions()) {
         TransactionForNetwork transactionForNetwork;
         transactionForNetwork.setTransaction(tx);
-        this->appendTransaction(transactionForNetwork);
+        this->appendTransaction(transactionForNetwork, NO_BROADCAST_TRANSACTION);
     }
 
     for(auto tx : block->getHeader()->getVotes()) {
         TransactionForNetwork transactionForNetwork;
         transactionForNetwork.setTransaction(tx);
-        this->appendTransaction(transactionForNetwork);
+        this->appendTransaction(transactionForNetwork, NO_BROADCAST_TRANSACTION);
     }
 }
 
