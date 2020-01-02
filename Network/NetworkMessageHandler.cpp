@@ -392,7 +392,7 @@ void NetworkMessageHandler::handleTransmitTransactions(TransmitTransactions *tra
     TxPool &txPool = TxPool::Instance();
 
     for(TransactionForNetwork tx : transmitBlocks->transactions) {
-        txPool.appendTransaction(tx);
+        txPool.appendTransaction(tx, BROADCAST_TRANSACTION);
     }
 }
 
