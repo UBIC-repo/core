@@ -11,6 +11,7 @@ private:
     std::string allowFrom;
     std::string donationAddress;
     std::string apiKey;
+    std::string mintingStatus;
     uint32_t numberOfAdresses;
     uint8_t logLevel;
 public:
@@ -27,6 +28,7 @@ public:
     uint8_t getLogLevel();
     std::string getDonationAddress();
     std::string getApiKey();
+    bool isMintingEnabled();
 };
 
 
