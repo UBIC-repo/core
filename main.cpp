@@ -25,8 +25,11 @@ void startSync() {
 
 void startMinting() {
     Mint& mint = Mint::Instance();
-    mint.stopMinting();
-    mint.startMintingService();
+    Config& config = Config::Instance();
+    if (config.isMintingEnabled()) {
+        mint.startMinting();
+        mint.startMintingService();
+    }
 }
 
 void getMyIP() {
