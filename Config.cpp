@@ -17,6 +17,7 @@ bool Config::loadConfig() {
         this->donationAddress = pt.get<std::string>("donationAddress");
         this->apiKey = pt.get<std::string>("apiKey");
         this->numberOfAdresses = (uint32_t)std::stoi(pt.get<std::string>("numberOfAdresses"));
+        this->mintingStatus = pt.get<std::string>("minting");
 
         this->logLevel = LOG_LEVEL_INFO;
         if(pt.get<std::string>("logLevel") == "NOTICE") {
@@ -64,4 +65,8 @@ std::string Config::getDonationAddress() {
 
 std::string Config::getApiKey() {
     return this->apiKey;
+}
+
+bool Config::isMintingEnabled() {
+    return this->mintingStatus.compare("ON") == 0 || this->mintingStatus.compare("on") == 0;
 }
