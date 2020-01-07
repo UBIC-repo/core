@@ -67,6 +67,10 @@ std::string Config::getApiKey() {
     return this->apiKey;
 }
 
+void Config::setMintingStatus(std::string mintingStatus) {
+    this->mintingStatus = mintingStatus;
+}
+
 bool Config::isMintingEnabled() {
     return this->mintingStatus.compare("ON") == 0 || this->mintingStatus.compare("on") == 0;
 }
