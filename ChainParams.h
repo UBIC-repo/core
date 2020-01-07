@@ -190,29 +190,43 @@
 #define MINIMUM_DELEGATE_VOTES 7
 
 #if defined(__APPLE__)
-#define BASE_PATH "/Applications/UBIC/"
-#define BASE_WEB_PATH "/Applications/UBIC/web/"
-#define CONFIG_BASE_PATH "ubic/"
-#define CONFIG_PATH "config.ini"
+    #ifdef TEST_MODE
+        #define BASE_PATH "/Applications/UBIC-test/"
+    #else
+        #define BASE_PATH "/Applications/UBIC/"
+    #endif
+    #define BASE_WEB_PATH "/Applications/UBIC/web/"
+    #define CONFIG_BASE_PATH "ubic/"
+    #define CONFIG_PATH "config.ini"
 #endif
 #if defined(__linux__)
-#define BASE_PATH "/var/ubic/"
-#define BASE_WEB_PATH "/var/ubic/web/"
-#define CONFIG_BASE_PATH "ubic/"
-#define CONFIG_PATH "config.ini"
+    #ifdef TEST_MODE
+        #define BASE_PATH "/var/ubic-test/"
+    #else
+        #define BASE_PATH "/var/ubic/"
+    #endif
+    #define BASE_WEB_PATH "/var/ubic/web/"
+    #define CONFIG_BASE_PATH "ubic/"
+    #define CONFIG_PATH "config.ini"
 #endif
 
 #if defined(_WIN32)
-#define BASE_PATH "./"
-#define BASE_WEB_PATH "./web"
-#define CONFIG_BASE_PATH "ubic/"
-#define CONFIG_PATH "config.ini"
+    #define BASE_PATH "./"
+    #define BASE_WEB_PATH "./web"
+    #define CONFIG_BASE_PATH "ubic/"
+    #define CONFIG_PATH "config.ini"
 #endif
 
 #define MAX_NUMBER_OF_MY_TRANSACTIONS_TO_DISPLAY 250
 
-#define NET_PORT "1334"
-#define NET_PORT_INT 1334
+#ifdef TEST_MODE
+    #define NET_PORT "1335"
+    #define NET_PORT_INT 1335
+#else
+    #define NET_PORT "1334"
+    #define NET_PORT_INT 1334
+#endif
+
 #define NET_API_PORT 12303
 #define NET_WEB_PORT 6789
 
