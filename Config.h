@@ -28,6 +28,7 @@ public:
     uint8_t getLogLevel();
     std::string getDonationAddress();
     std::string getApiKey();
+    void setMintingStatus(std::string);
     bool isMintingEnabled();
 };
 
