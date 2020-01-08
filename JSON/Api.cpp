@@ -832,11 +832,11 @@ std::string Api::readPassport(std::string json) {
 
 
         BIO *mem = BIO_new(BIO_s_mem());
-        X509_print(mem, pkcs7Parser->getDscCertificate());
+        i2d_X509_bio(mem, pkcs7Parser->getDscCertificate());
         char* x509Buffer;
         long x509BufferLength = BIO_get_mem_data(mem, &x509Buffer);
 
-        char* x509BufferCopy;
+        char* x509BufferCopy = (char*)malloc(x509BufferLength);
         std::memcpy(x509BufferCopy, x509Buffer, x509BufferLength);
         BIO_set_close(mem, BIO_CLOSE);
         BIO_free(mem);
