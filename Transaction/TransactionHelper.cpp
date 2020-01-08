@@ -589,7 +589,7 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
             }
             case SCRIPT_REGISTER_PASSPORT: {
                 if(!TransactionHelper::verifyRegisterPassportTx(tx, header->getBlockHeight(), nullptr)) {
-                    Log(LOG_LEVEL_ERROR) << "Failed to verify register passport transaction";
+                    Log(LOG_LEVEL_INFO) << "Failed to verify register passport transaction";
                     return false;
                 }
 
@@ -624,7 +624,7 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                     RSA_get0_key(rsa, nullptr, &exponent, nullptr);
                     BN_dec2bn(&minExponent, "65537");
 
-                    if (BN_cmp(exponent, minExponent) == -1) {
+                    if (addCertificateScript.isDSC() && BN_cmp(exponent, minExponent) == -1) {
                         Log(LOG_LEVEL_ERROR) << "SCRIPT_ADD_CERTIFICATE failed because RSA exponent is too small minimum required is 65537";
                         return false;
                     }
