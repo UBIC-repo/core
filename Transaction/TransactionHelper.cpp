@@ -369,8 +369,9 @@ bool TransactionHelper::verifyNetworkTx(TransactionForNetwork* txForNetwork) {
     }
 
     Transaction tx = txForNetwork->getTransaction();
+    Chain& chain = Chain::Instance();
 
-    if(verifyTx(&tx, false, nullptr)) {
+    if(verifyTx(&tx, IGNORE_IS_IN_HEADER, chain.getBestBlockHeader())) {
         return true;
     }
 
