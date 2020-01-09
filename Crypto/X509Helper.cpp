@@ -1,5 +1,5 @@
 
-#include <x509.h>
+#include <openssl/x509.h>
 #include "X509Helper.h"
 
 std::vector<unsigned char> X509Helper::certToVector(X509* x509){
