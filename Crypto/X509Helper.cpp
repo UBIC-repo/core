@@ -9,7 +9,7 @@ std::vector<unsigned char> X509Helper::certToVector(X509* x509){
     long x509BufferLength = BIO_get_mem_data(mem, &x509Buffer);
 
     char* x509BufferCopy = (char*)malloc(x509BufferLength);
-    std::memcpy(x509BufferCopy, x509Buffer, x509BufferLength);
+    memcpy(x509BufferCopy, x509Buffer, x509BufferLength);
     BIO_set_close(mem, BIO_CLOSE);
     BIO_free(mem);
 
