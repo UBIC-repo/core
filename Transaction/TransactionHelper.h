@@ -19,7 +19,7 @@ public:
     static std::vector<unsigned char> getTxId(Transaction* tx);
     static std::vector<unsigned char> getTxHash(Transaction* tx);
     static uint32_t getTxSize(Transaction* tx);
-    static std::vector<unsigned char> getPassportHash(Transaction* tx);
+    static std::vector<unsigned char> getPassportHash(Transaction* tx, X509* x509);
     static bool isVote(Transaction* tx);
     static bool isRegisterPassport(Transaction* tx);
     static bool verifyNetworkTx(TransactionForNetwork* tx);
