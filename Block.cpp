@@ -170,7 +170,7 @@ bool BlockHelper::verifyBlock(Block* block) {
 
     for(Transaction transaction: transactionsAndVotes) {
         if(TransactionHelper::isRegisterPassport(&transaction)) {
-            std::vector<unsigned char> passportHash = TransactionHelper::getPassportHash(&transaction);
+            std::vector<unsigned char> passportHash = TransactionHelper::getPassportHash(&transaction, nullptr);
 
             auto txInputsIt = std::find(txInputs.begin(),
                                         txInputs.end(),
