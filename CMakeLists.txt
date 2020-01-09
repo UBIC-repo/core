@@ -59,6 +59,7 @@ set(SOURCE_FILES
         Tools/Hexdump.cpp
         Tools/Hexdump.h
         Tools/Log.h
+	Tools/Helper.h
 
         NtpEsk/NtpEsk.cpp
         NtpEsk/NtpEsk.h
@@ -78,6 +79,8 @@ set(SOURCE_FILES
         Crypto/Hash256.h
         Crypto/PassportCrypto.cpp
         Crypto/PassportCrypto.h
+	Crypto/X509Helper.cpp
+	Crypto/X509Helper.h
 	
         CertStore/Cert.cpp
         CertStore/Cert.h
