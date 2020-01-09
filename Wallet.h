@@ -30,6 +30,8 @@ public:
     std::vector<std::vector<unsigned char> > getAddressesLink();
     std::vector<unsigned char> signWithAddress(std::vector<unsigned char> address, std::vector<unsigned char> msg);
     std::vector<unsigned char> getRandomPrivateKeyFromWallet();
+    std::vector<unsigned char> getPrivateKeyAtPosition(uint32_t position);
+    std::vector<unsigned char> getPublicKeyAtPosition(uint32_t position);
     std::vector<unsigned char> getRandomAddressScriptVectorFromWallet();
     Address getRandomAddressFromWallet();
     Transaction* signTransaction(Transaction* transaction);
