@@ -153,6 +153,14 @@ std::vector<unsigned char> Wallet::getRandomPrivateKeyFromWallet() {
     return this->privateKeys.at(selectedNbr);
 }
 
+std::vector<unsigned char> Wallet::getPrivateKeyAtPosition(uint32_t position) {
+    return this->privateKeys.at(position);
+}
+
+std::vector<unsigned char> Wallet::getPublicKeyAtPosition(uint32_t position) {
+    return this->publicKeys.at(position);
+}
+
 std::vector<unsigned char> Wallet::getRandomAddressScriptVectorFromWallet() {
     unsigned char randCharArr[4];
     RAND_bytes(randCharArr, 4);
