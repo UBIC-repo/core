@@ -136,6 +136,50 @@ int main() {
     SetConsoleCtrlHandler(signalHandler, TRUE);
 #endif
 
+#if defined(TEST_MODE)
+    App& app = App::Instance();
+    app.setIsStarting(true);
+
+    Log(LOG_LEVEL_INFO) << "Starting in test mode";
+
+    Test::sanitizeUbicFolder();
+
+    Loader::createTouchFilesAndDirectories();
+    Loader::loadConfig();
+    Config& config = Config::Instance();
+    config.setMintingStatus("ON"); // force mining to be on
+    Loader::loadDelegates();
+    Loader::loadBestBlockHeaders();
+    Loader::loadCertStore();
+    Loader::loadPathSum();
+    Loader::loadWallet();
+    app.setIsStarting(false);
+
+    VoteStore& voteStore = VoteStore::Instance();
+    if(voteStore.getActiveDelegates().empty()) { // if there are no validators we create them
+        Test::createValidators();
+    }
+
+    CertStore& certStore = CertStore::Instance();
+    if(certStore.getRootList().empty()) { // if there are no root certs we create one
+        Test::createRootCert();
+    }
+
+    Test::importCACerts();
+
+    Log(LOG_LEVEL_INFO) << "API KEY: " << config.getApiKey();
+
+    std::thread t1(&startApiServer);
+    std::thread t2(&startServer);
+    std::thread t3(&startWebInterface);
+    std::thread t4(&startMinting);
+    t1.join();
+    t2.join();
+    t3.join();
+    t4.join();
+
+    return 0;
+#else
     App& app = App::Instance();
     app.setIsStarting(true);
 
@@ -172,4 +216,5 @@ int main() {
     t5.join();
 
     return 0;
+#endif
 }
