@@ -3,7 +3,7 @@
 #define UBICD_X509HELPER_H
 
 
-#include <ossl_typ.h>
+#include <openssl/ossl_typ.h>
 #include <vector>
 
 class X509Helper {
