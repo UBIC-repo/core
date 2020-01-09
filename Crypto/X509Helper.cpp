@@ -1,4 +1,5 @@
 
+#include <string.h>
 #include <openssl/x509.h>
 #include "X509Helper.h"
 
