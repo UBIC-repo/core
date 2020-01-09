@@ -18,6 +18,10 @@
 #include "../Wallet.h"
 #include "../AddressHelper.h"
 #include "../App.h"
+#include "../CertStore/CertHelper.h"
+#include "../CertStore/CertStore.h"
+#include "../Scripts/AddCertificateScript.h"
+#include "../Crypto/X509Helper.h"
 
 Block Mint::mintBlock() {
     Log(LOG_LEVEL_INFO) << "Mint::mintBlock()";
@@ -65,6 +69,7 @@ Block Mint::mintBlock() {
 
     std::vector<Transaction> transactionList;
     std::vector<Transaction> voteList;
+    std::vector<TransactionForNetwork> toReappendInTxPool;
 
     uint32_t blockSize = 0;
     TxPool& txPool = TxPool::Instance();
@@ -81,6 +86,81 @@ Block Mint::mintBlock() {
 
         // if transaction is invalid
         if(!TransactionHelper::verifyTx(&ntx, IGNORE_IS_IN_HEADER, blockHeader)) {
+
+            // special case if it is a passport Transaction
+            // create an add certificate transaction from the additional Payload field if present
+            if(ntxForNetwork->getAdditionalPayloadType() == PAYLOAD_TYPE_DSC_CERTIFICATE
+                && !ntxForNetwork->getAdditionalPayload().empty()) {
+
+                X509 *x509 = X509Helper::vectorToCert(ntxForNetwork->getAdditionalPayload());
+                if(x509 == nullptr) {
+                    continue;
+                }
+
+                uint8_t currencyId = CertHelper::getCurrencyIdForCert(x509);
+                if(currencyId == 0) {
+                    continue;
+                }
+
+                uint64_t expiration = CertHelper::calculateDSCExpirationDateForCert(x509);
+                if(expiration < Time::getCurrentTimestamp() + 600) { //expired or going to expire very soon
+                    continue;
+                }
+
+                Chain& chain = Chain::Instance();
+                CertStore& certStore = CertStore::Instance();
+
+                Cert cert;
+                cert.setX509(x509);
+                cert.setCurrencyId(currencyId);
+                cert.setExpirationDate(expiration);
+                cert.appendStatusList(std::pair<uint32_t, bool>(chain.getCurrentBlockchainHeight(), true));
+
+                if(certStore.getDscCertWithCertId(cert.getId()) != nullptr) {
+                    // This case was already tested previously and if we are here it failed
+                    continue;
+                }
+
+                if(!certStore.isCertSignedByCSCA(&cert, chain.getCurrentBlockchainHeight())) {
+                    continue;
+                }
+
+                uint32_t nonce = 0;
+                AddCertificateScript addCertificateScript;
+                addCertificateScript.currency = cert.getCurrencyId();
+                addCertificateScript.type = TYPE_DSC;
+                addCertificateScript.expirationDate = cert.getExpirationDate();
+                addCertificateScript.certificate = ntxForNetwork->getAdditionalPayload();
+
+                CDataStream s1(SER_DISK, 1);
+                s1 << addCertificateScript;
+
+                TxIn *txIn = new TxIn();
+
+                UAmount inAmount;
+                txIn->setAmount(inAmount);
+                txIn->setNonce(nonce);
+                txIn->setInAddress(cert.getId());
+
+                UScript script;
+                script.setScript((unsigned char*)s1.data(), (uint16_t)s1.size());
+                script.setScriptType(SCRIPT_ADD_CERTIFICATE);
+                txIn->setScript(script);
+                std::vector<TxIn> txIns;
+                txIns.emplace_back(*txIn);
+
+                Transaction* addDscCertificateTransaction = new Transaction();
+                addDscCertificateTransaction->setNetwork(NET_CURRENT);
+                addDscCertificateTransaction->setTxIns(txIns);
+
+                transactionList.emplace_back(*addDscCertificateTransaction);
+
+                // Place the register passport transaction back into the transaction pool
+                // We'll try to include it in the next block
+                toReappendInTxPool.emplace_back(*ntxForNetwork);
+                continue;
+            }
+
             Log(LOG_LEVEL_ERROR) << "Had to remove one transaction that became invalid";
             continue;
         }
@@ -102,7 +182,12 @@ Block Mint::mintBlock() {
         }
     }
 
-    // Check for double inputs which can only occur because of votes
+    for (auto &ntxForNetwork : toReappendInTxPool) {
+        txPool.appendTransaction(ntxForNetwork, NO_BROADCAST_TRANSACTION);
+    }
+
+    // Check for double inputs which can only occur because of votes and new passport registration protocol
+    // where the DSC is embeded in the additionalPayload field
 
     // index transaction inputs
     std::vector<std::string> txInputs;
