@@ -84,7 +84,7 @@ uint32_t TransactionHelper::getTxSize(Transaction* tx) {
     return (uint32_t)s.size();
 }
 
-std::vector<unsigned char> TransactionHelper::getPassportHash(Transaction* tx) {
+std::vector<unsigned char> TransactionHelper::getPassportHash(Transaction* tx, X509* x509) {
     CDataStream srpScript(SER_DISK, 1);
     UScript script = tx->getTxIns().front().getScript();
     srpScript.write((char *) script.getScript().data(), script.getScript().size());
@@ -103,10 +103,16 @@ std::vector<unsigned char> TransactionHelper::getPassportHash(Transaction* tx) {
         return ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM());
     } else {
         // is NtpEsk
+
         NtpEskSignatureVerificationObject *ntpEskSignatureVerificationObject = new NtpEskSignatureVerificationObject();
-        CertStore& certStore = CertStore::Instance();
-        Cert* cert = certStore.getDscCertWithCertId(tx->getTxIns().front().getInAddress());
-        EC_KEY* ecKey = EVP_PKEY_get1_EC_KEY(cert->getPubKey());
+        EC_KEY *ecKey;
+        if(x509 != nullptr) {
+            ecKey = EVP_PKEY_get1_EC_KEY(X509_get_pubkey(x509));
+        } else {
+            CertStore &certStore = CertStore::Instance();
+            Cert *cert = certStore.getDscCertWithCertId(tx->getTxIns().front().getInAddress());
+            ecKey = EVP_PKEY_get1_EC_KEY(cert->getPubKey());
+        }
         ntpEskSignatureVerificationObject->setCurveParams(EC_KEY_get0_group(ecKey));
         try {
             srpScript >> *ntpEskSignatureVerificationObject;
@@ -379,9 +385,12 @@ bool TransactionHelper::verifyNetworkTx(TransactionForNetwork* txForNetwork) {
         // the passport transaction is a special case
         // It requires to take into account the additionalPayload field
 
-        BIO *certbio = BIO_new_mem_buf(txForNetwork->getAdditionalPayload().data(),
-                                       (int)txForNetwork->getAdditionalPayload().size());
-        X509 *x509 = d2i_X509_bio(certbio, NULL);
+        std::vector<unsigned char> payload = txForNetwork->getAdditionalPayload();
+        BIO *certbio = BIO_new_mem_buf((void*)payload.data(),
+                                       (int)payload.size());
+
+        X509 *x509 = d2i_X509_bio(certbio, nullptr);
+
         if(x509 == nullptr) {
             return false;
         }
@@ -402,6 +411,7 @@ bool TransactionHelper::verifyNetworkTx(TransactionForNetwork* txForNetwork) {
         Cert cert;
         cert.setCurrencyId(currencyId);
         cert.setExpirationDate(expiration);
+        cert.setX509(x509);
         cert.appendStatusList(std::pair<uint32_t, bool>(chain.getCurrentBlockchainHeight(), true));
 
         if(certStore.getDscCertWithCertId(cert.getId()) != nullptr) {
