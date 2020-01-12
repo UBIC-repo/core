@@ -1783,10 +1783,13 @@ std::string Api::sendTransaction(std::string json) {
                     // this might be an old transaction type without the additional payload field
                     // we try again this time deserializing it as a Transaction not a TransactionForNetwork
                     Transaction tx;
-                    s >> tx;
+                    CDataStream s2(SER_DISK, 1);
+                    s2.write(txString.c_str(), txString.length());
+                    s2 >> tx;
                     txForNetwork.setTransaction(tx);
-                } catch (const std::exception& e) {
+                } catch (const std::exception& e2) {
                     Log(LOG_LEVEL_ERROR) << "Cannot deserialize base64 encoded transaction";
+                    Log(LOG_LEVEL_ERROR) << "Exception: " << e2.what();
                     return "{\"success\": false, \"error\":\"Cannot deserialize base64 encoded transaction\"}";
                 }
             }
