@@ -3,7 +3,13 @@
 case "$1" in 
 start)
 if [ -e /var/ubic/ubic.pid ]; then
-   echo UBIC is already running
+   pid=$(cat /var/ubic/ubic.pid)
+   if [ -d "/proc/${pid}" ]; then
+      echo UBIC is already running
+   else
+      rm /var/ubic/ubic.pid
+      /usr/bin/ubicd
+   fi
 else
    /usr/bin/ubicd
 fi
