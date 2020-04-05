@@ -246,45 +246,45 @@ void Network::getMyIP() {
 }
 
 void Network::syncBlockchain() {
-    Peers &peers = Peers::Instance();
-    Log(LOG_LEVEL_INFO) << "Network::syncBlockchain()";
-    if (isSyncing) {
-        Log(LOG_LEVEL_INFO) << "Network::syncBlockchain(), already syncing";
-        //already syncing
-        return;
+    while(true) {
+        Peers &peers = Peers::Instance();
+        Log(LOG_LEVEL_INFO) << "Network::syncBlockchain()";
+        if (isSyncing) {
+            Log(LOG_LEVEL_INFO) << "Network::syncBlockchain(), already syncing";
+            //already syncing
+            return;
+        }
+
+        isSyncing = true;
+
+        if (peers.getPeers().size() < 10 && Time::getCurrentTimestamp() - lastPeerLookup > (3600 * 24)) {
+            Log(LOG_LEVEL_INFO) << "Going to look for peers";
+            lastPeerLookup = Time::getCurrentTimestamp();
+            std::thread t(&lookForPeers);
+            t.detach();
+        }
+
+        Log(LOG_LEVEL_INFO) << "Network start syncing";
+        Chain &chain = Chain::Instance();
+
+        uint32_t currentBlockHeight;
+        uint16_t batchSize = 100;
+
+        while (!synced) {
+            currentBlockHeight = chain.getCurrentBlockchainHeight() + 1;
+            Network::getBlocks(currentBlockHeight, batchSize, synced);
+        }
+        Log(LOG_LEVEL_INFO) << "Node is synced";
+
+        isSyncing = false;
+
+        // try to sync blockchain again after 20 seconds timeout
+        #if defined(_WIN32)
+            Sleep(20000);
+        #else
+            sleep(20);
+        #endif
     }
-
-    isSyncing = true;
-
-    if(peers.getPeers().size() < 10 && Time::getCurrentTimestamp() - lastPeerLookup > (3600*24) ) {
-        Log(LOG_LEVEL_INFO) << "Going to look for peers";
-        lastPeerLookup = Time::getCurrentTimestamp();
-        std::thread t(&lookForPeers);
-        t.detach();
-    }
-
-    Log(LOG_LEVEL_INFO) << "Network start syncing";
-    Chain &chain = Chain::Instance();
-
-    uint32_t currentBlockHeight;
-    uint16_t batchSize = 100;
-
-    while(!synced) {
-        currentBlockHeight = chain.getCurrentBlockchainHeight() + 1;
-        Network::getBlocks(currentBlockHeight, batchSize, synced);
-    }
-    Log(LOG_LEVEL_INFO) << "Node is synced";
-
-    isSyncing = false;
-
-    // try to sync blockchain again after 20 seconds timeout
-    #if defined(_WIN32)
-        Sleep(20000);
-    #else
-        sleep(20);
-    #endif
-
-    Network::syncBlockchain();
 }
 
 void Network::askForBlocks(PeerInterfacePtr peer, AskForBlocks askForBlocks) {
