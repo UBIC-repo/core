@@ -268,7 +268,7 @@ void Network::syncBlockchain() {
         Chain &chain = Chain::Instance();
 
         uint32_t currentBlockHeight;
-        uint16_t batchSize = 100;
+        uint16_t batchSize = 1000;
 
         while (!synced) {
             currentBlockHeight = chain.getCurrentBlockchainHeight() + 1;
