@@ -313,7 +313,7 @@ void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
     Chain &chain = Chain::Instance();
     Peers &peers = Peers::Instance();
     BlockCache &blockCache = BlockCache::Instance();
-    uint8_t peerBatch = 10;
+    uint8_t peerBatch = 100;
 
     bool done = false;
     uint32_t i = 0;
