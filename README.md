@@ -48,7 +48,7 @@ sudo systemctl enable ntp
 #### Install OpenSSL 1.1
 ```
 cd /usr/local/src
-sudo wget https://www.openssl.org/source/openssl-1.1.1d.tar.gz && sudo tar xzvf openssl-1.1.1d.tar.gz && cd openssl-1.1.1d
+sudo wget https://www.openssl.org/source/openssl-1.1.1f.tar.gz && sudo tar xzvf openssl-1.1.1f.tar.gz && cd openssl-1.1.1f
 sudo ./config -Wl,--enable-new-dtags,-rpath,'$(LIBRPATH)'
 sudo make
 sudo make install
