@@ -1,5 +1,6 @@
 
 #include <openssl/err.h>
+#include <openssl/x509.h>
 #include "Test.h"
 #include "../FS/FS.h"
 #include "../CertStore/CertStore.h"
@@ -11,10 +12,19 @@
 #include "../Time.h"
 #include "../Scripts/AddCertificateScript.h"
 #include "../CertStore/CertHelper.h"
+#include "../DB/DB.h"
+#include "../Consensus/Delegate.h"
+#include "../Consensus/VoteStore.h"
+#include "../Loader.h"
 
 void Test::importCACerts() {
 
+#ifdef TEST_MODE
+    Wallet& wallet = Wallet::Instance();
+    std::vector<unsigned char> privKey = wallet.getPrivateKeyAtPosition(0);
+#else
     std::vector<unsigned char> privKey = Hexdump::hexStringToVector(UBIC_ROOT_PRIVATE_KEY);
+#endif
 
     BIGNUM* keyBn = BN_new();
     BN_bin2bn(privKey.data(), (int)privKey.size(), keyBn);
@@ -42,10 +52,10 @@ void Test::importCACerts() {
     EVP_PKEY_print_private(bio_out, ubicKey, 1 , NULL);*/
 
     X509 *ubicCert = CertStore::createX509(reinterpret_cast<const unsigned char*>("CH"),
-                                          reinterpret_cast<const unsigned char*>("UBIC Team"),
-                                          reinterpret_cast<const unsigned char*>("Root Certificate"),
-                                          NULL,
-                                          ubicKey
+                                           reinterpret_cast<const unsigned char*>("UBIC Team"),
+                                           reinterpret_cast<const unsigned char*>("Root Certificate"),
+                                           NULL,
+                                           ubicKey
     );
 
     CertStore& certStore = CertStore::Instance();
@@ -155,7 +165,7 @@ void Test::importCACerts() {
             TransactionForNetwork transactionForNetwork;
             transactionForNetwork.setTransaction(*tx);
 
-            //txPool.appendTransaction(transactionForNetwork);
+            txPool.appendTransaction(transactionForNetwork, BROADCAST_TRANSACTION);
             cscaCounter++;
             //certStore.addCSCA(ca, header);
         }
@@ -277,12 +287,124 @@ void Test::importDSCCerts() {
 
             TransactionForNetwork transactionForNetwork;
             transactionForNetwork.setTransaction(*tx);
-            /*
-            if(txPool.appendTransaction(transactionForNetwork)) {
+
+            if(txPool.appendTransaction(transactionForNetwork, BROADCAST_TRANSACTION)) {
                 Log(LOG_LEVEL_INFO) << "appended ADD Certificate to transactions";
-            }*/
+            }
             dscCounter++;
         }
     }
     Log(LOG_LEVEL_INFO) << "added: " << dscCounter << " dsc certificates";
+}
+
+void Test::createRootCert() {
+    // use first wallet address for it
+
+
+    Wallet& wallet = Wallet::Instance();
+
+    X509 *ubicRootCert = create509(reinterpret_cast<const unsigned char*>("CH"),
+                                   reinterpret_cast<const unsigned char*>("UBIC Team"),
+                                   reinterpret_cast<const unsigned char*>("Testing Root Certificate"),
+                                   NULL,
+                                   NULL,
+                                   wallet.getPrivateKeyAtPosition(0)
+    );
+
+    if(ubicRootCert != nullptr) {
+        CertStore& certStore = CertStore::Instance();
+        Cert cert;
+        cert.setX509(ubicRootCert);
+        cert.setCurrencyId(0);
+        cert.setExpirationDate(Time::getCurrentTimestamp() + 60*60*24*365*10);
+
+        certStore.addUBICrootCert(&cert, 0);
+    }
+}
+
+void Test::createValidators() {
+    // use the 10 first wallet addresses for it
+
+    Wallet& wallet = Wallet::Instance();
+    DB& db = DB::Instance();
+
+    for(int i = 0; i < 10; i++) {
+        std::vector<unsigned char> publicKey = wallet.getPublicKeyAtPosition(i);
+        Delegate targetDelegate;
+
+        targetDelegate.setPublicKey(publicKey);
+        targetDelegate.setNonce(0);
+        targetDelegate.setBlockHashLastVote(std::vector<unsigned char>());
+        targetDelegate.setVoteCount(10);
+        targetDelegate.setUnVoteCount(0);
+
+        if(!db.serializeToDb(DB_VOTES, publicKey, targetDelegate)) {
+            Log(LOG_LEVEL_CRITICAL_ERROR) << "Cannot serialize delegate to DB";
+        }
+    }
+
+    VoteStore& voteStore = VoteStore::Instance();
+    voteStore.loadDelegates(); // reload delegates
+}
+
+
+X509* Test::create509(const unsigned char* c, const unsigned char* cn1, const unsigned char* cn2, X509* signer, EVP_PKEY *signerPkey, std::vector<unsigned char> privateKeyVector) {
+
+    EVP_PKEY* pkey = EVP_PKEY_new();
+    Wallet::privateKeyFromVector(pkey, privateKeyVector);
+
+    X509 *x509 = X509_new();
+    ASN1_INTEGER_set(X509_get_serialNumber(x509),1);
+    X509_gmtime_adj(X509_get_notBefore(x509),0);
+    X509_gmtime_adj(X509_get_notAfter(x509),(long)60*60*24*365*10);
+    X509_set_pubkey(x509,pkey);
+
+    X509_NAME *name = X509_get_subject_name(x509);
+    X509_NAME *issuerName = NULL;
+
+    X509_NAME_add_entry_by_txt(name,"C",
+                               MBSTRING_ASC, c, -1, -1, 0);
+    X509_NAME_add_entry_by_txt(name,"CN",
+                               MBSTRING_ASC, cn1, -1, -1, 0);
+    X509_NAME_add_entry_by_txt(name,"CN",
+                               MBSTRING_ASC, cn2, -1, -1, 0);
+    X509_set_subject_name(x509, name);
+
+    if(signer == NULL) {
+        issuerName = X509_get_subject_name(x509); //self signed
+    } else {
+        issuerName = X509_get_subject_name(signer);
+    }
+    X509_set_issuer_name(x509,issuerName);
+
+    if(signerPkey == NULL) {
+        if (X509_sign(x509, pkey, EVP_sha384())) {
+            Log(LOG_LEVEL_INFO) << "Successfully signed self signed certificate";
+        } else {
+            Log(LOG_LEVEL_ERROR) << "Failed to self sign certificate";
+        }
+    } else {
+        if (X509_sign(x509, signerPkey, EVP_sha384())) {
+            Log(LOG_LEVEL_INFO) << "Successfully signed certificate";
+        } else {
+            Log(LOG_LEVEL_ERROR) << "Failed to  sign certificate";
+        }
+    }
+
+    return x509;
+}
+
+void Test::sanitizeUbicFolder() {
+    FS::createDirectory(FS::getBasePath());
+    Loader::createTouchFilesAndDirectories();
+    FS::deleteDir(FS::getBlockIndexStorePath());
+    FS::deleteDir(FS::getBlockDatPath());
+    FS::deleteDir(FS::getCertDirectoryPath());
+    FS::deleteDir(FS::getX509DirectoryPath());
+    FS::deleteDir(FS::getAddressStorePath());
+    FS::deleteDir(FS::getVotesPath());
+    FS::deleteDir(FS::getDSCCounterStorePath());
+    FS::deleteDir(FS::getNTPSKStorePath());
+    FS::deleteDir(FS::getMyTransactionsPath());
+    FS::deleteFile(FS::getBestBlockHeadersPath());
 }
