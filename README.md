@@ -29,7 +29,7 @@ github.com/UBIC-repo
 #### Install dependencies
 ```
 sudo apt-get update
-sudo apt-get install git cmake gcc make libleveldb1d libpcsclite1 libpcsclite-dev libleveldb-dev libboost-all-dev gcc g++ ntp
+sudo apt-get install git cmake gcc make libleveldb-dev libpcsclite1 libpcsclite-dev libboost-all-dev gcc g++ ntp
 ```
 Verify that libboost is version >= 1.60 using ```apt-cache policy libboost-all-dev``` if it isn't run the commands bellow
 ```
