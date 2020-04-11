@@ -45,7 +45,7 @@ sudo apt-get install ntp
 sudo systemctl enable ntp
 ```
 
-#### Install OpenSSL 1.1
+#### Install OpenSSL 1.1.1d
 ```
 cd /usr/local/src
 sudo wget https://www.openssl.org/source/openssl-1.1.1f.tar.gz && sudo tar xzvf openssl-1.1.1f.tar.gz && cd openssl-1.1.1f
