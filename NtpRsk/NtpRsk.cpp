@@ -218,6 +218,14 @@ bool NtpRsk::verifyNtpRsk(NtpRskSignatureVerificationObject *ntpRskSignatureVeri
     if(BN_cmp(XT, t4) != 0) {
         std::cout << "BN_cmp(XT, t4) failed" << std::endl;
         BN_CTX_free(ctx);
+        BN_free(XT);
+        BN_free(m);
+        BN_free(nm);
+        BN_free(salt);
+        BN_free(d);
+        BN_free(e2);
+        BN_free(sub);
+        BN_free(add);
         return false;
     }
 
@@ -234,10 +242,26 @@ bool NtpRsk::verifyNtpRsk(NtpRskSignatureVerificationObject *ntpRskSignatureVeri
     if(BN_cmp(XT, t5) != 0) {
         std::cout << "BN_cmp(XT, t5) failed" << std::endl;
         BN_CTX_free(ctx);
+        BN_free(XT);
+        BN_free(m);
+        BN_free(nm);
+        BN_free(salt);
+        BN_free(d);
+        BN_free(e2);
+        BN_free(sub);
+        BN_free(add);
         return false;
     }
 
     BN_CTX_free(ctx);
+    BN_free(XT);
+    BN_free(m);
+    BN_free(nm);
+    BN_free(salt);
+    BN_free(d);
+    BN_free(e2);
+    BN_free(sub);
+    BN_free(add);
     return true;
 }
 
