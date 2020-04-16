@@ -91,6 +91,7 @@ bool Wallet::generateWallet() {
 
         EC_POINT_free(pubKey);
         BN_CTX_free(ctx);
+        BN_free(keyBn);
         EVP_PKEY_free(privateKey);
         EC_KEY_free(ecKey);
     }
