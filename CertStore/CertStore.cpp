@@ -463,10 +463,10 @@ void CertStore::loadFromFS() {
 
     std::vector<std::vector<unsigned char> > fileList = FS::readDir(path);
     for(std::vector<unsigned char> file : fileList) {
-        Cert* cert = new Cert();
-        FS::deserializeFromFile(file, *cert, CERT_SIZE_MAX);
-        cert->finishDeserialization("root");
-        this->RootList[cert->getId()] = *cert;
+        Cert cert;
+        FS::deserializeFromFile(file, cert, CERT_SIZE_MAX);
+        cert.finishDeserialization("root");
+        this->RootList[cert.getId()] = cert;
     }
     Log(LOG_LEVEL_INFO) << "Loaded root cert(s)";
 
@@ -475,10 +475,10 @@ void CertStore::loadFromFS() {
 
     fileList = FS::readDir(path);
     for(std::vector<unsigned char> file : fileList) {
-        Cert* cert = new Cert();
-        FS::deserializeFromFile(file, *cert, CERT_SIZE_MAX);
-        cert->finishDeserialization("csca");
-        this->CSCAList[cert->getId()] = *cert;
+        Cert cert;
+        FS::deserializeFromFile(file, cert, CERT_SIZE_MAX);
+        cert.finishDeserialization("csca");
+        this->CSCAList[cert.getId()] = cert;
     }
     Log(LOG_LEVEL_INFO) << "Loaded CSCA cert(s)";
 
