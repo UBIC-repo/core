@@ -11,13 +11,13 @@ void BlockStore::insertBlock(Block* block) {
     FS::serializeToFile(blockDatPath, *block);
     uint64_t ePosition = FS::getEofPosition(blockDatPath);
 
-    BlockIndex *index = new BlockIndex();
-    index->setBlockDatPath(blockDatPath);
-    index->setStartPosition(bPosition);
-    index->setSize(ePosition - bPosition);
+    BlockIndex index;
+    index.setBlockDatPath(blockDatPath);
+    index.setStartPosition(bPosition);
+    index.setSize(ePosition - bPosition);
 
     DB& db = DB::Instance();
-    db.serializeToDb(DB_BLOCK_INDEX, block->getHeader()->getHeaderHash(), *index);
+    db.serializeToDb(DB_BLOCK_INDEX, block->getHeader()->getHeaderHash(), index);
 }
 
 Block* BlockStore::getBlock(std::vector<unsigned char> blockHeaderHash) {
