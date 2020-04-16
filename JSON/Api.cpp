@@ -645,6 +645,7 @@ std::string Api::myTransactions() {
             if(txNbr > MAX_NUMBER_OF_MY_TRANSACTIONS_TO_DISPLAY) {
                 break;
             }
+            delete header;
         }
     }
 
@@ -2164,6 +2165,7 @@ std::string Api::getBlock(std::vector<unsigned char> blockHeaderHash) {
 
     std::stringstream ss;
     boost::property_tree::json_parser::write_json(ss, baseTree);
+    delete blockHeader;
 
     return ss.str();
 }
