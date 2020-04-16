@@ -330,6 +330,7 @@ bool BlockHelper::applyBlock(Block* block) {
                                     << " has been deactivated";
             }
         }
+        delete previousBlockHeader;
     }
 
     return true;
@@ -419,6 +420,7 @@ bool BlockHelper::undoBlock(Block* block) {
                 }
             }
         }
+        delete previousBlockHeader;
     }
 
     return true;
