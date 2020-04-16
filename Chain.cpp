@@ -140,6 +140,8 @@ bool Chain::connectBlock(Block* block, bool isRecursion) {
                 }
                 currentChainHeaderHash = currentChainHeader->getPreviousHeaderHash();
                 newChainHeaderHash = newChainHeader->getPreviousHeaderHash();
+                delete newChainHeader;
+                delete currentChainHeader;
 
                 for(auto toDoHeaderHash : toDo) {
                     auto found = std::find(toUndo.begin(), toUndo.end(), toDoHeaderHash);
@@ -291,7 +293,9 @@ uint32_t Chain::getBlockHeight(std::vector<unsigned char> blockHeaderHash) {
     BlockHeader* blockHeader = this->getBlockHeader(blockHeaderHash);
 
     if(blockHeader != nullptr) {
-        return blockHeader->getBlockHeight();
+        uint32_t height = blockHeader->getBlockHeight();
+        delete blockHeader;
+        return height;
     }
 
     return 0;
