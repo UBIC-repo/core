@@ -271,6 +271,7 @@ bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx, uint32_t block
             Log(LOG_LEVEL_ERROR) << "Failed to verify padding";
             Log(LOG_LEVEL_INFO) << "em : " << em;
             Log(LOG_LEVEL_INFO) << "em2 : " << em2;
+            delete ntpRskSignatureVerificationObject;
             return false;
         }
 
@@ -296,6 +297,7 @@ bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx, uint32_t block
             std::vector<unsigned char> passportHash = ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM());
             if (memcmp(digest, passportHash.data(), digestLength) != 0) {
                 Log(LOG_LEVEL_ERROR) << "Signed payload hash mismatch";
+                delete ntpRskSignatureVerificationObject;
                 return false;
             }
         }
@@ -304,14 +306,17 @@ bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx, uint32_t block
         DB& db = DB::Instance();
         if(db.isInDB(DB_NTPSK_ALREADY_USED, ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM()))) {
             Log(LOG_LEVEL_ERROR) << "NtpRsk " << ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM()) << " already used";
+            delete ntpRskSignatureVerificationObject;
             return false;
         }
 
         // Verify NtpEsk proof itself
         if(!NtpRsk::verifyNtpRsk(ntpRskSignatureVerificationObject)) {
             Log(LOG_LEVEL_ERROR) << "NtpRsk failed";
+            delete ntpRskSignatureVerificationObject;
             return false;
         }
+        delete ntpRskSignatureVerificationObject;
 
     } else {
         // is NtpEsk
@@ -346,6 +351,7 @@ bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx, uint32_t block
             EVP_MD_CTX_destroy(mdctx);
             if (memcmp(digest, ntpEskSignatureVerificationObject->getMessageHash().data(), digestLength) != 0) {
                 Log(LOG_LEVEL_ERROR) << "Signed payload hash mismatch";
+                delete ntpEskSignatureVerificationObject;
                 return false;
             }
         }
@@ -355,14 +361,18 @@ bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx, uint32_t block
         if (db.isInDB(DB_NTPSK_ALREADY_USED, ntpEskSignatureVerificationObject->getMessageHash())) {
             Log(LOG_LEVEL_ERROR) << "NtpEsk " << ntpEskSignatureVerificationObject->getMessageHash()
                                  << " already used";
+            delete ntpEskSignatureVerificationObject;
             return false;
         }
 
         // Verify NtpEsk proof itself
         if(!NtpEsk::verifyNtpEsk(ntpEskSignatureVerificationObject)) {
             Log(LOG_LEVEL_ERROR) << "NtpEsk failed";
+            delete ntpEskSignatureVerificationObject;
             return false;
         }
+
+        delete ntpEskSignatureVerificationObject;
     }
 
     return true;
