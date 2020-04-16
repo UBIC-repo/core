@@ -1897,10 +1897,10 @@ std::string Api::getWallet() {
         UAmount addressBalance = AddressHelper::getAmountWithUBI(&addressForStore);
         balance += addressBalance;
 
-        Address* address = new Address();
-        address->setScript(addressUScript);
+        Address address;
+        address.setScript(addressUScript);
 
-        addressTree.put("readable", Wallet::readableAddressFromAddress(*address));
+        addressTree.put("readable", Wallet::readableAddressFromAddress(address));
         addressTree.put("addressLink", Hexdump::vectorToHexString(addressLink));
         addressTree.put("hexscript", Hexdump::vectorToHexString(addressScript));
         addressTree.put("pubKey", Hexdump::vectorToHexString(wallet.getPublicKeyFromAddressLink(addressLink)));
