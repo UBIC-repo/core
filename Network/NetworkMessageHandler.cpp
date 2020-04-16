@@ -356,13 +356,13 @@ void NetworkMessageHandler::handleAskForPeers(PeerInterfacePtr recipient) {
 void NetworkMessageHandler::handleAskForBlockchainHeight(PeerInterfacePtr recipient) {
     Chain &chain = Chain::Instance();
 
-    TransmitBlockchainHeight* transmitBlockchainHeight = new TransmitBlockchainHeight();
-    transmitBlockchainHeight->height = chain.getCurrentBlockchainHeight();
+    TransmitBlockchainHeight transmitBlockchainHeight;
+    transmitBlockchainHeight.height = chain.getCurrentBlockchainHeight();
     if(chain.getBestBlockHeader() != nullptr) {
-        transmitBlockchainHeight->bestHeaderHash = chain.getBestBlockHeader()->getHeaderHash();
+        transmitBlockchainHeight.bestHeaderHash = chain.getBestBlockHeader()->getHeaderHash();
     }
 
-    recipient->deliver(NetworkMessageHelper::serializeToNetworkMessage(*transmitBlockchainHeight));
+    recipient->deliver(NetworkMessageHelper::serializeToNetworkMessage(transmitBlockchainHeight));
 }
 
 void NetworkMessageHandler::handleAskForBestBlockHeader(PeerInterfacePtr recipient) {
@@ -370,18 +370,18 @@ void NetworkMessageHandler::handleAskForBestBlockHeader(PeerInterfacePtr recipie
 }
 
 void NetworkMessageHandler::handleAskForVersion(PeerInterfacePtr recipient) {
-    TransmitVersion* transmitVersion =  new TransmitVersion();
-    transmitVersion->version = VERSION_16BITS;
+    TransmitVersion transmitVersion;
+    transmitVersion.version = VERSION_16BITS;
 
-    recipient->deliver(NetworkMessageHelper::serializeToNetworkMessage(*transmitVersion));
+    recipient->deliver(NetworkMessageHelper::serializeToNetworkMessage(transmitVersion));
 }
 
 void NetworkMessageHandler::handleAskForStatus(PeerInterfacePtr recipient) {
     Config &config = Config::Instance();
-    TransmitDonationAddress* transmitDonationAddress = new TransmitDonationAddress();
-    transmitDonationAddress->donationAddress = config.getDonationAddress();
+    TransmitDonationAddress transmitDonationAddress;
+    transmitDonationAddress.donationAddress = config.getDonationAddress();
 
-    recipient->deliver(NetworkMessageHelper::serializeToNetworkMessage(*transmitDonationAddress));
+    recipient->deliver(NetworkMessageHelper::serializeToNetworkMessage(transmitDonationAddress));
 }
 
 void NetworkMessageHandler::handleAskForDonationAddress(PeerInterfacePtr recipient) {
