@@ -64,11 +64,11 @@ public:
     bool loadDelegates() {
         DB& db = DB::Instance();
         for(std::vector<unsigned char> key : db.getAllKeys(DB_VOTES)) {
-            Delegate* delegate = new Delegate();
-            if(!db.deserializeFromDb(DB_VOTES, key, *delegate)) {
+            Delegate delegate;
+            if(!db.deserializeFromDb(DB_VOTES, key, delegate)) {
                 return false;
             }
-            this->allDelegates.insert(std::make_pair(delegate->getPublicKey(), *delegate));
+            this->allDelegates.insert(std::make_pair(delegate.getPublicKey(), delegate));
         }
 
         Log(LOG_LEVEL_INFO) << "this->allDelegates.size(): " << (uint64_t)this->allDelegates.size();
