@@ -181,9 +181,9 @@ bool CertStore::isCertSignedByCSCA(Cert* cert, uint32_t blockHeight) {
         X509_OBJECT *cscaObj = X509_OBJECT_new();
         X509_STORE_CTX_get_by_subject(ctx, X509_LU_X509, X509_get_issuer_name(cert->getX509()), cscaObj);
         X509* csca = X509_OBJECT_get0_X509(cscaObj);
-        Cert* cscaCert = new Cert();
-        cscaCert->setX509(csca);
-        Cert* recoveredCscaCert = this->getCscaCertWithCertId(cscaCert->getId());
+        Cert cscaCert;
+        cscaCert.setX509(csca);
+        Cert* recoveredCscaCert = this->getCscaCertWithCertId(cscaCert.getId());
 
         if(recoveredCscaCert->getId(), recoveredCscaCert->getCurrencyId() != Fixes::fixCertificateCurrencyID(cert->getId(), cert->getCurrencyId())) {
             Log(LOG_LEVEL_ERROR) << "DSC Cert: "
@@ -196,6 +196,8 @@ bool CertStore::isCertSignedByCSCA(Cert* cert, uint32_t blockHeight) {
                                  << recoveredCscaCert->getCurrencyId()
                                  << " don't have the same currency ID";
             X509_STORE_CTX_free(ctx);
+            X509_STORE_free(store);
+            X509_VERIFY_PARAM_free(param);
             return false;
         }
 
@@ -205,10 +207,14 @@ bool CertStore::isCertSignedByCSCA(Cert* cert, uint32_t blockHeight) {
         if(recoveredCscaCert->isMature(blockHeight)) {
             Log(LOG_LEVEL_INFO) << "DSC Cert is signed by mature CSCA: " << cert->getId();
             X509_STORE_CTX_free(ctx);
+            X509_STORE_free(store);
+            X509_VERIFY_PARAM_free(param);
             return true;
         }
         Log(LOG_LEVEL_INFO) << "DSC Cert is signed by CSCA, but " << cert->getId() << " is not yet mature";
         X509_STORE_CTX_free(ctx);
+        X509_STORE_free(store);
+        X509_VERIFY_PARAM_free(param);
         return false;
     }
 
@@ -220,7 +226,8 @@ bool CertStore::isCertSignedByCSCA(Cert* cert, uint32_t blockHeight) {
     Log(LOG_LEVEL_INFO) << "error depth: " << X509_STORE_CTX_get_error_depth(ctx);
 
     X509_STORE_CTX_free(ctx);
-
+    X509_STORE_free(store);
+    X509_VERIFY_PARAM_free(param);
     return false;
 }
 
