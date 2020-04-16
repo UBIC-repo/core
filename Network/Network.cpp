@@ -128,9 +128,9 @@ void Network::lookForPeers() {
 
 		    // transmit our own block height
 		    CDataStream s(SER_DISK, 1);
-		    TransmitBlockchainHeight *transmitBlockchainHeight = new TransmitBlockchainHeight();
-		    transmitBlockchainHeight->height = chain.getCurrentBlockchainHeight();
-		    s << *transmitBlockchainHeight;
+		    TransmitBlockchainHeight transmitBlockchainHeight;
+		    transmitBlockchainHeight.height = chain.getCurrentBlockchainHeight();
+		    s << transmitBlockchainHeight;
 
 		    NetworkMessage msg;
 		    msg.body_length(s.size());
@@ -141,8 +141,8 @@ void Network::lookForPeers() {
 
 		    //ask for blockheight
 		    CDataStream s2(SER_DISK, 1);
-		    AskForBlockchainHeight *askForBlockchainHeight = new AskForBlockchainHeight();
-		    s2 << *askForBlockchainHeight;
+		    AskForBlockchainHeight askForBlockchainHeight;
+		    s2 << askForBlockchainHeight;
 
 		    NetworkMessage msg2;
 		    msg2.body_length(s2.size());
