@@ -91,20 +91,20 @@ std::vector<unsigned char> TransactionHelper::getPassportHash(Transaction* tx, X
 
     if((uint32_t)script.getScript().at(0) % 2 == 0) {
         // is NtpRsk
-        NtpRskSignatureVerificationObject *ntpRskSignatureVerificationObject = new NtpRskSignatureVerificationObject();
+        NtpRskSignatureVerificationObject ntpRskSignatureVerificationObject;
 
         try {
-            srpScript >> *ntpRskSignatureVerificationObject;
+            srpScript >> ntpRskSignatureVerificationObject;
         } catch (const std::exception& e) {
             Log(LOG_LEVEL_ERROR) << "Failed to deserialize SCRIPT_REGISTER_PASSPORT payload";
             return std::vector<unsigned char>();
         }
 
-        return ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM());
+        return ECCtools::bnToVector(ntpRskSignatureVerificationObject.getM());
     } else {
         // is NtpEsk
 
-        NtpEskSignatureVerificationObject *ntpEskSignatureVerificationObject = new NtpEskSignatureVerificationObject();
+        NtpEskSignatureVerificationObject ntpEskSignatureVerificationObject;
         EC_KEY *ecKey;
         if(x509 != nullptr) {
             ecKey = EVP_PKEY_get1_EC_KEY(X509_get_pubkey(x509));
@@ -113,14 +113,14 @@ std::vector<unsigned char> TransactionHelper::getPassportHash(Transaction* tx, X
             Cert *cert = certStore.getDscCertWithCertId(tx->getTxIns().front().getInAddress());
             ecKey = EVP_PKEY_get1_EC_KEY(cert->getPubKey());
         }
-        ntpEskSignatureVerificationObject->setCurveParams(EC_KEY_get0_group(ecKey));
+        ntpEskSignatureVerificationObject.setCurveParams(EC_KEY_get0_group(ecKey));
         try {
-            srpScript >> *ntpEskSignatureVerificationObject;
+            srpScript >> ntpEskSignatureVerificationObject;
         } catch (const std::exception& e) {
             Log(LOG_LEVEL_ERROR) << "Failed to deserialize SCRIPT_REGISTER_PASSPORT payload";
             return std::vector<unsigned char>();
         }
-        return ntpEskSignatureVerificationObject->getMessageHash();
+        return ntpEskSignatureVerificationObject.getMessageHash();
     }
 }
 
