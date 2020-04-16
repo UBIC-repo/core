@@ -422,7 +422,7 @@ void NetworkMessageHandler::handleTransmitBlock(std::vector<unsigned char> block
     //verify if we asked for the block
     if(!blockCache.verifyAskedFor(recipient->getIp(), block.getHeader()->getHeaderHash(), block.getHeader()->getBlockHeight())) {
         BanList& banList = BanList::Instance();
-        Log(LOG_LEVEL_INFO) << "node:" << recipient->getIp() << "sent an unwanted block";
+        Log(LOG_LEVEL_INFO) << "node:" << recipient->getIp() << " sent an unwanted block";
         banList.appendBan(recipient->getIp(), BAN_INC_FOR_UNWANTED_BLOCK);
         return;
     }
@@ -484,9 +484,9 @@ void NetworkMessageHandler::handleTransmitPeers(TransmitPeers *transmitPeers, Pe
             Chain& chain = Chain::Instance();
 
             // transmit our own block height
-            TransmitBlockchainHeight *transmitBlockchainHeight = new TransmitBlockchainHeight();
-            transmitBlockchainHeight->height = chain.getCurrentBlockchainHeight();
-            peer->deliver(NetworkMessageHelper::serializeToNetworkMessage(*transmitBlockchainHeight));
+            TransmitBlockchainHeight transmitBlockchainHeight;
+            transmitBlockchainHeight.height = chain.getCurrentBlockchainHeight();
+            peer->deliver(NetworkMessageHelper::serializeToNetworkMessage(transmitBlockchainHeight));
 
             //ask for blockheight
             AskForBlockchainHeight askForBlockchainHeight;
