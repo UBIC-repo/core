@@ -140,12 +140,12 @@ bool Loader::loadBestBlockHeaders() {
     bool eof = false;
     std::vector<BlockHeader> bestBlockHeaders;
     while(!eof) {
-        BlockHeader* header = new BlockHeader();
-        if(!FS::deserializeFromFile(FS::getBestBlockHeadersPath(), BLOCK_SIZE_MAX, pos, *header, pos, eof)) {
+        BlockHeader header;
+        if(!FS::deserializeFromFile(FS::getBestBlockHeadersPath(), BLOCK_SIZE_MAX, pos, header, pos, eof)) {
             break;
         }
-        bestBlockHeaders.emplace_back(*header);
-        chain.setCurrentBlockchainHeight(header->getBlockHeight());
+        bestBlockHeaders.emplace_back(header);
+        chain.setCurrentBlockchainHeight(header.getBlockHeight());
     }
 
     if(bestBlockHeaders.empty()) {
