@@ -139,7 +139,9 @@ std::vector<unsigned char> FS::readFile(std::vector<unsigned char> path) {
     fread(pch, 1, (size_t)size, file);
     fclose(file);
 
-    return std::vector<unsigned char>(pch, pch + size);
+    std::vector<unsigned char> fileContent = std::vector<unsigned char>(pch, pch + size);
+    free(pch);
+    return fileContent;
 }
 
 std::vector<unsigned char> FS::readFile(std::vector<unsigned char> path, uint64_t startPosition, uint64_t size) {
@@ -170,11 +172,11 @@ std::vector<std::vector<unsigned char> > FS::readDir(std::vector<unsigned char> 
 
     const boost::filesystem::path p(pData);
     for(auto& entry : boost::make_iterator_range(boost::filesystem::directory_iterator(p), {})) {
-
         size_t pathLength = entry.path().string().length();
         char* cPath = (char*)malloc(sizeof(char) * (pathLength + 1));
         std::strcpy(cPath, entry.path().string().c_str());
         std::vector<unsigned char> dPath(cPath, cPath + pathLength);
+        free(cPath);
         rval.emplace_back(dPath);
     }
 
