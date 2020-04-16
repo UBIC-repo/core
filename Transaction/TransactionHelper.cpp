@@ -46,15 +46,15 @@ std::vector<unsigned char> TransactionHelper::getDeactivateCertificateScriptId(D
 
 std::vector<unsigned char> TransactionHelper::getTxId(Transaction* tx) {
     Transaction txClone = *tx;
-    UScript* emptyScript = new UScript();
+    UScript emptyScript;
     std::vector<unsigned char> emptyVector = std::vector<unsigned char>();
-    emptyScript->setScriptType(SCRIPT_EMPTY);
-    emptyScript->setScript(emptyVector);
+    emptyScript.setScriptType(SCRIPT_EMPTY);
+    emptyScript.setScript(emptyVector);
 
     std::vector<TxIn> cleanedTxIns;
     std::vector<TxIn> txIns = tx->getTxIns();
     for (std::vector<TxIn>::iterator txIn = txIns.begin(); txIn != txIns.end(); ++txIn) {
-        txIn->setScript(*emptyScript);
+        txIn->setScript(emptyScript);
         cleanedTxIns.emplace_back(*txIn);
     }
 
@@ -392,16 +392,21 @@ bool TransactionHelper::verifyNetworkTx(TransactionForNetwork* txForNetwork) {
         X509 *x509 = d2i_X509_bio(certbio, nullptr);
 
         if(x509 == nullptr) {
+            BIO_free(certbio);
             return false;
         }
 
         uint8_t currencyId = CertHelper::getCurrencyIdForCert(x509);
         if(currencyId == 0) {
+            X509_free(x509);
+            BIO_free(certbio);
             return false;
         }
 
         uint64_t expiration = CertHelper::calculateDSCExpirationDateForCert(x509);
         if(expiration < Time::getCurrentTimestamp() + 600) { //expired or going to expire very soon
+            X509_free(x509);
+            BIO_free(certbio);
             return false;
         }
 
@@ -416,14 +421,23 @@ bool TransactionHelper::verifyNetworkTx(TransactionForNetwork* txForNetwork) {
 
         if(certStore.getDscCertWithCertId(cert.getId()) != nullptr) {
             // This case was already tested previously and if we are here it failed
+            X509_free(x509);
+            BIO_free(certbio);
             return false;
         }
 
         if(!certStore.isCertSignedByCSCA(&cert, chain.getCurrentBlockchainHeight())) {
+            X509_free(x509);
+            BIO_free(certbio);
             return false;
         }
 
-        return verifyRegisterPassportTx(&tx, chain.getCurrentBlockchainHeight(), &cert);
+        bool verified = verifyRegisterPassportTx(&tx, chain.getCurrentBlockchainHeight(), &cert);
+
+        X509_free(x509);
+        BIO_free(certbio);
+
+        return verified;
     }
 
     return false;
@@ -705,6 +719,8 @@ bool TransactionHelper::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                     }
                 }
 
+                X509_free(x509);
+                BIO_free(certbio);
                 delete cert;
 
                 needToPayFee = false;
