@@ -623,6 +623,8 @@ UAmount32 BlockHelper::calculateUbiReceiverCount(Block* block, BlockHeader* prev
                     );
                     newUbiReceiverCount += toAdd;
                     delete cert;
+                    X509_free(x509);
+                    BIO_free(certbio);
                 }
             }
 
