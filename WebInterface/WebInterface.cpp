@@ -64,6 +64,7 @@ std::string readFile(std::string urlPath) {
     memcpy(cFileContent + vFileContent.size(), "\0", 1);
 
     std::string sFileContent(cFileContent, vFileContent.size());
+    free(cFileContent);
 
     return sFileContent;
 }
