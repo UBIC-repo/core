@@ -89,6 +89,8 @@ bool Wallet::generateWallet() {
         this->addressesLink.emplace_back(addressLink);
         //Log(LOG_LEVEL_INFO) << "added addressLink " << addressLink;
 
+        EC_POINT_free(pubKey);
+        BN_CTX_free(ctx);
         EVP_PKEY_free(privateKey);
         EC_KEY_free(ecKey);
     }
@@ -380,13 +382,13 @@ Address Wallet::addressFromPublicKey(std::vector<unsigned char> publicKey) {
     std::vector<unsigned char> sha256 = Sha256::sha256(publicKey);
     std::vector<unsigned char> ripemd160 = Ripemd160::ripemd160(sha256);
 
-    UScript* script = new UScript();
-    script->setScriptType(SCRIPT_PKH);
-    script->setScript(ripemd160);
+    UScript script;
+    script.setScriptType(SCRIPT_PKH);
+    script.setScript(ripemd160);
 
-    Address* addressObj = new Address();
-    addressObj->setScript(*script);
-    return *addressObj;
+    Address addressObj;
+    addressObj.setScript(script);
+    return addressObj;
 }
 
 Address Wallet::addressFromPrivateKey(EVP_PKEY *privateKey) {
@@ -394,10 +396,12 @@ Address Wallet::addressFromPrivateKey(EVP_PKEY *privateKey) {
     EC_KEY *privateEcKey = EVP_PKEY_get1_EC_KEY(privateKey);
     const EC_POINT* pubKeyPoint = EC_KEY_get0_public_key(privateEcKey);
 
-    std::vector<unsigned char> pubkeyVector = ECCtools::ecPointToVector(Wallet::getDefaultEcGroup(), pubKeyPoint);
+    EC_GROUP* ecGroup = Wallet::getDefaultEcGroup();
+    std::vector<unsigned char> pubkeyVector = ECCtools::ecPointToVector(ecGroup, pubKeyPoint);
 
     Address address = Wallet::addressFromPublicKey(pubkeyVector);
 
+    EC_GROUP_free(ecGroup);
     return address;
 }
 
