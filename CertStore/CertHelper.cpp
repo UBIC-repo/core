@@ -128,6 +128,8 @@ uint8_t CertHelper::getCurrencyIdForCert(X509* x509) {
         currencyId = CURRENCY_THAILAND;
     }
 
+    free(iso2code);
+
     return currencyId;
 }
 
