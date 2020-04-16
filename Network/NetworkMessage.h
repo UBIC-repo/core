@@ -121,14 +121,14 @@ public:
         CDataStream s(SER_DISK, 1);
         s << data;
 
-        NetworkMessage* msg = new NetworkMessage(s.size() + NetworkMessage::header_length);
+        NetworkMessage msg = NetworkMessage(s.size() + NetworkMessage::header_length);
 
-        msg->body_length(s.size());
-        std::memcpy(msg->body(), s.data(), msg->body_length());
-        msg->encode_header();
+        msg.body_length(s.size());
+        std::memcpy(msg.body(), s.data(), msg.body_length());
+        msg.encode_header();
         s.clear();
 
-        return *msg;
+        return msg;
     }
 };
 
