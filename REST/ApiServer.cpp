@@ -339,6 +339,7 @@ void ApiServer::run() {
                     boost::system::error_code ignored_error;
                     boost::asio::write(socket, boost::asio::buffer(responseBuffer, copySize), ignored_error);
                     cursor += 1024;
+                    free(responseBuffer);
                 }
                 socket.close();
                 free(buffer);
