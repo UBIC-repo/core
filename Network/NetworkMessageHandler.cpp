@@ -26,22 +26,21 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
     Log(LOG_LEVEL_INFO) << "NetworkMessageHandler::handleNetworkMessage() commandType: " << commandType;
     switch (commandType) {
         case ASK_FOR_BLOCKS_COMMAND: {
-            AskForBlocks *askForBlocks = new AskForBlocks();
+            AskForBlocks askForBlocks;
             try {
-                s >> *askForBlocks;
+                s >> askForBlocks;
             } catch (const std::exception& e) {
                 Log(LOG_LEVEL_ERROR) << "Error while deserializing ASK_FOR_BLOCKS_COMMAND from peer: " << recipient->getIp()
                                      << " terminated with exception: " << e.what();
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleAskForBlocks(askForBlocks, recipient);
-            delete askForBlocks;
             break;
         }
         case ASK_FOR_BLOCK_COMMAND: {
-            AskForBlock *askForBlock = new AskForBlock();
+            AskForBlock askForBlock;
             try {
-                s >> *askForBlock;
+                s >> askForBlock;
             } catch (const std::exception& e) {
                 Log(LOG_LEVEL_ERROR) << "Error while deserializing ASK_FOR_BLOCK_COMMAND from peer: " << recipient->getIp()
                                      << " terminated with exception: " << e.what();
