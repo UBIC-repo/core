@@ -11,8 +11,8 @@ typedef std::shared_ptr<PeerInterface> PeerInterfacePtr;
 class NetworkMessageHandler {
 private:
 
-    static void handleAskForBlocks(AskForBlocks *askForBlocks, PeerInterfacePtr recipient);
-    static void handleAskForBlock(AskForBlock *askForBlock, PeerInterfacePtr recipient);
+    static void handleAskForBlocks(AskForBlocks askForBlocks, PeerInterfacePtr recipient);
+    static void handleAskForBlock(AskForBlock askForBlock, PeerInterfacePtr recipient);
     static void handleAskForPeers(PeerInterfacePtr recipient);
     static void handleAskForBlockchainHeight(PeerInterfacePtr recipient);
     static void handleAskForBestBlockHeader(PeerInterfacePtr recipient);
