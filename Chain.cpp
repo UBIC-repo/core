@@ -266,8 +266,9 @@ bool Chain::connectBlock(Block* block, bool isRecursion) {
 
     //update best blocks
     this->bestBlockHeight = header->getBlockHeight();
-    this->bestBlocks.clear();
-    this->bestBlocks.emplace_back(*header);
+    std::vector<BlockHeader> newBestBlocks = std::vector<BlockHeader>();
+    newBestBlocks.emplace_back(*header);
+    this->setBestBlockHeaders(newBestBlocks);
     db.putInDB(DB_BLOCK_HEADERS, header->getBlockHeight(), header->getHeaderHash());
 
     FS::clearFile(FS::getBestBlockHeadersPath());
