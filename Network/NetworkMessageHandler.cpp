@@ -48,8 +48,7 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleAskForBlock(askForBlock, recipient);
-            free(askForBlock->blockHeaderHash.data());
-            delete askForBlock;
+
             break;
         }
         case ASK_FOR_PEERS_COMMAND: {
@@ -215,16 +214,16 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
     delete networkMessage;
 }
 
-void NetworkMessageHandler::handleAskForBlocks(AskForBlocks *askForBlocks, PeerInterfacePtr recipient) {
+void NetworkMessageHandler::handleAskForBlocks(AskForBlocks askForBlocks, PeerInterfacePtr recipient) {
 
     Chain &chain = Chain::Instance();
     BlockStore *blockStore = new BlockStore();
 
-    uint64_t startBlockHeight = askForBlocks->startBlockHeight;
-    uint64_t endBlockHeight = startBlockHeight + (askForBlocks->count - 1);
+    uint64_t startBlockHeight = askForBlocks.startBlockHeight;
+    uint64_t endBlockHeight = startBlockHeight + (askForBlocks.count - 1);
 
 
-    Log(LOG_LEVEL_INFO) << "Peer asked for " << askForBlocks->count << " starting from " << askForBlocks->startBlockHeight;
+    Log(LOG_LEVEL_INFO) << "Peer asked for " << askForBlocks.count << " starting from " << askForBlocks.startBlockHeight;
 
     if(recipient.get()->getVersion() >= 32) {
         uint64_t currentNetworkMessageSize = 1000;
@@ -305,19 +304,19 @@ void NetworkMessageHandler::handleAskForBlocks(AskForBlocks *askForBlocks, PeerI
     }
 }
 
-void NetworkMessageHandler::handleAskForBlock(AskForBlock *askForBlock, PeerInterfacePtr recipient) {
+void NetworkMessageHandler::handleAskForBlock(AskForBlock askForBlock, PeerInterfacePtr recipient) {
 
     BlockStore* blockStore = new BlockStore();
 
     TransmitBlock* transmitBlock = new TransmitBlock();
 
-    if(askForBlock->blockHeaderHash.size() > 0) {
-        Log(LOG_LEVEL_INFO) << "Peer asked for Block with hash" << askForBlock->blockHeaderHash;
-        transmitBlock->block = blockStore->getRawBlockVector(askForBlock->blockHeaderHash);
+    if(askForBlock.blockHeaderHash.size() > 0) {
+        Log(LOG_LEVEL_INFO) << "Peer asked for Block with hash" << askForBlock.blockHeaderHash;
+        transmitBlock->block = blockStore->getRawBlockVector(askForBlock.blockHeaderHash);
     } else {
         Chain &chain = Chain::Instance();
-        Log(LOG_LEVEL_INFO) << "Peer asked for Block with height" << askForBlock->blockHeight;
-        BlockHeader* blockHeader = chain.getBlockHeader(askForBlock->blockHeight);
+        Log(LOG_LEVEL_INFO) << "Peer asked for Block with height" << askForBlock.blockHeight;
+        BlockHeader* blockHeader = chain.getBlockHeader(askForBlock.blockHeight);
         if(blockHeader != nullptr) {
             std::vector<unsigned char> headerHash = blockHeader->getHeaderHash();
             transmitBlock->block = blockStore->getRawBlockVector(headerHash);
