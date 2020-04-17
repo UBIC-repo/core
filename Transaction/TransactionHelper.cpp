@@ -395,10 +395,8 @@ bool TransactionHelper::verifyNetworkTx(TransactionForNetwork* txForNetwork) {
     }
 
     if(verifyTx(&tx, IGNORE_IS_IN_HEADER, bestHeader)) {
-        delete bestHeader;
         return true;
     }
-    delete bestHeader;
 
     if(isRegisterPassport(&tx) && txForNetwork->getAdditionalPayloadType() == PAYLOAD_TYPE_DSC_CERTIFICATE) {
         // the passport transaction is a special case
