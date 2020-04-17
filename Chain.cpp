@@ -96,6 +96,8 @@ bool Chain::connectBlock(Block* block, bool isRecursion) {
         }
     }
 
+    BlockHeader* bestBlockHeader = this->getBestBlockHeader();
+
     if(this->bestBlockHeight >= header->getBlockHeight()) {
 
         // fork without consequences
@@ -112,8 +114,8 @@ bool Chain::connectBlock(Block* block, bool isRecursion) {
 
         connectBlockMutex.unlock();
         return true;
-    } else if(this->getBestBlockHeader() != nullptr && !block->getHeader()->getPreviousHeaderHash().empty()) {
-        if (this->getBestBlockHeader()->getHeaderHash() != block->getHeader()->getPreviousHeaderHash()) {
+    } else if(bestBlockHeader != nullptr && !block->getHeader()->getPreviousHeaderHash().empty()) {
+        if (bestBlockHeader->getHeaderHash() != block->getHeader()->getPreviousHeaderHash()) {
             // fork with consequences
             // Need to solve the fork
             Log(LOG_LEVEL_INFO) << "Started trying to solve a fork";
@@ -121,7 +123,7 @@ bool Chain::connectBlock(Block* block, bool isRecursion) {
             std::vector<std::vector<unsigned char> > toUndo;
             std::vector<std::vector<unsigned char> > toDo;
 
-            std::vector<unsigned char> currentChainHeaderHash = this->getBestBlockHeader()->getHeaderHash();
+            std::vector<unsigned char> currentChainHeaderHash = bestBlockHeader->getHeaderHash();
             std::vector<unsigned char> newChainHeaderHash = block->getHeader()->getPreviousHeaderHash();
             std::vector<unsigned char> commonHeaderHash;
 
@@ -352,8 +354,8 @@ void Chain::setCurrentBlockchainHeight(uint32_t bestHeight) {
     this->bestBlockHeight = bestHeight;
 }
 
-void Chain::setBestBlockHeaders(std::vector<BlockHeader> bestBlocks) {
-    this->bestBlocks = bestBlocks;
+void Chain::setBestBlockHeaders(std::vector<BlockHeader> newBestBlocks) {
+    this->bestBlocks = newBestBlocks;
 }
 
 std::vector<BlockHeader> Chain::getBestBlockHeaders() {
