@@ -387,9 +387,18 @@ bool TransactionHelper::verifyNetworkTx(TransactionForNetwork* txForNetwork) {
     Transaction tx = txForNetwork->getTransaction();
     Chain& chain = Chain::Instance();
 
-    if(verifyTx(&tx, IGNORE_IS_IN_HEADER, chain.getBestBlockHeader())) {
+    BlockHeader* bestHeader = chain.getBestBlockHeader();
+
+    if(bestHeader == nullptr) {
+        // something is wrong with our node, we can not verify the transaction
+        return false;
+    }
+
+    if(verifyTx(&tx, IGNORE_IS_IN_HEADER, bestHeader)) {
+        delete bestHeader;
         return true;
     }
+    delete bestHeader;
 
     if(isRegisterPassport(&tx) && txForNetwork->getAdditionalPayloadType() == PAYLOAD_TYPE_DSC_CERTIFICATE) {
         // the passport transaction is a special case
