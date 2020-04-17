@@ -84,107 +84,99 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
             break;
         }
         case TRANSMIT_TRANSACTIONS_COMMAND: {
-            TransmitTransactions *transmitTransactions = new TransmitTransactions();
+            TransmitTransactions transmitTransactions;
             try {
-                s >> *transmitTransactions;
+                s >> transmitTransactions;
             } catch (const std::exception& e) {
                 Log(LOG_LEVEL_ERROR) << "Error while deserializing TRANSMIT_TRANSACTIONS_COMMAND from peer: " << recipient->getIp()
                                      << " terminated with exception: " << e.what();
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleTransmitTransactions(transmitTransactions, recipient);
-            delete transmitTransactions;
             break;
         }
         case TRANSMIT_BLOCK_COMMAND: {
-            TransmitBlock *transmitBlock = new TransmitBlock();
+            TransmitBlock transmitBlock;
             try {
-                s >> *transmitBlock;
+                s >> transmitBlock;
             } catch (const std::exception& e) {
                 Log(LOG_LEVEL_ERROR) << "Error while deserializing TRANSMIT_BLOCK_COMMAND from peer: " << recipient->getIp()
                                      << " terminated with exception: " << e.what();
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleTransmitBlock(transmitBlock, recipient);
-            delete transmitBlock;
             break;
         }
         case TRANSMIT_BLOCKS_COMMAND: {
-            TransmitBlocks *transmitBlocks = new TransmitBlocks();
+            TransmitBlocks transmitBlocks;
             try {
-                s >> *transmitBlocks;
+                s >> transmitBlocks;
             } catch (const std::exception& e) {
                 Log(LOG_LEVEL_ERROR) << "Error while deserializing TRANSMIT_BLOCK_COMMAND from peer: " << recipient->getIp()
                                      << " terminated with exception: " << e.what();
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleTransmitBlocks(transmitBlocks, recipient);
-            delete transmitBlocks;
             break;
         }
         case TRANSMIT_PEERS_COMMAND: {
-            TransmitPeers *transmitPeers = new TransmitPeers();
+            TransmitPeers transmitPeers;
             try {
-                s >> *transmitPeers;
+                s >> transmitPeers;
             } catch (const std::exception& e) {
                 Log(LOG_LEVEL_ERROR) << "Error while deserializing TRANSMIT_PEERS_COMMAND from peer: " << recipient->getIp()
                                      << " terminated with exception: " << e.what();
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleTransmitPeers(transmitPeers, recipient);
-            delete transmitPeers;
             break;
         }
         case TRANSMIT_BLOCKCHAIN_HEIGHT_COMMAND: {
-            TransmitBlockchainHeight *transmitBlockchainHeight = new TransmitBlockchainHeight();
+            TransmitBlockchainHeight transmitBlockchainHeight;
             try {
-                s >> *transmitBlockchainHeight;
+                s >> transmitBlockchainHeight;
             } catch (const std::exception& e) {
                 Log(LOG_LEVEL_ERROR) << "Error while deserializing TRANSMIT_BLOCKCHAIN_HEIGHT_COMMAND from peer: " << recipient->getIp()
                                      << " terminated with exception: " << e.what();
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleTransmitBlockchainHeight(transmitBlockchainHeight, recipient);
-            delete transmitBlockchainHeight;
             break;
         }
         case TRANSMIT_BEST_BLOCK_HEADER_COMMAND: {
-            TransmitBestBlockHeader *transmitBestBlockHeader = new TransmitBestBlockHeader();
+            TransmitBestBlockHeader transmitBestBlockHeader;
             try {
-                s >> *transmitBestBlockHeader;
+                s >> transmitBestBlockHeader;
             } catch (const std::exception& e) {
                 Log(LOG_LEVEL_ERROR) << "Error while deserializing TRANSMIT_BEST_BLOCK_HEADER_COMMAND from peer: " << recipient->getIp()
                                      << " terminated with exception: " << e.what();
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleTransmitBestBlockHeader(transmitBestBlockHeader, recipient);
-            delete transmitBestBlockHeader;
             break;
         }
         case TRANSMIT_VERSION_COMMAND: {
-            TransmitVersion *transmitVersion = new TransmitVersion();
+            TransmitVersion transmitVersion;
             try {
-                s >> *transmitVersion;
+                s >> transmitVersion;
             } catch (const std::exception& e) {
                 Log(LOG_LEVEL_ERROR) << "Error while deserializing TRANSMIT_VERSION_COMMAND from peer: " << recipient->getIp()
                                      << " terminated with exception: " << e.what();
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleTransmitVersion(transmitVersion, recipient);
-            delete transmitVersion;
             break;
         }
         case TRANSMIT_STATUS_COMMAND: {
-            TransmitStatus *transmitStatus = new TransmitStatus();
+            TransmitStatus transmitStatus;
             try {
-                s >> *transmitStatus;
+                s >> transmitStatus;
             } catch (const std::exception& e) {
                 Log(LOG_LEVEL_ERROR) << "Error while deserializing TRANSMIT_STATUS_COMMAND from peer: " << recipient->getIp()
                                      << " terminated with exception: " << e.what();
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleTransmitStatus(transmitStatus, recipient);
-            delete transmitStatus;
             break;
         }
         case TRANSMIT_LEAVE_COMMAND: {
@@ -192,16 +184,15 @@ void NetworkMessageHandler::handleNetworkMessage(NetworkMessage *networkMessage,
             break;
         }
         case TRANSMIT_DONATION_ADDRESS_COMMAND: {
-            TransmitDonationAddress *transmitDonationAddress = new TransmitDonationAddress();
+            TransmitDonationAddress transmitDonationAddress;
             try {
-                s >> *transmitDonationAddress;
+                s >> transmitDonationAddress;
             } catch (const std::exception& e) {
                 Log(LOG_LEVEL_ERROR) << "Error while deserializing TRANSMIT_DONATION_ADDRESS_COMMAND from peer: " << recipient->getIp()
                                      << " terminated with exception: " << e.what();
                 banList.appendBan(recipient->getIp(), BAN_INC_FOR_INVALID_MESSAGE);
             }
             NetworkMessageHandler::handleTransmitDonationAddress(transmitDonationAddress, recipient);
-            delete transmitDonationAddress;
             break;
         }
         default:
@@ -307,31 +298,28 @@ void NetworkMessageHandler::handleAskForBlock(AskForBlock askForBlock, PeerInter
 
     BlockStore* blockStore = new BlockStore();
 
-    TransmitBlock* transmitBlock = new TransmitBlock();
+    TransmitBlock transmitBlock;
 
     if(askForBlock.blockHeaderHash.size() > 0) {
         Log(LOG_LEVEL_INFO) << "Peer asked for Block with hash" << askForBlock.blockHeaderHash;
-        transmitBlock->block = blockStore->getRawBlockVector(askForBlock.blockHeaderHash);
+        transmitBlock.block = blockStore->getRawBlockVector(askForBlock.blockHeaderHash);
     } else {
         Chain &chain = Chain::Instance();
         Log(LOG_LEVEL_INFO) << "Peer asked for Block with height" << askForBlock.blockHeight;
         BlockHeader* blockHeader = chain.getBlockHeader(askForBlock.blockHeight);
         if(blockHeader != nullptr) {
             std::vector<unsigned char> headerHash = blockHeader->getHeaderHash();
-            transmitBlock->block = blockStore->getRawBlockVector(headerHash);
+            transmitBlock.block = blockStore->getRawBlockVector(headerHash);
         }
     }
 
-    if(transmitBlock->block.size() <= 0) {
+    if(transmitBlock.block.size() <= 0) {
         Log(LOG_LEVEL_INFO) << "Peer asked for Block that couldn't be located";
         return;
     }
 
     CDataStream s(SER_DISK, 1);
-    s << *transmitBlock;
-
-    free(transmitBlock->block.data());
-    delete transmitBlock;
+    s << transmitBlock;
     
     NetworkMessage msg;
     msg.body_length(s.size());
@@ -386,10 +374,10 @@ void NetworkMessageHandler::handleAskForDonationAddress(PeerInterfacePtr recipie
 
 }
 
-void NetworkMessageHandler::handleTransmitTransactions(TransmitTransactions *transmitBlocks, PeerInterfacePtr recipient) {
+void NetworkMessageHandler::handleTransmitTransactions(TransmitTransactions transmitTransactions, PeerInterfacePtr recipient) {
     TxPool &txPool = TxPool::Instance();
 
-    for(TransactionForNetwork tx : transmitBlocks->transactions) {
+    for(TransactionForNetwork tx : transmitTransactions.transactions) {
         txPool.appendTransaction(tx, BROADCAST_TRANSACTION);
     }
 }
@@ -428,24 +416,24 @@ void NetworkMessageHandler::handleTransmitBlock(std::vector<unsigned char> block
     blockCache.appendBlock(recipient, &block);
 }
 
-void NetworkMessageHandler::handleTransmitBlock(TransmitBlock *transmitBlock, PeerInterfacePtr recipient) {
-    NetworkMessageHandler::handleTransmitBlock(transmitBlock->block, recipient);
+void NetworkMessageHandler::handleTransmitBlock(TransmitBlock transmitBlock, PeerInterfacePtr recipient) {
+    NetworkMessageHandler::handleTransmitBlock(transmitBlock.block, recipient);
 }
 
-void NetworkMessageHandler::handleTransmitBlocks(TransmitBlocks *transmitBlocks, PeerInterfacePtr recipient) {
-    for(auto blockVector: transmitBlocks->blocks) {
+void NetworkMessageHandler::handleTransmitBlocks(TransmitBlocks transmitBlocks, PeerInterfacePtr recipient) {
+    for(auto blockVector: transmitBlocks.blocks) {
         NetworkMessageHandler::handleTransmitBlock(blockVector, recipient);
     }
 }
 
-void NetworkMessageHandler::handleTransmitPeers(TransmitPeers *transmitPeers, PeerInterfacePtr recipient) {
+void NetworkMessageHandler::handleTransmitPeers(TransmitPeers transmitPeers, PeerInterfacePtr recipient) {
     Peers& peers = Peers::Instance();
-    if(transmitPeers->ipList.size() > 10) {
+    if(transmitPeers.ipList.size() > 10) {
         Log(LOG_LEVEL_WARNING) << "Peer: " << recipient->getIp() << " has transmitted too many peers";
         return;
     }
 
-    for(std::string ip : transmitPeers->ipList) {
+    for(std::string ip : transmitPeers.ipList) {
         if(ip == Network::myIP) {
             Log(LOG_LEVEL_INFO) << "Cannot add ip: " << ip << " because it is your own IP";
             continue;
@@ -499,22 +487,22 @@ void NetworkMessageHandler::handleTransmitPeers(TransmitPeers *transmitPeers, Pe
     }
 }
 
-void NetworkMessageHandler::handleTransmitBlockchainHeight(TransmitBlockchainHeight *transmitBlockchainHeight, PeerInterfacePtr recipient) {
+void NetworkMessageHandler::handleTransmitBlockchainHeight(TransmitBlockchainHeight transmitBlockchainHeight, PeerInterfacePtr recipient) {
 
     Log(LOG_LEVEL_INFO) << "NetworkMessageHandler::handleTransmitBlockchainHeight()";
     Chain &chain = Chain::Instance();
     uint32_t myHeight = chain.getCurrentBlockchainHeight();
 
-    recipient->setBlockHeight((uint32_t)transmitBlockchainHeight->height);
+    recipient->setBlockHeight((uint32_t)transmitBlockchainHeight.height);
     Log(LOG_LEVEL_INFO) << "recipient: " << recipient->getIp() << ", height:" << recipient->getBlockHeight();
 
     // if we don't have the block(s) ask for it/them
 
     // if there are less than 10 blocks difference just ask for each of them
-    if(transmitBlockchainHeight->height > myHeight && (myHeight + 10 > transmitBlockchainHeight->height)) {
+    if(transmitBlockchainHeight.height > myHeight && (myHeight + 10 > transmitBlockchainHeight.height)) {
 
         std::vector<uint32_t> askedBlockHeights;
-        for(uint32_t i = myHeight; i <= transmitBlockchainHeight->height; i++) {
+        for(uint32_t i = myHeight; i <= transmitBlockchainHeight.height; i++) {
             askedBlockHeights.emplace_back(i);
         }
         BlockCache& blockCache = BlockCache::Instance();
@@ -522,28 +510,28 @@ void NetworkMessageHandler::handleTransmitBlockchainHeight(TransmitBlockchainHei
 
         AskForBlocks askForBlocks;
         askForBlocks.startBlockHeight = myHeight;
-        askForBlocks.count = transmitBlockchainHeight->height - myHeight + 1;
+        askForBlocks.count = transmitBlockchainHeight.height - myHeight + 1;
 
         recipient->deliver(
                 NetworkMessageHelper::serializeToNetworkMessage(askForBlocks)
         );
     // if the difference is to big start new sync procedure
-    } else if(transmitBlockchainHeight->height > myHeight) {
+    } else if(transmitBlockchainHeight.height > myHeight) {
         Network::synced = false;
         Network &network = Network::Instance();
         network.syncBlockchain();
     }
 }
 
-void NetworkMessageHandler::handleTransmitBestBlockHeader(TransmitBestBlockHeader *transmitBestBlockHeader, PeerInterfacePtr recipient) {
+void NetworkMessageHandler::handleTransmitBestBlockHeader(TransmitBestBlockHeader transmitBestBlockHeader, PeerInterfacePtr recipient) {
 
 }
 
-void NetworkMessageHandler::handleTransmitVersion(TransmitVersion *transmitVersion, PeerInterfacePtr recipient) {
-    recipient->setVersion(transmitVersion->version);
+void NetworkMessageHandler::handleTransmitVersion(TransmitVersion transmitVersion, PeerInterfacePtr recipient) {
+    recipient->setVersion(transmitVersion.version);
 }
 
-void NetworkMessageHandler::handleTransmitStatus(TransmitStatus *transmitStatus, PeerInterfacePtr recipient) {
+void NetworkMessageHandler::handleTransmitStatus(TransmitStatus transmitStatus, PeerInterfacePtr recipient) {
     std::string ip = recipient->getIp();
 }
 
@@ -552,8 +540,8 @@ void NetworkMessageHandler::handleTransmitLeave(PeerInterfacePtr recipient) {
     peers.disconnect(recipient.get()->getIp());
 }
 
-void NetworkMessageHandler::handleTransmitDonationAddress(TransmitDonationAddress* transmitDonationAddress, PeerInterfacePtr recipient) {
-    if(!transmitDonationAddress->donationAddress.empty()) {
-        recipient->setDonationAddress(transmitDonationAddress->donationAddress);
+void NetworkMessageHandler::handleTransmitDonationAddress(TransmitDonationAddress transmitDonationAddress, PeerInterfacePtr recipient) {
+    if(!transmitDonationAddress.donationAddress.empty()) {
+        recipient->setDonationAddress(transmitDonationAddress.donationAddress);
     }
 }
