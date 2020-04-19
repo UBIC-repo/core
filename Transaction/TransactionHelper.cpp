@@ -375,6 +375,19 @@ bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx, uint32_t block
         delete ntpEskSignatureVerificationObject;
     }
 
+    if (blockHeight > MAXIMUM_PASSPORTS_PER_ADDRESS_ACTIVATION_HEIGHT) {
+        TxOut txOut = tx->getTxOuts().front();
+        UScript outScript = txOut.getScript();
+        AddressStore &addressStore = AddressStore::Instance();
+        std::vector<unsigned char> addressKey = AddressHelper::addressLinkFromScript(outScript);
+        AddressForStore outAddress = addressStore.getAddressFromStore(addressKey);
+
+        if (!outAddress.getDscToAddressLinks().empty() &&
+            outAddress.getDscToAddressLinks().size() > MAXIMUM_PASSPORTS_PER_ADDRESS) {
+            return false;
+        }
+    }
+
     return true;
 }
 
