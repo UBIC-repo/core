@@ -189,6 +189,8 @@
 #define MAXIMUM_DELEGATE_COUNT 51
 #define MINIMUM_DELEGATE_VOTES 7
 
+#define MAXIMUM_PASSPORTS_PER_ADDRESS 6
+
 #if defined(__APPLE__)
     #ifdef TEST_MODE
         #define BASE_PATH "/Applications/UBIC-test/"
