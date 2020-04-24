@@ -119,7 +119,8 @@ bool PKCS7Parser::isRSA() {
     if (signatureNid == NID_sha224WithRSAEncryption ||
         signatureNid == NID_sha256WithRSAEncryption ||
         signatureNid == NID_sha384WithRSAEncryption ||
-        signatureNid == NID_sha512WithRSAEncryption) {
+        signatureNid == NID_sha512WithRSAEncryption ||
+        signatureNid == NID_rsassaPss) {
         return true;
     }
 
