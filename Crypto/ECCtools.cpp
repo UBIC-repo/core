@@ -21,7 +21,7 @@ EC_POINT* ECCtools::vectorToEcPoint(const EC_GROUP* curveParams, std::vector<uns
 }
 
 std::vector<unsigned char> ECCtools::bnToVector(const BIGNUM* num) {
-    unsigned char binNum[256];
+    unsigned char binNum[512];
     int length = BN_bn2bin(num, binNum);
 
     std::vector<unsigned char> binVector(binNum, binNum + length);
