@@ -462,6 +462,22 @@ bool TransactionHelper::verifyNetworkTx(TransactionForNetwork* txForNetwork) {
             return false;
         }
 
+        // if it's an RSA certificate verify that the exponent >= 65537
+        EVP_PKEY* pkey = X509_get0_pubkey(x509);
+        RSA* rsa = EVP_PKEY_get1_RSA(pkey);
+
+        if(rsa != nullptr) {
+            const BIGNUM* exponent = BN_new();
+            BIGNUM* minExponent = BN_new();
+            RSA_get0_key(rsa, nullptr, &exponent, nullptr);
+            BN_dec2bn(&minExponent, "65537");
+
+            if (BN_cmp(exponent, minExponent) == -1) {
+                Log(LOG_LEVEL_ERROR) << "SCRIPT_ADD_CERTIFICATE failed because RSA exponent is too small minimum required is 65537";
+                return false;
+            }
+        }
+
         bool verified = verifyRegisterPassportTx(&tx, chain.getCurrentBlockchainHeight(), &cert);
 
         X509_free(x509);
