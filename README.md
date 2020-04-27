@@ -17,6 +17,8 @@ The UBIC-Wallet is still in an early stage but does provide all basic functional
 If you like the idea of the project you can support its development on github: github.com/rgex/UBIC-android-wallet &
 github.com/UBIC-repo
 
+ - [Block explorer](https://ubic.network)
+ - [UBIC Website](https://ubic.app)
  - [Whitepaper](https://github.com/UBIC-repo/Whitepaper/blob/master/README.md)
  - [Reddit](https://www.reddit.com/r/UBIC/)
  - [Bitcointalk announcement](https://bitcointalk.org/index.php?topic=3021063.0)
