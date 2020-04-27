@@ -8,8 +8,8 @@
 #include <openssl/ossl_typ.h>
 #include <openssl/ec.h>
 
-#define VERSION "0.4.0"
-#define VERSION_16BITS 31
+#define VERSION "0.4.2"
+#define VERSION_16BITS 42
 
 #define CURRENCY_SWITZERLAND 1
 #define CURRENCY_GERMANY 2
