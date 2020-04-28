@@ -1,6 +1,10 @@
 [![GitHub license](https://img.shields.io/github/license/UBIC-repo/core)](https://github.com/UBIC-repo/core/blob/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/UBIC-repo/core)](https://github.com/UBIC-repo/core/releases/)
 
+WARNING
+===============
+
+This piece of software is provided without warranty of any kind, use it at your own risk.
 
 # Overview
 
