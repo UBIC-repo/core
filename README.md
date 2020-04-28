@@ -33,8 +33,10 @@ github.com/UBIC-repo
 sudo apt-get update
 sudo apt-get install git cmake gcc make libleveldb-dev libpcsclite1 libpcsclite-dev libboost-all-dev gcc g++ ntp
 ```
+
 Verify that libboost is version >= 1.60 using ```apt-cache policy libboost-all-dev``` if it isn't run the commands bellow
 ```
+/!\ only if apt-cache policy libboost-all-dev returns a value below 1.60
 cd /usr/local/src
 sudo wget https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.gz && sudo tar xzvf boost_1_64_0.tar.gz && cd boost_1_64_0
 ./bootstrap.sh --prefix=/usr/local --with-libraries=all
