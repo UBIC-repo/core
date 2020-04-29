@@ -171,6 +171,10 @@ bool Loader::loadCertStore() {
 
 bool Loader::loadPathSum() {
     PathSum& pathSum = PathSum::Instance();
+    
+    UAmount zeroBlockAmount;
+    pathSum.appendValue(zeroBlockAmount); // Block zero doesn't exist so we assign empty value
+    
     Chain& chain = Chain::Instance();
 
     std::map<uint64_t, UAmount> pathSumList;
@@ -197,8 +201,6 @@ bool Loader::loadPathSum() {
         //delete found; This seems to have caused a lot of problems
     }
 
-    UAmount zeroBlockAmount;
-    pathSum.appendValue(zeroBlockAmount); // Block zero doesn't exist so we assign empty value
     int i = 0;
     for(std::map<uint64_t, UAmount>::iterator it = pathSumList.begin(); it != pathSumList.end(); ++it) {
         pathSum.appendValue(it->second);
