@@ -193,7 +193,9 @@ int main() {
     Loader::loadDelegates();
     Loader::loadBestBlockHeaders();
     Loader::loadCertStore();
-    Loader::loadPathSum();
+    if(!Loader::loadPathSum()) {
+        return 0;
+    }
     Loader::loadWallet();
 
     app.setIsStarting(false);
