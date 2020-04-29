@@ -199,10 +199,19 @@ bool Loader::loadPathSum() {
 
     UAmount zeroBlockAmount;
     pathSum.appendValue(zeroBlockAmount); // Block zero doesn't exist so we assign empty value
+    int i = 0;
     for(std::map<uint64_t, UAmount>::iterator it = pathSumList.begin(); it != pathSumList.end(); ++it) {
         pathSum.appendValue(it->second);
-        //Log(LOG_LEVEL_INFO) << "Inserted Payout: " << it->second;
+        //Log(LOG_LEVEL_INFO) << "Inserted block: " << it->first << " p:" << it->second;
+        if(i == 262970) {
+            if(it->second.map[6] != 67990909 && it->second.map[4] != 25316667) {
+                Log(LOG_LEVEL_CRITICAL_ERROR) << "failed the sanity check at height 262970, the Pathsum is dirty";
+                return false;
+            }
+        }
+        i++;
     }
+
 
     return true;
 }
