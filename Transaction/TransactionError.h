@@ -10,6 +10,7 @@ private:
     std::string errorMessage;
     std::string additionalDetails1;
     std::string additionalDetails2;
+    std::string additionalDetails3;
 public:
     uint16_t getErrorCode() const {
         return errorCode;
@@ -41,6 +42,14 @@ public:
 
     void setAdditionalDetails2(const std::string &additionalDetails2) {
         TransactionError::additionalDetails2 = additionalDetails2;
+    }
+
+    const std::string &getAdditionalDetails3() const {
+        return additionalDetails3;
+    }
+
+    void setAdditionalDetails3(const std::string &additionalDetails3) {
+        TransactionError::additionalDetails3 = additionalDetails3;
     }
 };
 

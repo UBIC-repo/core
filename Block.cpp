@@ -17,6 +17,8 @@
 #include "MerkleTree.h"
 #include "AddressHelper.h"
 #include "Scripts/AddCertificateScript.h"
+#include "Transaction/TransactionVerify.h"
+#include "Transaction/TransactionApply.h"
 #include <math.h>
 
 BlockHeader *Block::getHeader() {
@@ -101,7 +103,7 @@ bool BlockHelper::verifyBlock(Block* block) {
 
     if(header->getVotes().size() > 0) {
         for (auto vote: header->getVotes()) {
-            if(!TransactionHelper::verifyTx(&vote, IS_IN_HEADER, header)) {
+            if(!TransactionVerify::verifyTx(&vote, IS_IN_HEADER, header, nullptr)) {
                 Log(LOG_LEVEL_ERROR) << "Couldn't verify Vote in block header";
                 delete previousBlockHeader;
                 return false;
@@ -122,7 +124,7 @@ bool BlockHelper::verifyBlock(Block* block) {
     }
 
     for(Transaction transaction: transactions) {
-        if(!TransactionHelper::verifyTx(&transaction, IS_NOT_IN_HEADER, header)) {
+        if(!TransactionVerify::verifyTx(&transaction, IS_NOT_IN_HEADER, header, nullptr)) {
             Log(LOG_LEVEL_ERROR) << "Failed to verify block with height "
                                  << header->getBlockHeight()
                                  << ", previous hash "
@@ -275,14 +277,14 @@ bool BlockHelper::applyBlock(Block* block) {
 
     // apply transactions
     for(Transaction transaction: block->getTransactions()) {
-        TransactionHelper::applyTransaction(&transaction, block->getHeader());
+        TransactionApply::applyTransaction(&transaction, block->getHeader());
         // remove transaction from transaction pool
         txPool.popTransaction(TransactionHelper::getTxId(&transaction));
     }
 
     // apply votes
     for(Transaction transaction: block->getHeader()->getVotes()) {
-        TransactionHelper::applyTransaction(&transaction, block->getHeader());
+        TransactionApply::applyTransaction(&transaction, block->getHeader());
         // remove vote from transaction pool
         txPool.popTransaction(TransactionHelper::getTxId(&transaction));
     }
@@ -343,21 +345,21 @@ bool BlockHelper::undoBlock(Block* block) {
     // undo transactions
     std::vector<Transaction> transactions = block->getTransactions();
     for(Transaction transaction: transactions) {
-        TransactionHelper::undoTransaction(&transaction, block->getHeader());
+        TransactionApply::undoTransaction(&transaction, block->getHeader());
         TransactionForNetwork transactionForNetwork;
         transactionForNetwork.setTransaction(transaction);
         // add transaction from transaction pool
-        txPool.appendTransaction(transactionForNetwork, NO_BROADCAST_TRANSACTION);
+        txPool.appendTransaction(transactionForNetwork, NO_BROADCAST_TRANSACTION, nullptr);
     }
 
     // undo votes
     std::vector<Transaction> votes = block->getHeader()->getVotes();
     for(Transaction vote: votes) {
-        TransactionHelper::undoTransaction(&vote, block->getHeader());
+        TransactionApply::undoTransaction(&vote, block->getHeader());
         TransactionForNetwork transactionForNetwork;
         transactionForNetwork.setTransaction(vote);
         // add vote from transaction pool
-        txPool.appendTransaction(transactionForNetwork, NO_BROADCAST_TRANSACTION);
+        txPool.appendTransaction(transactionForNetwork, NO_BROADCAST_TRANSACTION, nullptr);
     }
 
     // undo payouts to PathSum

@@ -187,6 +187,11 @@ set(SOURCE_FILES
         App.h
         Transaction/TransactionHelper.cpp
         Transaction/TransactionHelper.h
+        Transaction/TransactionError.h
+        Transaction/TransactionVerify.cpp
+        Transaction/TransactionVerify.h
+        Transaction/TransactionApply.cpp
+        Transaction/TransactionApply.h
         Time.h
         WebInterface/WebInterface.cpp
         WebInterface/WebInterface.h
@@ -210,7 +215,8 @@ set(SOURCE_FILES
 
         KYC/MRZResponseObject.h
         KYC/MRZParser.cpp
-        KYC/MRZParser.h Transaction/TransactionError.h)
+        KYC/MRZParser.h
+        )
 add_executable(ubicd ${SOURCE_FILES})
 
 set(SOURCE_FILES_CLI
