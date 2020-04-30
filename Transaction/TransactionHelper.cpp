@@ -244,7 +244,7 @@ bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx, uint32_t block
         em2.insert(em2.end(), em.begin(), em.end());
 
         std::string asn1RSAWITHSHA256hex;
-        asn1RSAWITHSHA256hex = "3031300d060960864801650304020105000420"; // only fits for RSA2048 signatures
+        asn1RSAWITHSHA256hex = "3031300d060960864801650304020105000420"; // only fits fo signatures on SHA256
 
         std::vector<unsigned char> asn1RSAWITHSHA256;
         asn1RSAWITHSHA256 = Hexdump::hexStringToVector(asn1RSAWITHSHA256hex);
@@ -265,7 +265,7 @@ bool TransactionHelper::verifyRegisterPassportTx(Transaction* tx, uint32_t block
             }
         }
 
-        //@TODO 4096 bit RSA padding
+        //@TODO SHA512 padding
 
         if (!verifiedPadding) {
             Log(LOG_LEVEL_ERROR) << "Failed to verify padding";
