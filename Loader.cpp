@@ -171,10 +171,10 @@ bool Loader::loadCertStore() {
 
 bool Loader::loadPathSum() {
     PathSum& pathSum = PathSum::Instance();
-    
+
     UAmount zeroBlockAmount;
     pathSum.appendValue(zeroBlockAmount); // Block zero doesn't exist so we assign empty value
-    
+
     Chain& chain = Chain::Instance();
 
     std::map<uint64_t, UAmount> pathSumList;
@@ -198,16 +198,22 @@ bool Loader::loadPathSum() {
         //Log(LOG_LEVEL_INFO) << "Temporary inserted Payout: " << found->getPayout();
         pathSumList.insert(std::pair<uint64_t, UAmount>(found->getBlockHeight(), found->getPayout()));
         previousHeaderHash = found->getPreviousHeaderHash();
-        //delete found; This seems to have caused a lot of problems
+
+        delete found;
     }
 
-    int i = 0;
+    int i = 1;
     for(std::map<uint64_t, UAmount>::iterator it = pathSumList.begin(); it != pathSumList.end(); ++it) {
         pathSum.appendValue(it->second);
-        //Log(LOG_LEVEL_INFO) << "Inserted block: " << it->first << " p:" << it->second;
-        if(i == 262970) {
-            if(it->second.map[6] != 67990909 && it->second.map[4] != 25316667) {
-                Log(LOG_LEVEL_CRITICAL_ERROR) << "failed the sanity check at height 262970, the Pathsum is dirty";
+        //Log(LOG_LEVEL_INFO) << "Inserted block: " << i << ":" << it->first << " p:" << it->second;
+
+        if(it->first != i) {
+            Log(LOG_LEVEL_INFO) << "Block height " << it->first << " and PathSum insert position " << i << " mismatch";
+            return false;
+        }
+        if(it->first == 269970) {
+            if(it->second.map[8] != 453617 && it->second.map[6] != 32517392) {
+                Log(LOG_LEVEL_CRITICAL_ERROR) << "failed the sanity check at height 269970, the PathSum is dirty";
                 return false;
             }
         }
