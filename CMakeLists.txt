@@ -210,7 +210,7 @@ set(SOURCE_FILES
 
         KYC/MRZResponseObject.h
         KYC/MRZParser.cpp
-        KYC/MRZParser.h)
+        KYC/MRZParser.h Transaction/TransactionError.h)
 add_executable(ubicd ${SOURCE_FILES})
 
 set(SOURCE_FILES_CLI
