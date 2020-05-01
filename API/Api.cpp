@@ -7,7 +7,7 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include "../Tools/Log.h"
-#include "../BlockStore.h"
+#include "../Block/BlockStore.h"
 #include "../TxPool.h"
 #include "../Wallet.h"
 #include "../AddressStore.h"
@@ -20,11 +20,11 @@
 #include "../Network/Peers.h"
 #include "../Transaction/TransactionHelper.h"
 #include "../Consensus/VoteStore.h"
-#include "../Time.h"
+#include "../Tools/Time.h"
 #include "../Network/NetworkCommands.h"
 #include "../Network/BanList.h"
 #include "../Crypto/CreateSignature.h"
-#include "../Base64.h"
+#include "../Tools/Base64.h"
 #include "../Scripts/KycRequestScript.h"
 #include "../Scripts/NtpskAlreadyUsedScript.h"
 #include "../KYC/MRZParser.h"

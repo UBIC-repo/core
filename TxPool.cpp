@@ -1,11 +1,11 @@
 
 #include "TxPool.h"
 #include "Tools/Log.h"
-#include "Block.h"
+#include "Block/Block.h"
 #include "Transaction/TransactionHelper.h"
 #include "Chain.h"
 #include "Network/Network.h"
-#include "Time.h"
+#include "Tools/Time.h"
 #include "Crypto/X509Helper.h"
 #include "Transaction/TransactionVerify.h"
 

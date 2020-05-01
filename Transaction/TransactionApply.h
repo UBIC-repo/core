@@ -3,7 +3,7 @@
 
 
 #include "Transaction.h"
-#include "../BlockHeader.h"
+#include "../Block/BlockHeader.h"
 
 class TransactionApply {
 public:

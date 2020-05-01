@@ -4,7 +4,7 @@
 
 #include <vector>
 #include <boost/filesystem/path.hpp>
-#include "../streams.h"
+#include "../Serialization/streams.h"
 #include "../Tools/Log.h"
 #include "../ChainParams.h"
 

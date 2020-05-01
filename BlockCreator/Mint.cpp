@@ -14,7 +14,7 @@
 #include "../Tools/Log.h"
 #include "../Transaction/TransactionHelper.h"
 #include "../Consensus/VoteStore.h"
-#include "../Time.h"
+#include "../Tools/Time.h"
 #include "../Wallet.h"
 #include "../AddressHelper.h"
 #include "../App.h"

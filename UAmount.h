@@ -2,7 +2,7 @@
 #ifndef TX_UAMOUNT_H
 #define TX_UAMOUNT_H
 
-#include "serialize.h"
+#include "Serialization/serialize.h"
 #include "ChainParams.h"
 
 #include <stdlib.h>

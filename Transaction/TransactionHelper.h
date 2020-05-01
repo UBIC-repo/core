@@ -6,7 +6,7 @@
 #include <list>
 #include "TxIn.h"
 #include "TxOut.h"
-#include "../BlockHeader.h"
+#include "../Block/BlockHeader.h"
 #include "../Scripts/DeactivateCertificateScript.h"
 #include "../CertStore/Cert.h"
 #include "TransactionError.h"

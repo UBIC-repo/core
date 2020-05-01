@@ -2,7 +2,7 @@
 #ifndef UBICD_DEACTIVATECERTIFICATESCRIPT_H
 #define UBICD_DEACTIVATECERTIFICATESCRIPT_H
 
-#include "../serialize.h"
+#include "../Serialization/serialize.h"
 
 #define TYPE_CSCA 0
 #define TYPE_DSC 1

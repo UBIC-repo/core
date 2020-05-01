@@ -4,7 +4,7 @@
 
 #include "Transaction.h"
 #include "TransactionError.h"
-#include "../BlockHeader.h"
+#include "../Block/BlockHeader.h"
 #include "../CertStore/Cert.h"
 
 class TransactionVerify {

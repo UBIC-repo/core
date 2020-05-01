@@ -1,6 +1,6 @@
 #include <vector>
 #include "../Crypto/ECCtools.h"
-#include "../serialize.h"
+#include "../Serialization/serialize.h"
 
 #ifndef NTPESK_NTPRSKSIGNATUREVERIFICATIONOBJECT_H
 #define NTPESK_NTPRSKSIGNATUREVERIFICATIONOBJECT_H

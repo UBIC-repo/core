@@ -2,7 +2,7 @@
 #include "DSCAttachedPassportCounter.h"
 #include "DB/DB.h"
 #include "ChainParams.h"
-#include "streams.h"
+#include "Serialization/streams.h"
 #include "Tools/Log.h"
 
 bool DSCAttachedPassportCounter::increment(std::vector<unsigned char> dscId) {

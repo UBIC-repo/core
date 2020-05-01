@@ -3,7 +3,7 @@
 #define NTPESK_NTPESKSIGNATUREVERIFICATIONOBJECT_H
 
 #include <openssl/evp.h>
-#include "../serialize.h"
+#include "../Serialization/serialize.h"
 #include "../Crypto/ECCtools.h"
 
 class NtpEskSignatureVerificationObject {

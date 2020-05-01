@@ -7,7 +7,7 @@
 #include <openssl/pem.h>
 #include <leveldb/db.h>
 #include "Wallet.h"
-#include "Base58.h"
+#include "Tools/Base58.h"
 #include "Tools/Hexdump.h"
 #include "Crypto/Sha256.h"
 #include "Crypto/Ripemd160.h"

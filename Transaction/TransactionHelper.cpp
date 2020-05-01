@@ -1,5 +1,5 @@
 #include "TransactionHelper.h"
-#include "../streams.h"
+#include "../Serialization/streams.h"
 #include "../Tools/Log.h"
 #include "../Crypto/Hash256.h"
 #include "../NtpEsk/NtpEskSignatureVerificationObject.h"
@@ -8,7 +8,7 @@
 #include "../Crypto/VerifySignature.h"
 #include "../Chain.h"
 #include "../NtpRsk/NtpRsk.h"
-#include "../Time.h"
+#include "../Tools/Time.h"
 #include "../Scripts/AddCertificateScript.h"
 #include "../CertStore/CertHelper.h"
 

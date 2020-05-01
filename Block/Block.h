@@ -2,7 +2,7 @@
 #ifndef TX_BLOCK_H
 #define TX_BLOCK_H
 
-#include "Transaction/Transaction.h"
+#include "../Transaction/Transaction.h"
 #include "BlockHeader.h"
 
 class Block {

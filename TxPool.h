@@ -6,7 +6,7 @@
 #include <vector>
 #include <unordered_map>
 #include "Transaction/Transaction.h"
-#include "Block.h"
+#include "Block/Block.h"
 #include "Transaction/TransactionError.h"
 
 class TxPool {

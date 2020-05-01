@@ -6,7 +6,7 @@
 #include "Peers.h"
 #include "BlockCache.h"
 #include "NetworkCommands.h"
-#include "../Time.h"
+#include "../Tools/Time.h"
 #include <boost/asio/ssl.hpp>
 #include <regex>
 

@@ -6,8 +6,8 @@
 #include <string>
 #include <map>
 #include <list>
-#include "UAmount.h"
-#include "Transaction/Transaction.h"
+#include "../UAmount.h"
+#include "../Transaction/Transaction.h"
 
 class BlockHeader {
 private:

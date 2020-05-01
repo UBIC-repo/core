@@ -3,7 +3,7 @@
 #ifndef UBICD_PKHINSCRIPT_H
 #define UBICD_PKHINSCRIPT_H
 
-#include "../serialize.h"
+#include "../Serialization/serialize.h"
 
 struct PkhInScript {
     uint8_t version = 1;
