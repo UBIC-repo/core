@@ -4,7 +4,7 @@
 
 #include <vector>
 #include "../Transaction/Transaction.h"
-#include "../Block.h"
+#include "../Block/Block.h"
 #include "Peers.h"
 #include "NetworkCommands.h"
 

@@ -4,7 +4,7 @@
 #define UBICD_ADDCERTIFICATESCRIPT_H
 
 #include <cstdint>
-#include "../serialize.h"
+#include "../Serialization/serialize.h"
 
 #define TYPE_CSCA 0
 #define TYPE_DSC 1

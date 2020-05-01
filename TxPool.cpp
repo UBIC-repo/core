@@ -1,12 +1,13 @@
 
 #include "TxPool.h"
 #include "Tools/Log.h"
-#include "Block.h"
+#include "Block/Block.h"
 #include "Transaction/TransactionHelper.h"
 #include "Chain.h"
 #include "Network/Network.h"
-#include "Time.h"
+#include "Tools/Time.h"
 #include "Crypto/X509Helper.h"
+#include "Transaction/TransactionVerify.h"
 
 bool TxPool::isTxInputPresent(TxIn txIn) {
     if(txIn.getInAddress().empty()) {
@@ -70,10 +71,10 @@ void TxPool::popTransaction(std::vector<unsigned char> txId) {
     }
 }
 
-bool TxPool::appendTransaction(TransactionForNetwork transactionForNetwork, bool broadcast) {
+bool TxPool::appendTransaction(TransactionForNetwork transactionForNetwork, bool broadcast, TransactionError *transactionError) {
     Chain &chain = Chain::Instance();
     Transaction transaction = transactionForNetwork.getTransaction();
-    if (!TransactionHelper::verifyNetworkTx(&transactionForNetwork)) {
+    if (!TransactionVerify::verifyNetworkTx(&transactionForNetwork, transactionError)) {
         Log(LOG_LEVEL_ERROR) << "cannot append transaction to txpool because it isn't valid";
         return false;
     }
@@ -81,6 +82,11 @@ bool TxPool::appendTransaction(TransactionForNetwork transactionForNetwork, bool
     if (this->isTxInputPresent(&transactionForNetwork)) {
         Log(LOG_LEVEL_WARNING)
                 << "cannot append transaction to txpool because one of it's input has another transaction pending";
+
+        if(transactionError != nullptr) {
+            transactionError->setErrorCode(001);
+            transactionError->setErrorMessage("Cannot send the transaction, another one is still pending confirmation");
+        }
         return false;
     }
 
@@ -115,13 +121,13 @@ void TxPool::appendTransactionsFromBlock(Block* block) {
     for(auto tx : block->getTransactions()) {
         TransactionForNetwork transactionForNetwork;
         transactionForNetwork.setTransaction(tx);
-        this->appendTransaction(transactionForNetwork, NO_BROADCAST_TRANSACTION);
+        this->appendTransaction(transactionForNetwork, NO_BROADCAST_TRANSACTION, nullptr);
     }
 
     for(auto tx : block->getHeader()->getVotes()) {
         TransactionForNetwork transactionForNetwork;
         transactionForNetwork.setTransaction(tx);
-        this->appendTransaction(transactionForNetwork, NO_BROADCAST_TRANSACTION);
+        this->appendTransaction(transactionForNetwork, NO_BROADCAST_TRANSACTION, nullptr);
     }
 }
 

@@ -9,7 +9,7 @@
 #include "BlockCreator/Mint.h"
 #include "Loader.h"
 #include "TxPool.h"
-#include "REST/ApiServer.h"
+#include "API/ApiServer.h"
 #include "Network/Server.h"
 #include "Consensus/VoteStore.h"
 #include "Test/Test.h"

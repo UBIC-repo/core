@@ -3,7 +3,7 @@
 #define TX_TEST_H
 
 
-#include "../BlockHeader.h"
+#include "../Block/BlockHeader.h"
 
 class Test {
 public:

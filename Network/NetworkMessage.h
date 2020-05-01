@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <boost/asio/ip/tcp.hpp>
-#include "../streams.h"
+#include "../Serialization/streams.h"
 #include "../Tools/Hexdump.h"
 #include "../ChainParams.h"
 #include "../Tools/Log.h"

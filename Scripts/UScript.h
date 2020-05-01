@@ -3,7 +3,7 @@
 #define TX_USCRIPT_H
 
 #include <cstdint>
-#include "../serialize.h"
+#include "../Serialization/serialize.h"
 
 #define KYC_MODE_ANONYMOUS 0
 #define KYC_MODE_DG1 1

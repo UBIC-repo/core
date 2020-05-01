@@ -1,7 +1,7 @@
 
 #include "BlockStore.h"
-#include "FS/FS.h"
-#include "DB/DB.h"
+#include "../FS/FS.h"
+#include "../DB/DB.h"
 
 void BlockStore::insertBlock(Block* block) {
 

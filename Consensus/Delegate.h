@@ -5,7 +5,7 @@
 #include <vector>
 #include <sys/types.h>
 #include <cstdint>
-#include "../serialize.h"
+#include "../Serialization/serialize.h"
 #include "Vote.h"
 
 class Delegate {

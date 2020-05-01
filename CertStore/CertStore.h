@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include "../NtpEsk/NtpEsk.h"
 #include "Cert.h"
-#include "../BlockHeader.h"
+#include "../Block/BlockHeader.h"
 
 using namespace std;
 

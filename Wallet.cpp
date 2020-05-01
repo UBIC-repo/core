@@ -7,7 +7,7 @@
 #include <openssl/pem.h>
 #include <leveldb/db.h>
 #include "Wallet.h"
-#include "Base58.h"
+#include "Tools/Base58.h"
 #include "Tools/Hexdump.h"
 #include "Crypto/Sha256.h"
 #include "Crypto/Ripemd160.h"
@@ -24,6 +24,7 @@
 #include "Config.h"
 #include "Chain.h"
 #include "Scripts/PkhInScript.h"
+#include "Transaction/TransactionVerify.h"
 
 std::vector<unsigned char> Wallet::generateSeed() {
     unsigned char cRand[32];
@@ -257,7 +258,7 @@ Transaction* Wallet::payToTxOutputs(std::vector<TxOut> txOutputs) {
                 txTemp = this->signTransaction(txTemp);
 
                 // try again
-                if (TransactionHelper::verifyTx(txTemp, IS_NOT_IN_HEADER, chain.getBestBlockHeader())) {
+                if (TransactionVerify::verifyTx(txTemp, IS_NOT_IN_HEADER, chain.getBestBlockHeader(), nullptr)) {
                     return txTemp;
                 } else {
                     Log(LOG_LEVEL_INFO) << "Wallet::payToTxOutputs() failed for amount:" << nMinimumTransactionFees;

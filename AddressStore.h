@@ -3,7 +3,7 @@
 #define TX_ADDRESSSTORE_H
 
 #include "Address.h"
-#include "BlockHeader.h"
+#include "Block/BlockHeader.h"
 
 class AddressStore {
 public:

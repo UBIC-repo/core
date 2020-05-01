@@ -1,10 +1,10 @@
 
-#include "../streams.h"
+#include "../Serialization/streams.h"
 #include "../Tools/Log.h"
 #include "NetworkMessageHandler.h"
 #include "BlockCache.h"
 #include "../TxPool.h"
-#include "../BlockStore.h"
+#include "../Block/BlockStore.h"
 #include "Network.h"
 #include "../Config.h"
 
@@ -378,7 +378,7 @@ void NetworkMessageHandler::handleTransmitTransactions(TransmitTransactions tran
     TxPool &txPool = TxPool::Instance();
 
     for(TransactionForNetwork tx : transmitTransactions.transactions) {
-        txPool.appendTransaction(tx, BROADCAST_TRANSACTION);
+        txPool.appendTransaction(tx, BROADCAST_TRANSACTION, nullptr);
     }
 }
 

@@ -1,7 +1,7 @@
 
 #include <cstdint>
 #include "BlockHeader.h"
-#include "UAmount.h"
+#include "../UAmount.h"
 
 std::vector<unsigned char> BlockHeader::getHeaderHash() {
     return headerHash;

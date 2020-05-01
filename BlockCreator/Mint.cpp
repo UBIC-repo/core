@@ -14,7 +14,7 @@
 #include "../Tools/Log.h"
 #include "../Transaction/TransactionHelper.h"
 #include "../Consensus/VoteStore.h"
-#include "../Time.h"
+#include "../Tools/Time.h"
 #include "../Wallet.h"
 #include "../AddressHelper.h"
 #include "../App.h"
@@ -22,6 +22,7 @@
 #include "../CertStore/CertStore.h"
 #include "../Scripts/AddCertificateScript.h"
 #include "../Crypto/X509Helper.h"
+#include "../Transaction/TransactionVerify.h"
 
 Block Mint::mintBlock() {
     Log(LOG_LEVEL_INFO) << "Mint::mintBlock()";
@@ -85,7 +86,7 @@ Block Mint::mintBlock() {
         Transaction ntx = ntxForNetwork->getTransaction();
 
         // if transaction is invalid
-        if(!TransactionHelper::verifyTx(&ntx, IGNORE_IS_IN_HEADER, blockHeader)) {
+        if(!TransactionVerify::verifyTx(&ntx, IGNORE_IS_IN_HEADER, blockHeader, nullptr)) {
 
             // special case if it is a passport Transaction
             // create an add certificate transaction from the additional Payload field if present
@@ -171,7 +172,7 @@ Block Mint::mintBlock() {
         if(blockSize > (BLOCK_SIZE_MAX - 20000)) {
             Log(LOG_LEVEL_INFO) << "Minted Block is full";
             //push back transaction
-            txPool.appendTransaction(*ntxForNetwork, NO_BROADCAST_TRANSACTION);
+            txPool.appendTransaction(*ntxForNetwork, NO_BROADCAST_TRANSACTION, nullptr);
             break;
         }
 
@@ -183,7 +184,7 @@ Block Mint::mintBlock() {
     }
 
     for (auto &ntxForNetwork : toReappendInTxPool) {
-        txPool.appendTransaction(ntxForNetwork, NO_BROADCAST_TRANSACTION);
+        txPool.appendTransaction(ntxForNetwork, NO_BROADCAST_TRANSACTION, nullptr);
     }
 
     // Check for double inputs which can only occur because of votes and new passport registration protocol
@@ -209,7 +210,7 @@ Block Mint::mintBlock() {
             TransactionForNetwork transactionForNetwork;
             transactionForNetwork.setTransaction(*it);
             // remove transaction from list and push it back to the TxPool
-            txPool.appendTransaction(transactionForNetwork, NO_BROADCAST_TRANSACTION);
+            txPool.appendTransaction(transactionForNetwork, NO_BROADCAST_TRANSACTION, nullptr);
             it = transactionList.erase(it);
         } else {
             it++;
@@ -254,7 +255,7 @@ Block Mint::mintBlock() {
             TransactionForNetwork transactionForNetwork;
             transactionForNetwork.setTransaction(*it);
             // remove transaction from list and push it back to the TxPool
-            txPool.appendTransaction(transactionForNetwork, NO_BROADCAST_TRANSACTION);
+            txPool.appendTransaction(transactionForNetwork, NO_BROADCAST_TRANSACTION, nullptr);
             it = voteList.erase(it);
         } else {
             it++;

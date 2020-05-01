@@ -1,6 +1,6 @@
 
 #include "MerkleTree.h"
-#include "streams.h"
+#include "Serialization/streams.h"
 #include "Crypto/Sha256.h"
 #include "ChainParams.h"
 

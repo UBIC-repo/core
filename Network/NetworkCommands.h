@@ -24,7 +24,7 @@
 
 #include <cstdint>
 #include <vector>
-#include "../Block.h"
+#include "../Block/Block.h"
 
 struct AskForBlocks {
     uint8_t command = ASK_FOR_BLOCKS_COMMAND;

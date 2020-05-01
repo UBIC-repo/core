@@ -1,6 +1,6 @@
 
 #include "Chain.h"
-#include "BlockStore.h"
+#include "Block/BlockStore.h"
 #include "Tools/Log.h"
 #include "FS/FS.h"
 #include "DB/DB.h"

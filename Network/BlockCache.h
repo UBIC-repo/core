@@ -3,7 +3,7 @@
 #define TX_BLOCKCACHE_H
 
 #include <cstdint>
-#include "../Block.h"
+#include "../Block/Block.h"
 #include "../Chain.h"
 #include "../Tools/Log.h"
 #include "BanList.h"

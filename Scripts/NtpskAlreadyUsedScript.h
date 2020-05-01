@@ -3,7 +3,7 @@
 #define UBICD_NTPSKALREADYUSEDSCRIPT_H
 
 #include <cstdint>
-#include "../serialize.h"
+#include "../Serialization/serialize.h"
 
 struct NtpskAlreadyUsedScript {
     std::vector<unsigned char> address;

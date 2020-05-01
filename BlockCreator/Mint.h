@@ -2,7 +2,7 @@
 #ifndef TX_MINT_H
 #define TX_MINT_H
 
-#include "../Block.h"
+#include "../Block/Block.h"
 
 class Mint {
 private:

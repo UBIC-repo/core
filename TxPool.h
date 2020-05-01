@@ -6,7 +6,8 @@
 #include <vector>
 #include <unordered_map>
 #include "Transaction/Transaction.h"
-#include "Block.h"
+#include "Block/Block.h"
+#include "Transaction/TransactionError.h"
 
 class TxPool {
 private:
@@ -24,7 +25,7 @@ public:
     std::unordered_map<std::string, TransactionForNetwork> getTransactionList();
     void setTransactionList(std::unordered_map<std::string, TransactionForNetwork> transactionList);
     void popTransaction(std::vector<unsigned char> txId);
-    bool appendTransaction(TransactionForNetwork transaction, bool broadcast);
+    bool appendTransaction(TransactionForNetwork transaction, bool broadcast, TransactionError *transactionError);
     void appendTransactionsFromBlock(Block* block);
     uint32_t getTxCount();
     TransactionForNetwork* popTransaction();

@@ -7,7 +7,7 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include "../Tools/Log.h"
-#include "../BlockStore.h"
+#include "../Block/BlockStore.h"
 #include "../TxPool.h"
 #include "../Wallet.h"
 #include "../AddressStore.h"
@@ -20,11 +20,11 @@
 #include "../Network/Peers.h"
 #include "../Transaction/TransactionHelper.h"
 #include "../Consensus/VoteStore.h"
-#include "../Time.h"
+#include "../Tools/Time.h"
 #include "../Network/NetworkCommands.h"
 #include "../Network/BanList.h"
 #include "../Crypto/CreateSignature.h"
-#include "../Base64.h"
+#include "../Tools/Base64.h"
 #include "../Scripts/KycRequestScript.h"
 #include "../Scripts/NtpskAlreadyUsedScript.h"
 #include "../KYC/MRZParser.h"
@@ -33,6 +33,7 @@
 #include "../Loader.h"
 #include "../Crypto/Hash256.h"
 #include "../Scripts/PkhInScript.h"
+#include "../Transaction/TransactionVerify.h"
 
 using boost::property_tree::ptree;
 
@@ -147,7 +148,6 @@ std::string Api::vote(std::string json) {
     boost::property_tree::ptree pt;
     boost::property_tree::read_json(ss, pt);
     Peers &peers = Peers::Instance();
-    bool success = true;
 
     bool removedPeer = false;
     for (boost::property_tree::ptree::value_type &v : pt) {
@@ -218,22 +218,24 @@ std::string Api::vote(std::string json) {
             transaction->setTxIns(txInsWithSignature);
 
             Chain& chain = Chain::Instance();
-            if(TransactionHelper::verifyTx(transaction, IS_IN_HEADER, chain.getBestBlockHeader())) {
+            TransactionError transactionError;
+            if(TransactionVerify::verifyTx(transaction, IS_IN_HEADER, chain.getBestBlockHeader(), &transactionError)) {
                 TransactionForNetwork transactionForNetwork;
                 transactionForNetwork.setTransaction(*transaction);
-                txPool.appendTransaction(transactionForNetwork, BROADCAST_TRANSACTION);
+                if(!txPool.appendTransaction(transactionForNetwork, BROADCAST_TRANSACTION, &transactionError)) {
+                    char response[1024];
+                    sprintf(response, "{\"success\": false, \"errorCode\": %d, \"error\": \"%s\"}", transactionError.getErrorCode(), transactionError.getErrorMessage().c_str());
+                    return std::string(response);
+                }
             } else {
-                success = false;
+                char response[1024];
+                sprintf(response, "{\"success\": false, \"errorCode\": %d, \"error\": \"%s\"}", transactionError.getErrorCode(), transactionError.getErrorMessage().c_str());
+                return std::string(response);
             }
         }
     }
 
-    if(success) {
-        return "{\"success\": true}";
-    } else {
-        return "{\"success\": false, \"error\": \"Failed to verify transaction\"}";
-    }
-
+    return "{\"success\": true}";
 }
 
 std::string Api::unvote(std::string json) {
@@ -314,22 +316,24 @@ std::string Api::unvote(std::string json) {
             transaction->setTxIns(txInsWithSignature);
 
             Chain& chain = Chain::Instance();
-            if(TransactionHelper::verifyTx(transaction, IS_IN_HEADER, chain.getBestBlockHeader())) {
+            TransactionError transactionError;
+            if(TransactionVerify::verifyTx(transaction, IS_IN_HEADER, chain.getBestBlockHeader(), &transactionError)) {
                 TransactionForNetwork transactionForNetwork;
                 transactionForNetwork.setTransaction(*transaction);
-                txPool.appendTransaction(transactionForNetwork, BROADCAST_TRANSACTION);
+                if(!txPool.appendTransaction(transactionForNetwork, BROADCAST_TRANSACTION, &transactionError)) {
+                    char response[1024];
+                    sprintf(response, "{\"success\": false, \"errorCode\": %d, \"error\": \"%s\"}", transactionError.getErrorCode(), transactionError.getErrorMessage().c_str());
+                    return std::string(response);
+                }
             } else {
-                success = false;
+                    char response[1024];
+                    sprintf(response, "{\"success\": false, \"errorCode\": %d, \"error\": \"%s\"}", transactionError.getErrorCode(), transactionError.getErrorMessage().c_str());
+                    return std::string(response);
             }
         }
     }
 
-    if(success) {
-        return "{\"success\": true}";
-    } else {
-        return "{\"success\": false, \"error\": \"Failed to verify transaction\"}";
-    }
-
+    return "{\"success\": true}";
 }
 
 std::string Api::getDelegates() {
@@ -806,10 +810,10 @@ std::string Api::readPassport(std::string json) {
         registerPassportTx->setTxIns(pTxIns);
 
         Chain& chain = Chain::Instance();
-        if(TransactionHelper::verifyTx(registerPassportTx, IS_NOT_IN_HEADER, chain.getBestBlockHeader())) {
+        TransactionError transactionError;
+        if(TransactionVerify::verifyTx(registerPassportTx, IS_NOT_IN_HEADER, chain.getBestBlockHeader(), &transactionError)) {
             Log(LOG_LEVEL_INFO) << "Passport transaction verified";
         } else {
-
             char pData[512];
             FS::charPathFromVectorPath(pData, FS::concatPaths(FS::getConfigBasePath(), "extractedDSC.cert"));
             FILE* fileDSC = fopen (pData , "w");
@@ -820,7 +824,9 @@ std::string Api::readPassport(std::string json) {
                 fclose(fileDSC);
             }
 
-            return "{\"success\": false, \"error\" : \"couldn't verify Passport transaction\"}";
+            char response[1024];
+            sprintf(response, "{\"success\": false, \"errorCode\": %d, \"error\": \"%s\"}", transactionError.getErrorCode(), transactionError.getErrorMessage());
+            return std::string(response);
         }
 
         CDataStream spTx(SER_DISK, 1);
@@ -852,12 +858,14 @@ std::string Api::readPassport(std::string json) {
         registerPassportTxForNetwork.setAdditionalPayload(
                 x509Vector
         );
-        if(txPool.appendTransaction(registerPassportTxForNetwork, BROADCAST_TRANSACTION)) {
+        if(txPool.appendTransaction(registerPassportTxForNetwork, BROADCAST_TRANSACTION, &transactionError)) {
             Network &network = Network::Instance();
             network.broadCastTransaction(registerPassportTxForNetwork);
             return "{\"success\": true}";
         } else {
-            return "{\"success\": false, \"error\" : \"Cannot append transaction to txPool, may be this passport is already registered\"}";
+            char response[1024];
+            sprintf(response, "{\"success\": false, \"errorCode\": %d, \"error\": \"%s\"}", transactionError.getErrorCode(), transactionError.getErrorMessage().c_str());
+            return std::string(response);
         }
 
     } else {
@@ -1181,15 +1189,17 @@ std::string Api::pay(std::string json) {
     txForNetwork.setTransaction(*tx);
 
     TxPool &txPool = TxPool::Instance();
-    if (txPool.appendTransaction(txForNetwork, BROADCAST_TRANSACTION)) {
-
+    TransactionError transactionError;
+    if (txPool.appendTransaction(txForNetwork, BROADCAST_TRANSACTION, &transactionError)) {
         Network &network = Network::Instance();
         network.broadCastTransaction(txForNetwork);
 
         return "{\"success\": true}";
+    } else {
+        char response[1024];
+        sprintf(response, "{\"success\": false, \"errorCode\": %d, \"error\": \"%s\"}", transactionError.getErrorCode(), transactionError.getErrorMessage().c_str());
+        return std::string(response);
     }
-
-    return "{\"success\": false}";
 }
 
 std::string Api::createTransactionWithPrivateKey(std::string json) {
@@ -1478,8 +1488,11 @@ std::string Api::verifyKYC(std::string json) {
                 // @TODO End of code block
 
                 Chain& chain = Chain::Instance();
-                if(!TransactionHelper::verifyRegisterPassportTx(&tx, chain.getCurrentBlockchainHeight(), nullptr)) {
-                    return "{\"success\": false, \"error\":\"Cannot verify kyc transaction\"}";
+                TransactionError transactionError;
+                if(!TransactionVerify::verifyRegisterPassportTx(&tx, chain.getCurrentBlockchainHeight(), nullptr, &transactionError)) {
+                    char response[1024];
+                    sprintf(response, "{\"success\": false, \"errorCode\": %d, \"error\": \"%s\"}", transactionError.getErrorCode(), transactionError.getErrorMessage().c_str());
+                    return std::string(response);
                 }
 
                 currentAddress = tx.getTxOuts().front().getScript().getScript();
@@ -1796,14 +1809,17 @@ std::string Api::sendTransaction(std::string json) {
             }
 
             TxPool &txPool = TxPool::Instance();
-            if (txPool.appendTransaction(txForNetwork, BROADCAST_TRANSACTION)) {
+            TransactionError transactionError;
+            if (txPool.appendTransaction(txForNetwork, BROADCAST_TRANSACTION, &transactionError)) {
 
                 Network &network = Network::Instance();
                 network.broadCastTransaction(txForNetwork);
 
                 return "{\"success\": true}";
             } else {
-                return "{\"success\": false}";
+                char response[1024];
+                sprintf(response, "{\"success\": false, \"errorCode\": %d, \"error\": \"%s\"}", transactionError.getErrorCode(), transactionError.getErrorMessage().c_str());
+                return std::string(response);
             }
         }
     }
@@ -2416,11 +2432,17 @@ std::string Api::removeCert(std::string json, uint8_t type) {
 
             TransactionForNetwork transactionForNetwork;
             transactionForNetwork.setTransaction(*tx);
-            txPool.appendTransaction(transactionForNetwork, BROADCAST_TRANSACTION);
+
+            TransactionError transactionError;
+            if(!txPool.appendTransaction(transactionForNetwork, BROADCAST_TRANSACTION, &transactionError)) {
+                char response[1024];
+                sprintf(response, "{\"success\": false, \"errorCode\": %d, \"error\": \"%s\"}", transactionError.getErrorCode(), transactionError.getErrorMessage().c_str());
+                return std::string(response);
+            }
         }
     }
 
-    return "{\"success\": false}";
+    return "{\"success\": true}";
 }
 
 std::string Api::generateKeyPair() {

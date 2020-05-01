@@ -5,7 +5,7 @@
 #include <leveldb/db.h>
 #include <vector>
 #include <leveldb/status.h>
-#include "../streams.h"
+#include "../Serialization/streams.h"
 #include "../Tools/Hexdump.h"
 
 class DB {
