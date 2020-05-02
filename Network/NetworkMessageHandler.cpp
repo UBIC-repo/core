@@ -332,10 +332,12 @@ void NetworkMessageHandler::handleAskForBlock(AskForBlock askForBlock, PeerInter
 void NetworkMessageHandler::handleAskForPeers(PeerInterfacePtr recipient) {
     Peers &peers = Peers::Instance();
     TransmitPeers transmitPeers;
+    peers.peersLock.lock();
     auto randomPeers = peers.getRandomPeers(8);
     for(auto peer: randomPeers) {
         transmitPeers.ipList.emplace_back(peer->getIp());
     }
+    peers.peersLock.unlock();
     recipient->deliver(NetworkMessageHelper::serializeToNetworkMessage(transmitPeers));
 }
 

@@ -159,12 +159,14 @@ void Network::lookForPeers() {
     }
 
     // Step 2 ask for peers
+    peers.peersLock.lock();
     for(auto peer : peers.getPeers()) {
         AskForPeers askForPeers;
         peer.second->deliver(
                 NetworkMessageHelper::serializeToNetworkMessage(askForPeers)
         );
     }
+    peers.peersLock.unlock();
 
     // Wait 2 seconds
 
@@ -257,12 +259,14 @@ void Network::syncBlockchain() {
 
         isSyncing = true;
 
+        peers.peersLock.lock();
         if (peers.getPeers().size() < 10 && Time::getCurrentTimestamp() - lastPeerLookup > (3600 * 24)) {
             Log(LOG_LEVEL_INFO) << "Going to look for peers";
             lastPeerLookup = Time::getCurrentTimestamp();
             std::thread t(&lookForPeers);
             t.detach();
         }
+        peers.peersLock.unlock();
 
         Log(LOG_LEVEL_INFO) << "Network start syncing";
         Chain &chain = Chain::Instance();
@@ -323,6 +327,7 @@ void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
 
         uint32_t unbusyPeerNbr = 0;
 
+        peers.peersLock.lock();
         std::vector<PeerInterfacePtr> peerList = peers.getRandomPeers(6);
 
         if(peers.getPeers().size() == 0 && Time::getCurrentTimestamp() - lastPeerLookup > 5 ) {
@@ -435,7 +440,7 @@ void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
                 unbusyPeerNbr++;
             }
         }
-
+        peers.peersLock.unlock();
 
 #if defined(_WIN32)
         Sleep(1000);
@@ -492,6 +497,8 @@ void Network::broadCastNewBlockHeight(uint64_t height, std::vector<unsigned char
     transmitBlockchainHeight.bestHeaderHash = bestHeaderHash;
 
     Peers &peers = Peers::Instance();
+
+    peers.peersLock.lock();
     std::vector<PeerInterfacePtr> peerList = peers.getRandomPeers(12);
     Log(LOG_LEVEL_INFO) << "peerList.size(): " << (uint64_t)peerList.size();
 
@@ -500,6 +507,7 @@ void Network::broadCastNewBlockHeight(uint64_t height, std::vector<unsigned char
                 NetworkMessageHelper::serializeToNetworkMessage(transmitBlockchainHeight)
         );
     }
+    peers.peersLock.unlock();
 }
 
 void Network::broadCastTransaction(TransactionForNetwork tx) {
@@ -507,12 +515,14 @@ void Network::broadCastTransaction(TransactionForNetwork tx) {
     transmitTransaction.transactions.emplace_back(tx);
 
     Peers &peers = Peers::Instance();
+    peers.peersLock.lock();
     std::vector<PeerInterfacePtr> peerList = peers.getRandomPeers(10);
     for(auto &peer : peerList) {
         peer->deliver(
                 NetworkMessageHelper::serializeToNetworkMessage(transmitTransaction)
         );
     }
+    peers.peersLock.unlock();
 }
 
 bool Network::isSynced() {
