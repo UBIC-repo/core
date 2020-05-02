@@ -53,7 +53,6 @@ bool Peers::appendPeer(PeerInterfacePtr peer) {
     // Peer is already in peer list
     if(isPeerAlreadyInList(peer->getIp())) {
         Log(LOG_LEVEL_ERROR) << "Cannot appendPeer peer:" << peer->getIp() << " peer is already in peerlist";
-        peer = nullptr;
         return false;
     }
 
