@@ -34,10 +34,14 @@ std::map<ip_t, PeerInterfacePtr> Peers::getPeers() {
 }
 
 bool Peers::isPeerAlreadyInList(ip_t ip) {
+    peersLock.lock();
     auto found = this->peers.find(ip);
 
     // Peer is already in peer list
-    return found != this->peers.end();
+    bool result = found != this->peers.end();
+    peersLock.unlock();
+
+    return result;
 }
 
 bool Peers::appendPeer(PeerInterfacePtr peer) {
