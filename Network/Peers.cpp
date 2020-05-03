@@ -5,7 +5,10 @@
 #include "../Chain.h"
 #include "BanList.h"
 
+std::mutex Peers::peersLock;
+
 void Peers::disconnect(ip_t ip) {
+    peersLock.lock();
     Log(LOG_LEVEL_INFO) << "Peers::disconnect(" << ip << ")";
     auto found = this->peers.find(ip);
 
@@ -14,6 +17,7 @@ void Peers::disconnect(ip_t ip) {
         this->peers.erase(found);
         Log(LOG_LEVEL_INFO) << "disconnected:" << ip;
     }
+    peersLock.unlock();
 }
 
 PeerInterfacePtr Peers::getPeer(ip_t ip) {
@@ -58,7 +62,9 @@ bool Peers::appendPeer(PeerInterfacePtr peer) {
 
     Chain &chain = Chain::Instance();
 
+    peersLock.lock();
     this->peers.insert(std::make_pair(peer->getIp(), peer));
+    peersLock.unlock();
     Log(LOG_LEVEL_INFO) << "appended Peer, new peers list size : " << (uint64_t)this->peers.size();
 
     return true;

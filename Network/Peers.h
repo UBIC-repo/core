@@ -29,6 +29,7 @@ public:
         static Peers instance;
         return instance;
     }
+    static std::mutex peersLock;
 
     void disconnect(ip_t ip);
     PeerInterfacePtr getPeer(ip_t ip);
