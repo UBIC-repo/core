@@ -18,8 +18,8 @@ Your identity is NOT revealed to other participants of the system.
 
 The UBIC-Wallet is still in an early stage but does provide all basic functionalities a Wallet requires. You can send transactions, receive them and register a passport in order to get your UBIC cryptoUBI.
 
-If you like the idea of the project you can support its development on github: github.com/rgex/UBIC-android-wallet &
-github.com/UBIC-repo
+If you like the idea of the project you can support its development on github: [UBIC Android wallet source code](https://github.com/rgex/UBIC-android-wallet) &
+[UBIC node source code](https://github.com/UBIC-repo)
 
  - [Block explorer](https://ubic.network)
  - [UBIC Website](https://ubic.app)
