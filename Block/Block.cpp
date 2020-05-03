@@ -429,56 +429,47 @@ bool BlockHelper::undoBlock(Block* block) {
 }
 
 UAmount BlockHelper::calculateDelegatePayout(uint32_t blockHeight) {
-    uint32_t numberOfHalvings = (uint32_t)(blockHeight / HALVING_INTERVAL_IN_BLOCKS);
-    int32_t halvingFactor = 1;
-
-    for(int i = 0; i < numberOfHalvings && i < NUMBER_OF_HALVINGS; i++) {
-        halvingFactor = halvingFactor * 2;
-    }
-
-    Log(LOG_LEVEL_INFO) << "BlockHelper::calculateDelegatePayout() halvingFactor:" << halvingFactor;
-    Log(LOG_LEVEL_INFO) << "BlockHelper::calculateDelegatePayout() UCH payout:" << CURRENCY_SWITZERLAND_DELEGATE_PAYOUT / halvingFactor;
 
     UAmount amount;
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_SWITZERLAND, CURRENCY_SWITZERLAND_DELEGATE_PAYOUT / halvingFactor));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_GERMANY, CURRENCY_GERMANY_DELEGATE_PAYOUT / halvingFactor));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_AUSTRIA, CURRENCY_AUSTRIA_DELEGATE_PAYOUT / halvingFactor));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_UNITED_KINGDOM, CURRENCY_UNITED_KINGDOM_DELEGATE_PAYOUT / halvingFactor));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_IRELAND, (uint64_t)(CURRENCY_IRELAND_DELEGATE_PAYOUT / halvingFactor)));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_USA, (uint64_t)(CURRENCY_USA_DELEGATE_PAYOUT / halvingFactor)));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_AUSTRALIA, (uint64_t)(CURRENCY_AUSTRALIA_DELEGATE_PAYOUT / halvingFactor)));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_CHINA, (uint64_t)(CURRENCY_CHINA_DELEGATE_PAYOUT / halvingFactor)));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_SWEDEN, (uint64_t)(CURRENCY_SWEDEN_DELEGATE_PAYOUT / halvingFactor)));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_FRANCE, (uint64_t)(CURRENCY_FRANCE_DELEGATE_PAYOUT / halvingFactor)));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_CANADA, (uint64_t)(CURRENCY_CANADA_DELEGATE_PAYOUT / halvingFactor)));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_JAPAN, (uint64_t)(CURRENCY_JAPAN_DELEGATE_PAYOUT / halvingFactor)));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_THAILAND, (uint64_t)(CURRENCY_THAILAND_DELEGATE_PAYOUT / halvingFactor)));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_NEW_ZEALAND, (uint64_t)(CURRENCY_NEW_ZEALAND_DELEGATE_PAYOUT / halvingFactor)));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_UNITED_ARAB_EMIRATES, (uint64_t)(CURRENCY_UNITED_ARAB_EMIRATES_DELEGATE_PAYOUT / halvingFactor)));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_FINLAND, (uint64_t)(CURRENCY_FINLAND_DELEGATE_PAYOUT / halvingFactor)));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_LUXEMBOURG, (uint64_t)(CURRENCY_LUXEMBOURG_DELEGATE_PAYOUT / halvingFactor)));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_SINGAPORE, (uint64_t)(CURRENCY_SINGAPORE_DELEGATE_PAYOUT / halvingFactor)));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_HUNGARY, (uint64_t)(CURRENCY_HUNGARY_DELEGATE_PAYOUT / halvingFactor)));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_CZECH_REPUBLIC, (uint64_t)(CURRENCY_CZECH_REPUBLIC_DELEGATE_PAYOUT / halvingFactor)));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_MALAYSIA, (uint64_t)(CURRENCY_MALAYSIA_DELEGATE_PAYOUT / halvingFactor)));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_UKRAINE, (uint64_t)(CURRENCY_UKRAINE_DELEGATE_PAYOUT / halvingFactor)));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_ESTONIA, (uint64_t)(CURRENCY_ESTONIA_DELEGATE_PAYOUT / halvingFactor)));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_MONACO, (uint64_t)(CURRENCY_MONACO_DELEGATE_PAYOUT / halvingFactor)));
-    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_LIECHTENSTEIN, (uint64_t)(CURRENCY_LIECHTENSTEIN_DELEGATE_PAYOUT / halvingFactor)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_SWITZERLAND, (uint64_t)(CURRENCY_SWITZERLAND_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_GERMANY, (uint64_t)(CURRENCY_GERMANY_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_AUSTRIA, (uint64_t)(CURRENCY_AUSTRIA_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_UNITED_KINGDOM, (uint64_t)(CURRENCY_UNITED_KINGDOM_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_IRELAND, (uint64_t)(CURRENCY_IRELAND_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_USA, (uint64_t)(CURRENCY_USA_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_AUSTRALIA, (uint64_t)(CURRENCY_AUSTRALIA_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_CHINA, (uint64_t)(CURRENCY_CHINA_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_SWEDEN, (uint64_t)(CURRENCY_SWEDEN_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_FRANCE, (uint64_t)(CURRENCY_FRANCE_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_CANADA, (uint64_t)(CURRENCY_CANADA_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_JAPAN, (uint64_t)(CURRENCY_JAPAN_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_THAILAND, (uint64_t)(CURRENCY_THAILAND_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_NEW_ZEALAND, (uint64_t)(CURRENCY_NEW_ZEALAND_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_UNITED_ARAB_EMIRATES, (uint64_t)(CURRENCY_UNITED_ARAB_EMIRATES_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_FINLAND, (uint64_t)(CURRENCY_FINLAND_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_LUXEMBOURG, (uint64_t)(CURRENCY_LUXEMBOURG_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_SINGAPORE, (uint64_t)(CURRENCY_SINGAPORE_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_HUNGARY, (uint64_t)(CURRENCY_HUNGARY_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_CZECH_REPUBLIC, (uint64_t)(CURRENCY_CZECH_REPUBLIC_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_MALAYSIA, (uint64_t)(CURRENCY_MALAYSIA_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_UKRAINE, (uint64_t)(CURRENCY_UKRAINE_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_ESTONIA, (uint64_t)(CURRENCY_ESTONIA_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_MONACO, (uint64_t)(CURRENCY_MONACO_DELEGATE_PAYOUT)));
+    amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_LIECHTENSTEIN, (uint64_t)(CURRENCY_LIECHTENSTEIN_DELEGATE_PAYOUT)));
 
     if(blockHeight >= ICELAND_ACTIVATION_BLOCK_HEIGHT) {
         amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_ICELAND,
-                                                      (uint64_t) (CURRENCY_ICELAND_DELEGATE_PAYOUT / halvingFactor)));
+                                                      (uint64_t) (CURRENCY_ICELAND_DELEGATE_PAYOUT)));
     }
 
     if(blockHeight >= HONG_KONG_ACTIVATION_BLOCK_HEIGHT) {
         amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_HONG_KONG,
-                                                      (uint64_t) (CURRENCY_HONG_KONG_DELEGATE_PAYOUT / halvingFactor)));
+                                                      (uint64_t) (CURRENCY_HONG_KONG_DELEGATE_PAYOUT)));
     }
 
     if(blockHeight >= SPAIN_ACTIVATION_BLOCK_HEIGHT) {
         amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_SPAIN,
-                                                      (uint64_t) (CURRENCY_SPAIN_DELEGATE_PAYOUT / halvingFactor)));
+                                                      (uint64_t) (CURRENCY_SPAIN_DELEGATE_PAYOUT)));
     }
 
     return amount;
