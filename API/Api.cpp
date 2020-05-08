@@ -107,6 +107,7 @@ ptree txToPtree(Transaction transaction, bool checkIsMine) {
     ptree txOutTree;
     ptree transactionTree;
     transactionTree.put("txId", Hexdump::vectorToHexString(TransactionHelper::getTxId(&transaction)));
+    transactionTree.put("txHash", Hexdump::vectorToHexString(TransactionHelper::getTxHash(&transaction)));
     transactionTree.put("network", transaction.getNetwork());
 
     UAmount inAmount;
