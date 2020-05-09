@@ -142,3 +142,56 @@ Adding peer succeeded
 
 # Development environment
 UBIC was developed using CLion. If you want to work on the source code it is recommended that you use the same IDE.
+
+# Upgrading the node on Linux
+Stop the ubic process
+```
+/etc/init.d/ubic stop
+```
+
+go into /usr/local/src and remove the old installation (if present)
+```
+cd /usr/local/src/
+rm -rf core
+```
+
+download the latest release and run the installation
+```
+git clone https://github.com/UBIC-repo/core.git
+chmod -R 777 core
+cmake CMakeLists.txt
+make
+sudo make install
+```
+Start the node again
+```
+/etc/init.d/ubic start
+```
+
+
+# Reinstallation of the node on Linux
+This will make the node resynchronize from
+Stop the ubic process
+```
+/etc/init.d/ubic stop
+```
+
+go into /usr/local/src and remove the old installation (if present). Also remove the ubic folder.
+```
+cd /usr/local/src/
+rm -rf core
+sudo -rf /var/ubic/
+```
+
+download the latest release and run the installation
+```
+git clone https://github.com/UBIC-repo/core.git
+chmod -R 777 core
+cmake CMakeLists.txt
+make
+sudo make install
+```
+Start the node again
+```
+/etc/init.d/ubic start
+```
