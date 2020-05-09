@@ -194,7 +194,7 @@ UAmount TransactionHelper::calculateMinimumFee(size_t txSize, BlockHeader* heade
     }
 
     for (std::map<uint8_t, CAmount>::const_iterator it(totalPayout.map.begin()); it != totalPayout.map.end(); ++it) {
-        rAmount.map[it->first] = (uint64_t) it->second * txSize * TXFEE_FACTOR;
+        rAmount.map[it->first] = (uint64_t) (it->second * txSize * TXFEE_FACTOR);
     }
 
     return rAmount;
