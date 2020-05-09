@@ -884,7 +884,7 @@ function updateMyUbi() {
 				var html = "";
 				html += "<div class='my-ubi-passport-info'>";
 				html += "<div>started at block height:" + data['ubis'][i]['startedAtBlockHeight'] + "</div>";
-				html += "<div>DSC Certificate ID: " + data['ubis'][i]['dscCertificateId'] + "</div>";
+				html += "<div>DSC Certificate ID: " + data['ubis'][i]['dsc']['DscCertificate'] + "</div>";
 				html += "<div>Issuer: <span id='myubi-issuer-" + i + "'>...</span>";
 				html += "<div>Expiration date: <span id='myubi-expiration-date-" + i + "'>loading</span>";
 				html += "<div>Total Amount received: " + uamountToHtml(data['ubis'][i]['totalUbiReceived']) + "</div>";
@@ -892,7 +892,7 @@ function updateMyUbi() {
 				html += "<hr/>";
 				$("#ubi-existing-identities").append(html);
 				(function(i){
-						$.ajax( {url:protocol + host + "/certificates/dsc/" + data['ubis'][i]['dscCertificateId'], headers: { 'apiKey': apiKey } }).done(function( data ) {
+						$.ajax( {url:protocol + host + "/certificates/dsc/" + data['ubis'][i]['dsc']['DscCertificate'], headers: { 'apiKey': apiKey } }).done(function( data ) {
 						console.log(i);
 						console.log(data);
 						if(data['issuer'] != undefined) {
