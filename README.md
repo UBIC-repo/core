@@ -159,6 +159,7 @@ download the latest release and run the installation
 ```
 git clone https://github.com/UBIC-repo/core.git
 chmod -R 777 core
+cd core
 cmake CMakeLists.txt
 make
 sudo make install
@@ -187,6 +188,7 @@ download the latest release and run the installation
 ```
 git clone https://github.com/UBIC-repo/core.git
 chmod -R 777 core
+cd core
 cmake CMakeLists.txt
 make
 sudo make install
