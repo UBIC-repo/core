@@ -171,7 +171,8 @@ Start the node again
 
 
 # Reinstallation of the node on Linux
-This will make the node resynchronize from
+This will make the node resynchronize from zero. To do so:
+
 Stop the ubic process
 ```
 /etc/init.d/ubic stop
