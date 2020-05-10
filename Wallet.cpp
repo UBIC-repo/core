@@ -273,6 +273,8 @@ Transaction* Wallet::payToTxOutputs(std::vector<TxOut> txOutputs) {
 Transaction* Wallet::payToTxOutputsWithoutFees(std::vector<TxOut> txOutputs) {
     Transaction newTransaction;
     UAmount toSpend;
+    Chain& chain = Chain::Instance();
+
     for(TxOut txOutput: txOutputs) {
         toSpend += txOutput.getAmount();
     }
@@ -287,18 +289,28 @@ Transaction* Wallet::payToTxOutputsWithoutFees(std::vector<TxOut> txOutputs) {
         UAmount addressAmount = AddressHelper::getAmountWithUBI(&addressForStore);
         TxIn txIn;
         // iterate through all currencies of the address
-        for (std::map<uint8_t, CAmount>::iterator it = addressAmount.map.begin(); it != addressAmount.map.end(); ++it)
+        for (std::map<uint8_t, CAmount>::iterator addressIt = addressAmount.map.begin(); addressIt != addressAmount.map.end(); ++addressIt)
         {
-            auto cToSpend = toSpend.map.find(it->first);
-            if(cToSpend != toSpend.map.end()) {
+            auto cToSpend = toSpend.map.find(addressIt->first);
+            if(cToSpend != toSpend.map.end()) { // if the currency we want to spend is present on the address
                 UAmount toSubstract;
-                if(it->second >= cToSpend->second) {
-                    toSubstract .map.insert(std::make_pair(it->first, cToSpend->second));
-                } else {
-                    toSubstract .map.insert(std::make_pair(it->first, it->second));
+
+                // the minimum required amount required for the address to be "profitable"
+                // profitable means that it isn't dust that would only generate additional transaction costs
+                UAmount minimumAmountRequired = TransactionHelper::calculateMinimumFee(200,chain.getBestBlockHeader());
+
+                // we only consider the address if it is "profitable"
+                if(addressIt->second > minimumAmountRequired.map.find(addressIt->first)->second) {
+                    if (addressIt->second >= cToSpend->second) {
+                        toSubstract.map.insert(std::make_pair(addressIt->first,
+                                                              cToSpend->second)); // address has more coins than required we subtract the tospend amount
+                    } else {
+                        toSubstract.map.insert(std::make_pair(addressIt->first,
+                                                              addressIt->second)); // address has less coins than required, we subtract the address amount
+                    }
+                    addressAmountToSpend += toSubstract;
+                    toSpend -= toSubstract;
                 }
-                addressAmountToSpend += toSubstract;
-                toSpend -= toSubstract;
             }
         }
         if(addressAmountToSpend > 0) {
@@ -310,7 +322,7 @@ Transaction* Wallet::payToTxOutputsWithoutFees(std::vector<TxOut> txOutputs) {
     }
 
     if(toSpend != 0) {
-        Log(LOG_LEVEL_ERROR) << "not enough founds";
+        Log(LOG_LEVEL_ERROR) << "not enough founds, missing: " << toSpend;
         return nullptr;
     }
 
