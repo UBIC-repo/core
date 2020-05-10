@@ -642,15 +642,21 @@ std::string Api::myTransactions() {
 
         BlockHeader* header = chain.getBlockHeader(it->getBlockHash());
         // this part ensures that the transaction is on the main chain
+
+        ptree txTree = txToPtree(it->getTx(), true);
         if(header != nullptr) {
-            ptree txTree = txToPtree(it->getTx(), true);
+            txTree.put("isInMainChain", true);
             txTree.put("confirmations", chain.getCurrentBlockchainHeight() - header->getBlockHeight());
-            transactionsTree.push_back(std::make_pair("", txTree));
-            txNbr++;
-            if(txNbr > MAX_NUMBER_OF_MY_TRANSACTIONS_TO_DISPLAY) {
-                break;
-            }
             delete header;
+        } else {
+            txTree.put("isInMainChain", false);
+            txTree.put("confirmations", 0);
+        }
+
+        transactionsTree.push_back(std::make_pair("", txTree));
+        txNbr++;
+        if(txNbr > MAX_NUMBER_OF_MY_TRANSACTIONS_TO_DISPLAY) {
+            break;
         }
     }
 
@@ -2077,9 +2083,9 @@ std::string Api::reindex() {
     app.setReindexingHeight(0);
 
     #if defined(_WIN32)
-        Sleep(2000);
+        Sleep(3000);
     #else
-        sleep(2);
+        sleep(3);
     #endif
 
     // Reset current state to genesis
