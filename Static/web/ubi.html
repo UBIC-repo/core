@@ -189,59 +189,14 @@ background-color: #000;
 
 <div id="send" class="tab hidden">
 	<form>
-		<div>
-			<label for="address">Address:</label>
-			<input id="address" type="text" class="form-control">
+		<div id="tx-outputs-container">
+			
 		</div>
 
 		<div>
-			<div class="row">
-				<div class="col-lg-2"><label for="amount">Amount:</label></div>
-			</div>
-			<div class="row">
-			  <div class="col-lg-4">
-			    <div class="input-group">
-			      <span class="input-group-addon">
-				<select id="currency"><option value="" disabled selected>Currency</option>
-					<option value="1">UCH</option>
-					<option value="2">UDE</option>
-					<option value="3">UAT</option>
-					<option value="4">UUK</option>
-					<option value="5">UIE</option>
-					<option value="6">UUS</option>
-					<option value="7">UAU</option>
-					<option value="8">UCN</option>
-					<option value="9">USE</option>
-					<option value="10">UFR</option>
-					<option value="11">UCA</option>
-					<option value="12">UJP</option>
-					<option value="13">UTH</option>
-					<option value="14">UNZ</option>
-					<option value="15">UAE</option>
-					<option value="16">UFI</option>
-					<option value="17">ULU</option>
-					<option value="18">USG</option>
-					<option value="19">UHU</option>
-					<option value="20">UCZ</option>
-					<option value="21">UMY</option>
-					<option value="22">UUA</option>
-					<option value="23">UEE</option>
-					<option value="24">UMC</option>
-					<option value="25">ULI</option>
-
-				</select>
-			      </span>
-			      <input type="number" class="form-control" id="amount" aria-label="...">
-			    </div><!-- /input-group -->
-			  </div><!-- /.col-lg-6 -->
-<!--
-			  <div class="col-lg-4">
-				<input type="checkbox" checked=1 disabled=1 id="useSameForTxFee">
-				<label for="useSameForTxFee">Use same currency to pay TxFee</label>
-			  </div>
--->
-			</div><!-- /.row -->
+			<button class="btn btn-default " type="button" id="new-output-btn">Add a new transaction output</button>
 		</div>
+		<br/>
 
 		<div>
 			<button class="btn btn-default " type="button" id="pay-btn">Pay</button>
@@ -1032,6 +987,66 @@ function toggle(to) {
 	$('#' + to).removeClass('hidden');
 }
 
+function addNewTxOutput() {
+$('#tx-outputs-container').append(
+ '<div class="tx-output-entries">' +
+ '		<div>'  + 
+ '			<label for="address">Address:</label>'  + 
+ '			<input class="address" type="text" class="form-control">'  + 
+ '		</div>'  + 
+ '   <div class="row">  '  + 
+ '   				<div class="col-lg-2"><label>Amount:</label></div>  '  + 
+ '   			</div>  '  + 
+ '   			<div class="row">  '  + 
+ '   			  <div class="col-lg-4">  '  + 
+ '   			    <div class="input-group">  '  + 
+ '   			      <span class="input-group-addon">  '  + 
+ '   				<select class="currency"><option value="" disabled selected>Currency</option>  '  + 
+ '   					<option value="1">UCH</option>  '  + 
+ '   					<option value="2">UDE</option>  '  + 
+ '   					<option value="3">UAT</option>  '  + 
+ '   					<option value="4">UUK</option>  '  + 
+ '   					<option value="5">UIE</option>  '  + 
+ '   					<option value="6">UUS</option>  '  + 
+ '   					<option value="7">UAU</option>  '  + 
+ '   					<option value="8">UCN</option>  '  + 
+ '   					<option value="9">USE</option>  '  + 
+ '   					<option value="10">UFR</option>  '  + 
+ '   					<option value="11">UCA</option>  '  + 
+ '   					<option value="12">UJP</option>  '  + 
+ '   					<option value="13">UTH</option>  '  + 
+ '   					<option value="14">UNZ</option>  '  + 
+ '   					<option value="15">UAE</option>  '  + 
+ '   					<option value="16">UFI</option>  '  + 
+ '   					<option value="17">ULU</option>  '  + 
+ '   					<option value="18">USG</option>  '  + 
+ '   					<option value="19">UHU</option>  '  + 
+ '   					<option value="20">UCZ</option>  '  + 
+ '   					<option value="21">UMY</option>  '  + 
+ '   					<option value="22">UUA</option>  '  + 
+ '   					<option value="23">UEE</option>  '  + 
+ '   					<option value="24">UMC</option>  '  + 
+ '   					<option value="25">ULI</option>  '  + 
+ '   					<option value="26">UIS</option>  '  + 
+ '   					<option value="27">UHK</option>  '  + 
+ '   					<option value="28">UES</option>  '  + 
+ '     '  + 
+ '   				</select>  '  + 
+ '   			      </span>  '  + 
+ '   			      <input type="number" class="form-control amount" aria-label="...">  '  + 
+ '   			    </div><!-- /input-group -->  '  + 
+ '   			  </div><!-- /.col-lg-6 -->  '  + 
+ '   <!--  '  + 
+ '   			  <div class="col-lg-4">  '  + 
+ '   				<input type="checkbox" checked=1 disabled=1 id="useSameForTxFee">  '  + 
+ '   				<label for="useSameForTxFee">Use same currency to pay TxFee</label>  '  + 
+ '   			  </div>  '  + 
+ '   -->  '  + 
+ '  			</div><!-- /.row -->  ' +
+ '<hr/>' +
+ '</div>');
+}
+
 $('#home-link').bind('click', function() { updateStatus(); toggle('home'); return false; });
 $('#my-ubi-link').bind('click', function() { updateMyUbi(); toggle('my-ubi'); return false; });
 $('#kyc-link').bind('click', function() { updateMyUbi(); toggle('kyc'); return false; });
@@ -1133,18 +1148,28 @@ $('#pay-confirmation-btn').bind('click', function() {
 	return false;
 });
 
+$('#new-output-btn').bind('click', function() {
+	addNewTxOutput();
+});
+
 $('#pay-btn').bind('click', function() {
 	NProgress.start();
-	var payload = {}
-	payload[$('#address').val()] = {};
-	payload[$('#address').val()][$('#currency').val()] = {};
-	payload[$('#address').val()][$('#currency').val()] = Math.floor($('#amount').val() * subUnits);
+	var payload = {};
 
-	if($('#address').val().length  == 0 || $('#currency').val()  == 0 || $('#amount').val().length == 0) {
-		displayError("Address, amout or currency can't be empty");
-		NProgress.done();
-		return;
-	}
+	$('#tx-outputs-container').children('.tx-output-entries').each(function( index ) {
+console.log($(this).find('.address').val());
+		payload[$(this).find('.address').val()] = {};
+		payload[$(this).find('.address').val()][$(this).find('.currency').val()] = {};
+		payload[$(this).find('.address').val()][$(this).find('.currency').val()] = Math.floor($(this).find('.amount').val() * subUnits);
+console.log(payload);
+		if($(this).find('.address').val().length  == 0 || $(this).find('.currency').val()  == 0 || $(this).find('.amount').val().length == 0) {
+			displayError("Address, amout or currency can't be empty");
+			NProgress.done();
+			return;
+		}
+	});
+
+console.log(payload);
 
 	$.ajax( {type: "POST", url:protocol + host + "/wallet/createTransaction", data:{"json": JSON.stringify(payload)}, headers: { 'apiKey': apiKey }} ).done(function(data) {
 		if(data["success"]) {
@@ -1394,6 +1419,7 @@ if(apiKey.length > 1) {
 
 	regularUpdates();
 	unregularUpdates();
+	addNewTxOutput();
 
 	var updateInterval = setInterval(function () {
 		regularUpdates();
