@@ -220,7 +220,7 @@
     #define CONFIG_PATH "config.ini"
 #endif
 
-#define MAX_NUMBER_OF_MY_TRANSACTIONS_TO_DISPLAY 250
+#define MAX_NUMBER_OF_MY_TRANSACTIONS_TO_DISPLAY 1000
 
 #ifdef TEST_MODE
     #define NET_PORT "1335"
