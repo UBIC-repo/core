@@ -992,7 +992,7 @@ $('#tx-outputs-container').append(
  '<div class="tx-output-entries">' +
  '		<div>'  + 
  '			<label for="address">Address:</label>'  + 
- '			<input class="address" type="text" class="form-control">'  + 
+ '			<input class="address form-control" type="text" class="form-control">'  + 
  '		</div>'  + 
  '   <div class="row">  '  + 
  '   				<div class="col-lg-2"><label>Amount:</label></div>  '  + 
@@ -1001,7 +1001,7 @@ $('#tx-outputs-container').append(
  '   			  <div class="col-lg-4">  '  + 
  '   			    <div class="input-group">  '  + 
  '   			      <span class="input-group-addon">  '  + 
- '   				<select class="currency"><option value="" disabled selected>Currency</option>  '  + 
+ '   				<select class="currency"><option value="0" disabled selected>Currency</option>  '  + 
  '   					<option value="1">UCH</option>  '  + 
  '   					<option value="2">UDE</option>  '  + 
  '   					<option value="3">UAT</option>  '  + 
@@ -1157,19 +1157,19 @@ $('#pay-btn').bind('click', function() {
 	var payload = {};
 
 	$('#tx-outputs-container').children('.tx-output-entries').each(function( index ) {
-console.log($(this).find('.address').val());
+		console.log($(this).find('.address').val());
 		payload[$(this).find('.address').val()] = {};
 		payload[$(this).find('.address').val()][$(this).find('.currency').val()] = {};
 		payload[$(this).find('.address').val()][$(this).find('.currency').val()] = Math.floor($(this).find('.amount').val() * subUnits);
-console.log(payload);
-		if($(this).find('.address').val().length  == 0 || $(this).find('.currency').val()  == 0 || $(this).find('.amount').val().length == 0) {
-			displayError("Address, amout or currency can't be empty");
+		console.log(payload);
+		if($(this).find('.address').val().length  == 0 || $(this).find('.currency').val() == null || $(this).find('.currency').val()  == "" || $(this).find('.currency').val()  == "0" || $(this).find('.amount').val().length == 0) {
+			displayError("Address, amount or currency can't be empty");
 			NProgress.done();
 			return;
 		}
 	});
 
-console.log(payload);
+	console.log(payload);
 
 	$.ajax( {type: "POST", url:protocol + host + "/wallet/createTransaction", data:{"json": JSON.stringify(payload)}, headers: { 'apiKey': apiKey }} ).done(function(data) {
 		if(data["success"]) {
