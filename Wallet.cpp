@@ -281,10 +281,11 @@ Transaction* Wallet::payToTxOutputsWithoutFees(std::vector<TxOut> txOutputs) {
 
     std::vector<TxIn> txInputs;
     // iterate through all addresses of the wallet
-    for(std::vector<unsigned char> address: this->addressesLink) {
+    for(std::vector<std::vector<unsigned char>>::reverse_iterator address = this->addressesLink.rbegin(); address != this->addressesLink.rend(); ++address) {
+
         UAmount addressAmountToSpend;
         AddressStore &addressStore = AddressStore::Instance();
-        AddressForStore addressForStore = addressStore.getAddressFromStore(address);
+        AddressForStore addressForStore = addressStore.getAddressFromStore(*address);
 
         UAmount addressAmount = AddressHelper::getAmountWithUBI(&addressForStore);
         TxIn txIn;
@@ -316,7 +317,7 @@ Transaction* Wallet::payToTxOutputsWithoutFees(std::vector<TxOut> txOutputs) {
         if(addressAmountToSpend > 0) {
             txIn.setNonce(addressForStore.getNonce());
             txIn.setAmount(addressAmountToSpend);
-            txIn.setInAddress(address);
+            txIn.setInAddress(*address);
             txInputs.emplace_back(txIn);
         }
     }
