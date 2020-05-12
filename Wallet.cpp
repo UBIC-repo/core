@@ -49,6 +49,7 @@ bool Wallet::generateWallet() {
 
     Config& config = Config::Instance();
     Log(LOG_LEVEL_INFO) << "Going to import " << config.getNumberOfAdresses() << " addresses";
+    EC_GROUP *defaultEcGroup = Wallet::getDefaultEcGroup();
     for(int i = 0; i < config.getNumberOfAdresses(); i++) {
 
         currentPrivKey = Hash256::hash256(FS::concatPaths(currentPrivKey, this->seed));
@@ -59,12 +60,12 @@ bool Wallet::generateWallet() {
         BIGNUM* keyBn = BN_new();
         BN_bin2bn(currentPrivKey.data(), (int)currentPrivKey.size(), keyBn);
         EC_KEY* ecKey = EC_KEY_new();
-        EC_KEY_set_group(ecKey, Wallet::getDefaultEcGroup());
+        EC_KEY_set_group(ecKey, defaultEcGroup);
         EC_KEY_set_private_key(ecKey, keyBn);
 
-        EC_POINT* pubKey = EC_POINT_new(Wallet::getDefaultEcGroup());
+        EC_POINT* pubKey = EC_POINT_new(defaultEcGroup);
         BN_CTX* ctx = BN_CTX_new();
-        EC_POINT_mul(Wallet::getDefaultEcGroup(), pubKey, keyBn, NULL, NULL, ctx);
+        EC_POINT_mul(defaultEcGroup, pubKey, keyBn, NULL, NULL, ctx);
         EC_KEY_set_public_key(ecKey, pubKey);
 
         EVP_PKEY_assign_EC_KEY(privateKey, ecKey);
@@ -78,7 +79,7 @@ bool Wallet::generateWallet() {
 
         const EC_POINT* pubKeyPoint = EC_KEY_get0_public_key(privateEcKey);
 
-        std::vector<unsigned char> pubkeyVector = ECCtools::ecPointToVector(Wallet::getDefaultEcGroup(), pubKeyPoint);
+        std::vector<unsigned char> pubkeyVector = ECCtools::ecPointToVector(defaultEcGroup, pubKeyPoint);
         this->publicKeys.emplace_back(pubkeyVector);
         //Log(LOG_LEVEL_INFO) << "added pubkeyVector " << pubkeyVector;
 
@@ -96,6 +97,7 @@ bool Wallet::generateWallet() {
         EVP_PKEY_free(privateKey);
         EC_KEY_free(ecKey);
     }
+    EC_GROUP_free(defaultEcGroup);
 
     return true;
 }
