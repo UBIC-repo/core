@@ -106,13 +106,14 @@ bool TransactionVerify::verifyRegisterPassportTx(Transaction* tx, uint32_t block
 
         try {
             srpScript >> *ntpRskSignatureVerificationObject;
-        } catch (const std::exception &e) {
+        } catch (const std::exception &exception) {
             Log(LOG_LEVEL_ERROR) << "Failed to deserialize SCRIPT_REGISTER_PASSPORT payload";
 
             if(transactionError != nullptr) {
                 transactionError->setErrorCode(1106);
                 transactionError->setErrorMessage("Failed to deserialize SCRIPT_REGISTER_PASSPORT payload");
             }
+            delete ntpRskSignatureVerificationObject;
             return false;
         }
 
@@ -798,6 +799,8 @@ bool TransactionVerify::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
 
                 if(addCertificateScript.isCSCA()) {
                     if(!certStore.verifyAddCSCA(cert)) {
+                        Log(LOG_LEVEL_ERROR) << "verifyAddCSCA failed";
+
                         if(transactionError != nullptr) {
                             transactionError->setErrorCode(914);
                             transactionError->setErrorMessage("verifyAddCSCA failed");
@@ -806,6 +809,8 @@ bool TransactionVerify::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                     }
                 } else if(addCertificateScript.isDSC()) {
                     if(!certStore.verifyAddDSC(cert, header->getBlockHeight())) {
+                        Log(LOG_LEVEL_ERROR) << "verifyAddDSC failed";
+
                         if(transactionError != nullptr) {
                             transactionError->setErrorCode(915);
                             transactionError->setErrorMessage("verifyAddDSC failed");
