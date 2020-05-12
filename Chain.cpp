@@ -94,6 +94,7 @@ bool Chain::connectBlock(Block* block, bool isRecursion) {
             connectBlockMutex.unlock();
             return false;
         }
+        delete previousHeader;
     }
 
     BlockHeader* bestBlockHeader = this->getBestBlockHeader();
@@ -317,6 +318,7 @@ BlockHeader* Chain::getBlockHeader(std::vector<unsigned char> blockHeaderHash) {
         return blockHeader;
     }
 
+    delete blockHeader;
     return nullptr;
 }
 
