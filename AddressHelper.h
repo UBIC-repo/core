@@ -8,7 +8,7 @@
 class AddressHelper {
 public:
 
-    static std::vector<unsigned char> addressLinkFromScript(UScript script) {
+    static std::vector<unsigned char> addressLinkFromScript(const UScript& script) {
         //if it is already an address
         if(script.getScriptType() == SCRIPT_LINK) {
             return script.getScript();
