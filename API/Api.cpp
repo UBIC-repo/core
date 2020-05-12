@@ -1906,22 +1906,20 @@ std::string Api::getWallet() {
     ptree baseTree;
     ptree addressesTree;
     UAmount balance;
-    for(std::vector<unsigned char> addressScript: wallet.getAddressesScript()) {
+
+    for(const std::vector<unsigned char>& addressScript: wallet.getAddressesScript()) {
         ptree addressTree;
+
+        Address address;
         UScript addressUScript;
         addressUScript.setScript(addressScript);
         addressUScript.setScriptType(SCRIPT_PKH);
 
         std::vector<unsigned char> addressLink = AddressHelper::addressLinkFromScript(addressUScript);
-
-        //Log(LOG_LEVEL_INFO) << "Wallet lookup for " << addressLink;
-        AddressStore &addressStore = AddressStore::Instance();
-        AddressForStore addressForStore = addressStore.getAddressFromStore(addressLink);
+        AddressForStore addressForStore = AddressStore::getAddressFromStore(addressLink);
 
         UAmount addressBalance = AddressHelper::getAmountWithUBI(&addressForStore);
         balance += addressBalance;
-
-        Address address;
         address.setScript(addressUScript);
 
         addressTree.put("readable", Wallet::readableAddressFromAddress(address));
@@ -1930,10 +1928,6 @@ std::string Api::getWallet() {
         addressTree.put("pubKey", Hexdump::vectorToHexString(wallet.getPublicKeyFromAddressLink(addressLink)));
         addressTree.push_back(std::make_pair("amount", uamountToPtree(addressBalance)));
         addressesTree.push_back(std::make_pair("", addressTree));
-
-        if(addressBalance > 0) {
-            Log(LOG_LEVEL_INFO) << "addressBalance: " << addressBalance;
-        }
     }
 
     baseTree.push_back(std::make_pair("addresses", addressesTree));
