@@ -57,6 +57,7 @@ bool TransactionApply::applyTransaction(Transaction* tx, BlockHeader* blockHeade
 
                     db.putInDB(DB_NTPSK_ALREADY_USED, ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM()),
                                std::vector<unsigned char>(nauscript.data(), nauscript.data() + nauscript.size()));
+                    delete ntpRskSignatureVerificationObject;
                 } else {
                     // is NtpEsk
                     Cert* cert = certStore.getDscCertWithCertId(txIn->getInAddress());
@@ -158,6 +159,7 @@ bool TransactionApply::applyTransaction(Transaction* tx, BlockHeader* blockHeade
                 }
 
                 addressStore.creditAddressToStore(address, false);
+                delete address;
                 break;
             }
             case SCRIPT_VOTE: {
