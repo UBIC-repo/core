@@ -22,7 +22,9 @@ bool TxPool::isTxInputPresent(TransactionForNetwork* transactionForNetwork) {
     Transaction transaction = transactionForNetwork->getTransaction();
 
     if(TransactionHelper::isRegisterPassport(&transaction)) {
-        std::vector<unsigned char> passportHash = TransactionHelper::getPassportHash(&transaction, X509Helper::vectorToCert(transactionForNetwork->getAdditionalPayload()));
+        X509* x509 = X509Helper::vectorToCert(transactionForNetwork->getAdditionalPayload());
+        std::vector<unsigned char> passportHash = TransactionHelper::getPassportHash(&transaction, x509);
+        X509_free(x509);
 
         std::unordered_map<std::string, TxIn>::iterator txInIt = this->txInputs.find(Hexdump::vectorToHexString(passportHash));
         return txInIt != this->txInputs.end();
@@ -101,7 +103,10 @@ bool TxPool::appendTransaction(TransactionForNetwork transactionForNetwork, bool
     );
 
     if (TransactionHelper::isRegisterPassport(&transaction)) {
-        std::vector<unsigned char> passportHash = TransactionHelper::getPassportHash(&transaction, X509Helper::vectorToCert(transactionForNetwork.getAdditionalPayload()));
+        X509* x509 = X509Helper::vectorToCert(transactionForNetwork.getAdditionalPayload());
+        std::vector<unsigned char> passportHash = TransactionHelper::getPassportHash(&transaction, x509);
+        X509_free(x509);
+
         this->txInputs.insert(std::make_pair(Hexdump::vectorToHexString(passportHash), transaction.getTxIns().front()));
     } else {
         for (TxIn txIn: transaction.getTxIns()) {
