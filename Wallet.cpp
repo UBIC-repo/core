@@ -432,7 +432,6 @@ std::vector<unsigned char> Wallet::addressVectorFromAddress(Address address) {
 
 std::string Wallet::readableAddressFromAddress(Address address) {
     std::vector<unsigned char> addressVector = Wallet::addressVectorFromAddress(address);
-    Log(LOG_LEVEL_INFO) << "addressVector:" << addressVector;
     std::vector<unsigned char> checksum = Hash256::hash256(FS::concatPaths(addressVector, "UBIC"));
     addressVector.insert(addressVector.end(), checksum.begin(), checksum.begin() + 3);
 
