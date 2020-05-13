@@ -17,7 +17,7 @@ public:
     static std::string addPeer(std::string json);
     static std::string getPeers();
 
-    static std::string getAddress(std::vector<unsigned char> address);
+    static std::string getAddress(std::string addressString);
     static std::string removeBan(std::string json);
     static std::string addBan(std::string json);
     static std::string getBans();
