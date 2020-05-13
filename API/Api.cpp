@@ -516,9 +516,26 @@ std::string Api::getPeers() {
     return ss.str();
 }
 
-std::string Api::getAddress(std::vector<unsigned char> address) {
+std::string Api::getAddress(std::string addressString) {
+    std::vector<unsigned char> addressVector;
+    if(addressString.length() != 40) {
+        std::vector<unsigned char> vectorAddress = Wallet::readableAddressToVectorAddress(addressString);
+
+        Address address;
+        try {
+            CDataStream s(SER_DISK, 1);
+            s.write((char *) vectorAddress.data(), vectorAddress.size());
+            s >> address;
+        } catch (const std::exception& e) {
+            return "{\"success\": false, \"error\": \"failed to deserialize the address\"}";
+        }
+        addressVector = AddressHelper::addressLinkFromScript(address.getScript());
+    } else {
+        addressVector = Hexdump::hexStringToVector(addressString);
+    }
+
     AddressStore &addressStore = AddressStore::Instance();
-    AddressForStore addressForStore = addressStore.getAddressFromStore(address);
+    AddressForStore addressForStore = addressStore.getAddressFromStore(addressVector);
 
     if(addressForStore.getScript().getScript().empty()) {
         return "{\"success\": false, \"error\": \"address not found\"}";
