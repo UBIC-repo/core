@@ -1,4 +1,3 @@
-
 #include "ApiServer.h"
 #include "../Tools/Log.h"
 #include "Api.h"
@@ -7,11 +6,9 @@
 #include "../Scripts/AddCertificateScript.h"
 #include "../App.h"
 #include <boost/asio.hpp>
-#include <thread>
 #include <regex>
 #include <boost/algorithm/string.hpp>
 #include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 
 using boost::asio::ip::tcp;
 using boost::property_tree::ptree;
@@ -228,7 +225,7 @@ std::string ApiServer::route(std::vector<std::string> urlParts, std::string json
             return Api::getBans();
         } else if(urlParts.at(0) == "address") {
             if(urlParts.size() == 2) {
-                return Api::getAddress(Hexdump::hexStringToVector(urlParts.at(1)));
+                return Api::getAddress(urlParts.at(1));
             }
         } else if(urlParts.at(0) == "currencies") {
             if(urlParts.size() == 1) {
