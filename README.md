@@ -5,6 +5,7 @@ WARNING
 ===============
 
 This piece of software is provided without warranty of any kind, use it at your own risk.
+UBIC is currently "Beta" software, bugs might occur.
 
 # Overview
 
