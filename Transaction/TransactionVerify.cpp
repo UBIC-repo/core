@@ -500,7 +500,13 @@ bool TransactionVerify::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
     UAmount totalOutAmount;
     UAmount addressAvailableAmount;
     std::vector<TxIn> txIns = tx->getTxIns();
+    std::map<std::vector<unsigned char>, bool> txInsDuplicates = std::map<std::vector<unsigned char>, bool> ();
     for (std::vector<TxIn>::iterator txIn = txIns.begin(); txIn != txIns.end(); ++txIn) {
+        if(txInsDuplicates.find(txIn->getScript().getScript()) != txInsDuplicates.end()) {
+            Log(LOG_LEVEL_ERROR) << "Same input is duplicated";
+            return false;
+        }
+        txInsDuplicates.insert(std::make_pair(txIn->getScript().getScript(), true));
         UAmount inAmount = txIn->getAmount();
         if(!UAmountHelper::isValidAmount(inAmount)) {
             Log(LOG_LEVEL_ERROR) << "Invalid inAmount: "
@@ -512,7 +518,14 @@ bool TransactionVerify::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
             }
             return false;
         }
-        totalInAmount += inAmount;
+
+        UAmount newTotalInAmount = totalInAmount + inAmount;
+        if(totalInAmount <= newTotalInAmount && totalInAmount != newTotalInAmount) {
+            Log(LOG_LEVEL_ERROR) << "Invalid inAmount: "
+                                 << inAmount;
+            return false;
+        }
+        totalInAmount = newTotalInAmount;
         AddressForStore addressForStore = addressStore.getAddressFromStore(txIn->getInAddress());
         addressAvailableAmount += AddressHelper::getAmountWithUBI(&addressForStore);
     }
@@ -545,7 +558,14 @@ bool TransactionVerify::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
             }
             return false;
         }
-        totalOutAmount += outAmount;
+
+        UAmount newTotalOutAmount = totalOutAmount + outAmount;
+        if(totalInAmount <= newTotalOutAmount && totalInAmount != newTotalOutAmount) {
+            Log(LOG_LEVEL_ERROR) << "Invalid outAmount: "
+                                 << outAmount;
+            return false;
+        }
+        totalOutAmount = newTotalOutAmount;
 
         switch(txOut->getScript().getScriptType()) {
             case SCRIPT_LINK: {
