@@ -502,11 +502,11 @@ bool TransactionVerify::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
     std::vector<TxIn> txIns = tx->getTxIns();
     std::map<std::vector<unsigned char>, bool> txInsDuplicates = std::map<std::vector<unsigned char>, bool> ();
     for (std::vector<TxIn>::iterator txIn = txIns.begin(); txIn != txIns.end(); ++txIn) {
-        if(txInsDuplicates.find(txIn->getScript().getScript()) != txInsDuplicates.end()) {
+        if(txInsDuplicates.find(txIn->getInAddress()) != txInsDuplicates.end()) {
             Log(LOG_LEVEL_ERROR) << "Same input is duplicated";
             return false;
         }
-        txInsDuplicates.insert(std::make_pair(txIn->getScript().getScript(), true));
+        txInsDuplicates.insert(std::make_pair(txIn->getInAddress(), true));
         UAmount inAmount = txIn->getAmount();
         if(!UAmountHelper::isValidAmount(inAmount)) {
             Log(LOG_LEVEL_ERROR) << "Invalid inAmount: "
