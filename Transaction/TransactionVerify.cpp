@@ -520,7 +520,7 @@ bool TransactionVerify::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
         }
 
         UAmount newTotalInAmount = totalInAmount + inAmount;
-        if(totalInAmount <= newTotalInAmount && totalInAmount != newTotalInAmount) {
+        if(totalInAmount >= newTotalInAmount && totalInAmount != newTotalInAmount) {
             Log(LOG_LEVEL_ERROR) << "Invalid inAmount: "
                                  << inAmount;
             return false;
@@ -560,7 +560,7 @@ bool TransactionVerify::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
         }
 
         UAmount newTotalOutAmount = totalOutAmount + outAmount;
-        if(totalInAmount <= newTotalOutAmount && totalInAmount != newTotalOutAmount) {
+        if(totalOutAmount >= newTotalOutAmount && totalInAmount != newTotalOutAmount) {
             Log(LOG_LEVEL_ERROR) << "Invalid outAmount: "
                                  << outAmount;
             return false;
