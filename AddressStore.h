@@ -15,7 +15,7 @@ public:
     void debitAddressToStore(std::vector<unsigned char> addressKey, UAmount amount, BlockHeader* blockHeader, bool isUndo);
     void debitAddressToStore(AddressForStore* address, UAmount amount, bool isUndo);
     void creditAddressToStore(AddressForStore* address, bool isUndo);
-    static AddressForStore getAddressFromStore(std::vector<unsigned char> address);
+    static AddressForStore getAddressFromStore(const std::vector<unsigned char> &address);
 };
 
 
