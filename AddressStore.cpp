@@ -82,7 +82,7 @@ void AddressStore::creditAddressToStore(AddressForStore* address, bool isUndo) {
     Log(LOG_LEVEL_INFO) << "Credited address " << addressKey;
 }
 
-AddressForStore AddressStore::getAddressFromStore(std::vector<unsigned char> address) {
+AddressForStore AddressStore::getAddressFromStore(const std::vector<unsigned char> &address) {
     AddressForStore addressForStore;
     addressForStore.setNonce(0); //default nonce if not in address store
     DB& db = DB::Instance();
