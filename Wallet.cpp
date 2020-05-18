@@ -281,18 +281,37 @@ Transaction* Wallet::payToTxOutputsWithoutFees(std::vector<TxOut> txOutputs) {
         toSpend += txOutput.getAmount();
     }
 
-    std::vector<TxIn> txInputs;
+    struct AddressesWithAmount {
+        std::vector<unsigned char> address;
+        UAmount amount;
+    };
+
+    std::vector<AddressesWithAmount> addressesLinksWithAmount;
     // iterate through all addresses of the wallet
-    for(std::vector<std::vector<unsigned char>>::reverse_iterator address = this->addressesLink.rbegin(); address != this->addressesLink.rend(); ++address) {
+    for(std::vector<std::vector<unsigned char>>::iterator address = this->addressesLink.begin(); address != this->addressesLink.end(); ++address) {
+        AddressForStore addressForStore = AddressStore::getAddressFromStore(*address);
+        AddressesWithAmount addressesWithAmount {*address, AddressHelper::getAmountWithUBI(&addressForStore)};
+        addressesLinksWithAmount.push_back(addressesWithAmount);
+    }
+
+    std::sort(addressesLinksWithAmount.begin(),
+              addressesLinksWithAmount.end(),
+              [](AddressesWithAmount& lhs, AddressesWithAmount& rhs)
+              {
+                  return lhs.amount >= rhs.amount && lhs.amount != rhs.amount;
+              }
+    );
+
+    std::vector<TxIn> txInputs;
+    // iterate through addressesLinksWithAmount
+    for(std::vector<AddressesWithAmount>::iterator it = addressesLinksWithAmount.begin(); it != addressesLinksWithAmount.end(); ++it) {
 
         UAmount addressAmountToSpend;
-        AddressStore &addressStore = AddressStore::Instance();
-        AddressForStore addressForStore = addressStore.getAddressFromStore(*address);
+        AddressForStore addressForStore = AddressStore::getAddressFromStore(it->address);
 
-        UAmount addressAmount = AddressHelper::getAmountWithUBI(&addressForStore);
         TxIn txIn;
         // iterate through all currencies of the address
-        for (std::map<uint8_t, CAmount>::iterator addressIt = addressAmount.map.begin(); addressIt != addressAmount.map.end(); ++addressIt)
+        for (std::map<uint8_t, CAmount>::iterator addressIt = it->amount.map.begin(); addressIt != it->amount.map.end(); ++addressIt)
         {
             auto cToSpend = toSpend.map.find(addressIt->first);
             if(cToSpend != toSpend.map.end()) { // if the currency we want to spend is present on the address
@@ -319,7 +338,7 @@ Transaction* Wallet::payToTxOutputsWithoutFees(std::vector<TxOut> txOutputs) {
         if(addressAmountToSpend > 0) {
             txIn.setNonce(addressForStore.getNonce());
             txIn.setAmount(addressAmountToSpend);
-            txIn.setInAddress(*address);
+            txIn.setInAddress(it->address);
             txInputs.emplace_back(txIn);
         }
     }
