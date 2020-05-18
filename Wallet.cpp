@@ -298,7 +298,7 @@ Transaction* Wallet::payToTxOutputsWithoutFees(std::vector<TxOut> txOutputs) {
               addressesLinksWithAmount.end(),
               [](AddressesWithAmount& lhs, AddressesWithAmount& rhs)
               {
-                  return lhs.amount >= rhs.amount && lhs.amount != rhs.amount;
+                  return lhs.amount.total() > rhs.amount.total();
               }
     );
 
