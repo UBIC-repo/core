@@ -128,6 +128,34 @@ uint8_t CertHelper::getCurrencyIdForCert(X509* x509) {
         currencyId = CURRENCY_THAILAND;
     }
 
+    if(strcmp(iso2code, "RU") == 0 || strcmp(iso2code, "ru") == 0) {
+        currencyId = CURRENCY_RUSSIA;
+    }
+
+    if(strcmp(iso2code, "IL") == 0 || strcmp(iso2code, "il") == 0) {
+        currencyId = CURRENCY_ISRAEL;
+    }
+
+    if(strcmp(iso2code, "PT") == 0 || strcmp(iso2code, "pt") == 0) {
+        currencyId = CURRENCY_PORTUGAL;
+    }
+
+    if(strcmp(iso2code, "DK") == 0 || strcmp(iso2code, "dk") == 0) {
+        currencyId = CURRENCY_DENMARK;
+    }
+
+    if(strcmp(iso2code, "TR") == 0 || strcmp(iso2code, "tr") == 0) {
+        currencyId = CURRENCY_TURKEY;
+    }
+
+    if(strcmp(iso2code, "RO") == 0 || strcmp(iso2code, "ro") == 0) {
+        currencyId = CURRENCY_ROMANIA;
+    }
+
+    if(strcmp(iso2code, "PL") == 0 || strcmp(iso2code, "pl") == 0) {
+        currencyId = CURRENCY_POLAND;
+    }
+    
     free(iso2code);
 
     return currencyId;
@@ -178,6 +206,12 @@ uint64_t CertHelper::calculateDSCExpirationDateForCert(X509* x509) {
         currencyId == CURRENCY_SPAIN ||
         currencyId == CURRENCY_HONG_KONG ||
         currencyId == CURRENCY_ICELAND ||
+        currencyId == CURRENCY_TURKEY ||
+        currencyId == CURRENCY_DENMARK ||
+        currencyId == CURRENCY_ISRAEL ||
+        currencyId == CURRENCY_POLAND ||
+        currencyId == CURRENCY_RUSSIA ||
+        currencyId == CURRENCY_ROMANIA ||
         currencyId == CURRENCY_FRANCE) {
         maxValidity = tenYears;
     }
@@ -190,6 +224,7 @@ uint64_t CertHelper::calculateDSCExpirationDateForCert(X509* x509) {
         currencyId == CURRENCY_MONACO ||
         currencyId == CURRENCY_ESTONIA ||
         currencyId == CURRENCY_LUXEMBOURG ||
+        currencyId == CURRENCY_PORTUGAL ||
         currencyId == CURRENCY_UNITED_ARAB_EMIRATES
             ) {
         maxValidity = fiveYears;
