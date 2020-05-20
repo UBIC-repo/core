@@ -155,7 +155,11 @@ uint8_t CertHelper::getCurrencyIdForCert(X509* x509) {
     if(strcmp(iso2code, "PL") == 0 || strcmp(iso2code, "pl") == 0) {
         currencyId = CURRENCY_POLAND;
     }
-    
+
+    if(strcmp(iso2code, "NL") == 0 || strcmp(iso2code, "nl") == 0) {
+        currencyId = CURRENCY_NETHERLANDS;
+    }
+
     free(iso2code);
 
     return currencyId;
@@ -189,43 +193,44 @@ uint64_t CertHelper::calculateDSCExpirationDateForCert(X509* x509) {
     uint32_t fiveYears = 5 * 365 * 24 * 3600;
 
     if(currencyId == CURRENCY_AUSTRIA ||
-        currencyId == CURRENCY_GERMANY ||
-        currencyId == CURRENCY_CHINA ||
-        currencyId == CURRENCY_UNITED_KINGDOM ||
-        currencyId == CURRENCY_AUSTRALIA ||
-        currencyId == CURRENCY_IRELAND ||
-        currencyId == CURRENCY_NEW_ZEALAND ||
-        currencyId == CURRENCY_CZECH_REPUBLIC ||
-        currencyId == CURRENCY_CANADA ||
-        currencyId == CURRENCY_UNITED_ARAB_EMIRATES ||
-        currencyId == CURRENCY_USA ||
-        currencyId == CURRENCY_JAPAN ||
-        currencyId == CURRENCY_HUNGARY ||
-        currencyId == CURRENCY_LIECHTENSTEIN ||
-        currencyId == CURRENCY_SWITZERLAND ||
-        currencyId == CURRENCY_SPAIN ||
-        currencyId == CURRENCY_HONG_KONG ||
-        currencyId == CURRENCY_ICELAND ||
-        currencyId == CURRENCY_TURKEY ||
-        currencyId == CURRENCY_DENMARK ||
-        currencyId == CURRENCY_ISRAEL ||
-        currencyId == CURRENCY_POLAND ||
-        currencyId == CURRENCY_RUSSIA ||
-        currencyId == CURRENCY_ROMANIA ||
-        currencyId == CURRENCY_FRANCE) {
+       currencyId == CURRENCY_GERMANY ||
+       currencyId == CURRENCY_CHINA ||
+       currencyId == CURRENCY_UNITED_KINGDOM ||
+       currencyId == CURRENCY_AUSTRALIA ||
+       currencyId == CURRENCY_IRELAND ||
+       currencyId == CURRENCY_NEW_ZEALAND ||
+       currencyId == CURRENCY_CZECH_REPUBLIC ||
+       currencyId == CURRENCY_CANADA ||
+       currencyId == CURRENCY_UNITED_ARAB_EMIRATES ||
+       currencyId == CURRENCY_USA ||
+       currencyId == CURRENCY_JAPAN ||
+       currencyId == CURRENCY_HUNGARY ||
+       currencyId == CURRENCY_LIECHTENSTEIN ||
+       currencyId == CURRENCY_SWITZERLAND ||
+       currencyId == CURRENCY_SPAIN ||
+       currencyId == CURRENCY_HONG_KONG ||
+       currencyId == CURRENCY_ICELAND ||
+       currencyId == CURRENCY_TURKEY ||
+       currencyId == CURRENCY_DENMARK ||
+       currencyId == CURRENCY_ISRAEL ||
+       currencyId == CURRENCY_POLAND ||
+       currencyId == CURRENCY_RUSSIA ||
+       currencyId == CURRENCY_ROMANIA ||
+       currencyId == CURRENCY_NETHERLANDS ||
+       currencyId == CURRENCY_FRANCE) {
         maxValidity = tenYears;
     }
 
     if(currencyId == CURRENCY_SWEDEN ||
-        currencyId == CURRENCY_FINLAND ||
-        currencyId == CURRENCY_MALAYSIA ||
-        currencyId == CURRENCY_THAILAND ||
-        currencyId == CURRENCY_SINGAPORE ||
-        currencyId == CURRENCY_MONACO ||
-        currencyId == CURRENCY_ESTONIA ||
-        currencyId == CURRENCY_LUXEMBOURG ||
-        currencyId == CURRENCY_PORTUGAL ||
-        currencyId == CURRENCY_UNITED_ARAB_EMIRATES
+       currencyId == CURRENCY_FINLAND ||
+       currencyId == CURRENCY_MALAYSIA ||
+       currencyId == CURRENCY_THAILAND ||
+       currencyId == CURRENCY_SINGAPORE ||
+       currencyId == CURRENCY_MONACO ||
+       currencyId == CURRENCY_ESTONIA ||
+       currencyId == CURRENCY_LUXEMBOURG ||
+       currencyId == CURRENCY_PORTUGAL ||
+       currencyId == CURRENCY_UNITED_ARAB_EMIRATES
             ) {
         maxValidity = fiveYears;
     }
