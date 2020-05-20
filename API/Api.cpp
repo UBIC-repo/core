@@ -2021,6 +2021,14 @@ std::string Api::getCurrencies() {
     currencyCodes.put(std::to_string(CURRENCY_ICELAND), "UIS");
     currencyCodes.put(std::to_string(CURRENCY_HONG_KONG), "UHK");
     currencyCodes.put(std::to_string(CURRENCY_SPAIN), "UES");
+    currencyCodes.put(std::to_string(CURRENCY_RUSSIA), "URU");
+    currencyCodes.put(std::to_string(CURRENCY_ISRAEL), "UIL");
+    currencyCodes.put(std::to_string(CURRENCY_PORTUGAL), "UPT");
+    currencyCodes.put(std::to_string(CURRENCY_DENMARK), "UDK");
+    currencyCodes.put(std::to_string(CURRENCY_TURKEY), "UTR");
+    currencyCodes.put(std::to_string(CURRENCY_ROMANIA), "URO");
+    currencyCodes.put(std::to_string(CURRENCY_POLAND), "UPL");
+    currencyCodes.put(std::to_string(CURRENCY_NETHERLANDS), "UNL");
 
     baseTree.push_back(std::make_pair("currencyCodes", currencyCodes));
 
