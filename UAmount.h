@@ -381,7 +381,15 @@ public:
                  it->first == CURRENCY_LIECHTENSTEIN ||
                  it->first == CURRENCY_ICELAND ||
                  it->first == CURRENCY_HONG_KONG ||
-                 it->first == CURRENCY_SPAIN
+                 it->first == CURRENCY_SPAIN ||
+                 it->first == CURRENCY_RUSSIA ||
+                 it->first == CURRENCY_ISRAEL ||
+                 it->first == CURRENCY_PORTUGAL ||
+                 it->first == CURRENCY_DENMARK ||
+                 it->first == CURRENCY_TURKEY ||
+                 it->first == CURRENCY_ROMANIA ||
+                 it->first == CURRENCY_POLAND ||
+                 it->first == CURRENCY_NETHERLANDS
                 )) {
                 return false;
             }
