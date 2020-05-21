@@ -397,6 +397,24 @@ public:
 
         return true;
     }
+
+    static UAmount UAmount32toUAmount64(UAmount32 amount32) {
+        UAmount amount64;
+        for (std::map<uint8_t, CAmount32>::const_iterator it(amount32.map.begin()); it != amount32.map.end(); ++it) {
+            amount64.map.insert(std::make_pair(it->first, (uint64_t)it->second));
+        }
+
+        return amount64;
+    }
+
+    static UAmount32 UAmount64toUAmount32(UAmount amount64) {
+        UAmount32 amount32;
+        for (std::map<uint8_t, CAmount>::const_iterator it(amount64.map.begin()); it != amount64.map.end(); ++it) {
+            amount32.map.insert(std::make_pair(it->first, (uint32_t)it->second));
+        }
+
+        return amount32;
+    }
 };
 
 #endif //TX_UAMOUNT_H
