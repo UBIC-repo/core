@@ -50,6 +50,11 @@ bool BlockHelper::verifyBlock(Block* block) {
 
     std::vector<unsigned char> computedHeaderHash = BlockHelper::computeBlockHeaderHash(*header);
 
+    if(header->getVersion() > LATEST_BLOCK_VERSION || header->getVersion() == 0) {
+        Log(LOG_LEVEL_ERROR) << "The block is using an invalid block version number";
+        return false;
+    }
+
     if(computedHeaderHash != header->getHeaderHash()) {
         Log(LOG_LEVEL_ERROR) << "Header hash "
                              << header->getHeaderHash()
@@ -472,6 +477,25 @@ UAmount BlockHelper::calculateDelegatePayout(uint32_t blockHeight) {
                                                       (uint64_t) (CURRENCY_SPAIN_DELEGATE_PAYOUT)));
     }
 
+    if(blockHeight >= NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT) {
+        amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_RUSSIA,
+                                                      (uint64_t) (CURRENCY_RUSSIA_DELEGATE_PAYOUT)));
+        amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_ISRAEL,
+                                                      (uint64_t) (CURRENCY_ISRAEL_DELEGATE_PAYOUT)));
+        amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_PORTUGAL,
+                                                      (uint64_t) (CURRENCY_PORTUGAL_DELEGATE_PAYOUT)));
+        amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_DENMARK,
+                                                      (uint64_t) (CURRENCY_DENMARK_DELEGATE_PAYOUT)));
+        amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_TURKEY,
+                                                      (uint64_t) (CURRENCY_TURKEY_DELEGATE_PAYOUT)));
+        amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_ROMANIA,
+                                                      (uint64_t) (CURRENCY_ROMANIA_DELEGATE_PAYOUT)));
+        amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_POLAND,
+                                                      (uint64_t) (CURRENCY_POLAND_DELEGATE_PAYOUT)));
+        amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_NETHERLANDS,
+                                                      (uint64_t) (CURRENCY_NETHERLANDS_DELEGATE_PAYOUT)));
+    }
+
     return amount;
 }
 
@@ -528,6 +552,33 @@ UAmount BlockHelper::calculateDevFundPayout(uint32_t blockHeight) {
                                                                   halvingFactor)));
     }
 
+    if(blockHeight >= NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT) {
+        amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_RUSSIA,
+                                                      (uint64_t) (CURRENCY_RUSSIA_DEVELOPMENT_PAYOUT /
+                                                                  halvingFactor)));
+        amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_ISRAEL,
+                                                      (uint64_t) (CURRENCY_ISRAEL_DEVELOPMENT_PAYOUT /
+                                                                  halvingFactor)));
+        amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_PORTUGAL,
+                                                      (uint64_t) (CURRENCY_PORTUGAL_DEVELOPMENT_PAYOUT /
+                                                                  halvingFactor)));
+        amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_DENMARK,
+                                                      (uint64_t) (CURRENCY_DENMARK_DEVELOPMENT_PAYOUT /
+                                                                  halvingFactor)));
+        amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_TURKEY,
+                                                      (uint64_t) (CURRENCY_TURKEY_DEVELOPMENT_PAYOUT /
+                                                                  halvingFactor)));
+        amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_ROMANIA,
+                                                      (uint64_t) (CURRENCY_ROMANIA_DEVELOPMENT_PAYOUT /
+                                                                  halvingFactor)));
+        amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_POLAND,
+                                                      (uint64_t) (CURRENCY_POLAND_DEVELOPMENT_PAYOUT /
+                                                                  halvingFactor)));
+        amount.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_NETHERLANDS,
+                                                      (uint64_t) (CURRENCY_NETHERLANDS_DEVELOPMENT_PAYOUT /
+                                                                  halvingFactor)));
+    }
+
     return amount;
 }
 
@@ -578,6 +629,17 @@ UAmount32 BlockHelper::calculateUbiReceiverCount(Block* block, BlockHeader* prev
 
     if(block->getHeader()->getBlockHeight() == SPAIN_ACTIVATION_BLOCK_HEIGHT) {
         newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_SPAIN, 0));
+    }
+
+    if(block->getHeader()->getBlockHeight() == NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT) {
+        newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_RUSSIA, 0));
+        newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_ISRAEL, 0));
+        newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_PORTUGAL, 0));
+        newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_DENMARK, 0));
+        newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_TURKEY, 0));
+        newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_ROMANIA, 0));
+        newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_POLAND, 0));
+        newUbiReceiverCount.map.insert(std::pair<uint8_t, CAmount32>(CURRENCY_NETHERLANDS, 0));
     }
 
     CertStore& certStore = CertStore::Instance();
@@ -713,6 +775,25 @@ UAmount BlockHelper::getTotalPayout(uint64_t blockHeight) {
                 std::pair<uint8_t, CAmount>(CURRENCY_SPAIN, (uint64_t) (CURRENCY_SPAIN_EMISSION_RATE)));
     }
 
+    if(blockHeight >= NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT) {
+        totalPayout.map.insert(
+                std::pair<uint8_t, CAmount>(CURRENCY_RUSSIA, (uint64_t) (CURRENCY_RUSSIA_EMISSION_RATE)));
+        totalPayout.map.insert(
+                std::pair<uint8_t, CAmount>(CURRENCY_ISRAEL, (uint64_t) (CURRENCY_ISRAEL_EMISSION_RATE)));
+        totalPayout.map.insert(
+                std::pair<uint8_t, CAmount>(CURRENCY_PORTUGAL, (uint64_t) (CURRENCY_PORTUGAL_EMISSION_RATE)));
+        totalPayout.map.insert(
+                std::pair<uint8_t, CAmount>(CURRENCY_DENMARK, (uint64_t) (CURRENCY_DENMARK_EMISSION_RATE)));
+        totalPayout.map.insert(
+                std::pair<uint8_t, CAmount>(CURRENCY_TURKEY, (uint64_t) (CURRENCY_TURKEY_EMISSION_RATE)));
+        totalPayout.map.insert(
+                std::pair<uint8_t, CAmount>(CURRENCY_ROMANIA, (uint64_t) (CURRENCY_ROMANIA_EMISSION_RATE)));
+        totalPayout.map.insert(
+                std::pair<uint8_t, CAmount>(CURRENCY_POLAND, (uint64_t) (CURRENCY_POLAND_EMISSION_RATE)));
+        totalPayout.map.insert(
+                std::pair<uint8_t, CAmount>(CURRENCY_NETHERLANDS, (uint64_t) (CURRENCY_NETHERLANDS_EMISSION_RATE)));
+    }
+
     return totalPayout;
 }
 
@@ -794,21 +875,6 @@ void BlockHelper::calculatePayout(Block* block, BlockHeader* previousBlockHeader
 
         payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_LIECHTENSTEIN, 0));
         payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_LIECHTENSTEIN, 0));
-
-        if(block->getHeader()->getBlockHeight() >= ICELAND_ACTIVATION_BLOCK_HEIGHT) {
-            payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_ICELAND, 0));
-            payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_ICELAND, 0));
-        }
-
-        if(block->getHeader()->getBlockHeight() >= HONG_KONG_ACTIVATION_BLOCK_HEIGHT) {
-            payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_HONG_KONG, 0));
-            payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_HONG_KONG, 0));
-        }
-
-        if(block->getHeader()->getBlockHeight() >= SPAIN_ACTIVATION_BLOCK_HEIGHT) {
-            payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_SPAIN, 0));
-            payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_SPAIN, 0));
-        }
 
         return;
     }
@@ -1082,26 +1148,108 @@ void BlockHelper::calculatePayout(Block* block, BlockHeader* previousBlockHeader
 
     if(block->getHeader()->getBlockHeight() >= HONG_KONG_ACTIVATION_BLOCK_HEIGHT) {
         // -------------------------------------------------------------------------------------------------------
-        uint64_t divICE = 0;
-        uint64_t remICE = 0;
+        uint64_t divHK = 0;
+        uint64_t remHK = 0;
         if(newReceiverCount.map[CURRENCY_HONG_KONG] != 0) {
-            divICE = (uint64_t) totalPayout.map[CURRENCY_HONG_KONG] / newReceiverCount.map[CURRENCY_HONG_KONG];
-            remICE = (uint64_t) totalPayout.map[CURRENCY_HONG_KONG] % newReceiverCount.map[CURRENCY_HONG_KONG];
+            divHK = (uint64_t) totalPayout.map[CURRENCY_HONG_KONG] / newReceiverCount.map[CURRENCY_HONG_KONG];
+            remHK = (uint64_t) totalPayout.map[CURRENCY_HONG_KONG] % newReceiverCount.map[CURRENCY_HONG_KONG];
         }
-        payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_HONG_KONG, divICE));
-        payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_HONG_KONG, remICE));
+        payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_HONG_KONG, divHK));
+        payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_HONG_KONG, remHK));
     }
 
     if(block->getHeader()->getBlockHeight() >= SPAIN_ACTIVATION_BLOCK_HEIGHT) {
         // -------------------------------------------------------------------------------------------------------
-        uint64_t divICE = 0;
-        uint64_t remICE = 0;
+        uint64_t divES = 0;
+        uint64_t remES = 0;
         if(newReceiverCount.map[CURRENCY_SPAIN] != 0) {
-            divICE = (uint64_t) totalPayout.map[CURRENCY_SPAIN] / newReceiverCount.map[CURRENCY_SPAIN];
-            remICE = (uint64_t) totalPayout.map[CURRENCY_SPAIN] % newReceiverCount.map[CURRENCY_SPAIN];
+            divES = (uint64_t) totalPayout.map[CURRENCY_SPAIN] / newReceiverCount.map[CURRENCY_SPAIN];
+            remES = (uint64_t) totalPayout.map[CURRENCY_SPAIN] % newReceiverCount.map[CURRENCY_SPAIN];
         }
-        payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_SPAIN, divICE));
-        payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_SPAIN, remICE));
+        payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_SPAIN, divES));
+        payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_SPAIN, remES));
+    }
+
+    if(block->getHeader()->getBlockHeight() >= NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT) {
+        // -------------------------------------------------------------------------------------------------------
+        uint64_t divRU = 0;
+        uint64_t remRU = 0;
+        if(newReceiverCount.map[CURRENCY_RUSSIA] != 0) {
+            divRU = (uint64_t) totalPayout.map[CURRENCY_RUSSIA] / newReceiverCount.map[CURRENCY_RUSSIA];
+            remRU = (uint64_t) totalPayout.map[CURRENCY_RUSSIA] % newReceiverCount.map[CURRENCY_RUSSIA];
+        }
+        payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_RUSSIA, divRU));
+        payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_RUSSIA, remRU));
+
+        // -------------------------------------------------------------------------------------------------------
+        uint64_t divIL = 0;
+        uint64_t remIL = 0;
+        if(newReceiverCount.map[CURRENCY_ISRAEL] != 0) {
+            divIL = (uint64_t) totalPayout.map[CURRENCY_ISRAEL] / newReceiverCount.map[CURRENCY_ISRAEL];
+            remIL = (uint64_t) totalPayout.map[CURRENCY_ISRAEL] % newReceiverCount.map[CURRENCY_ISRAEL];
+        }
+        payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_ISRAEL, divIL));
+        payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_ISRAEL, remIL));
+
+        // -------------------------------------------------------------------------------------------------------
+        uint64_t divPT = 0;
+        uint64_t remPT = 0;
+        if(newReceiverCount.map[CURRENCY_PORTUGAL] != 0) {
+            divPT = (uint64_t) totalPayout.map[CURRENCY_PORTUGAL] / newReceiverCount.map[CURRENCY_PORTUGAL];
+            remPT = (uint64_t) totalPayout.map[CURRENCY_PORTUGAL] % newReceiverCount.map[CURRENCY_PORTUGAL];
+        }
+        payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_PORTUGAL, divPT));
+        payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_PORTUGAL, remPT));
+
+        // -------------------------------------------------------------------------------------------------------
+        uint64_t divDK = 0;
+        uint64_t remDK = 0;
+        if(newReceiverCount.map[CURRENCY_DENMARK] != 0) {
+            divDK = (uint64_t) totalPayout.map[CURRENCY_DENMARK] / newReceiverCount.map[CURRENCY_DENMARK];
+            remDK = (uint64_t) totalPayout.map[CURRENCY_DENMARK] % newReceiverCount.map[CURRENCY_DENMARK];
+        }
+        payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_DENMARK, divDK));
+        payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_DENMARK, remDK));
+
+        // -------------------------------------------------------------------------------------------------------
+        uint64_t divTR = 0;
+        uint64_t remTR = 0;
+        if(newReceiverCount.map[CURRENCY_TURKEY] != 0) {
+            divTR = (uint64_t) totalPayout.map[CURRENCY_TURKEY] / newReceiverCount.map[CURRENCY_TURKEY];
+            remTR = (uint64_t) totalPayout.map[CURRENCY_TURKEY] % newReceiverCount.map[CURRENCY_TURKEY];
+        }
+        payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_TURKEY, divTR));
+        payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_TURKEY, remTR));
+
+        // -------------------------------------------------------------------------------------------------------
+        uint64_t divRO = 0;
+        uint64_t remRO = 0;
+        if(newReceiverCount.map[CURRENCY_ROMANIA] != 0) {
+            divRO = (uint64_t) totalPayout.map[CURRENCY_ROMANIA] / newReceiverCount.map[CURRENCY_ROMANIA];
+            remRO = (uint64_t) totalPayout.map[CURRENCY_ROMANIA] % newReceiverCount.map[CURRENCY_ROMANIA];
+        }
+        payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_ROMANIA, divRO));
+        payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_ROMANIA, remRO));
+
+        // -------------------------------------------------------------------------------------------------------
+        uint64_t divPL = 0;
+        uint64_t remPL = 0;
+        if(newReceiverCount.map[CURRENCY_POLAND] != 0) {
+            divPL = (uint64_t) totalPayout.map[CURRENCY_POLAND] / newReceiverCount.map[CURRENCY_POLAND];
+            remPL = (uint64_t) totalPayout.map[CURRENCY_POLAND] % newReceiverCount.map[CURRENCY_POLAND];
+        }
+        payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_POLAND, divPL));
+        payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_POLAND, remPL));
+
+        // -------------------------------------------------------------------------------------------------------
+        uint64_t divNL = 0;
+        uint64_t remNL = 0;
+        if(newReceiverCount.map[CURRENCY_NETHERLANDS] != 0) {
+            divNL = (uint64_t) totalPayout.map[CURRENCY_NETHERLANDS] / newReceiverCount.map[CURRENCY_NETHERLANDS];
+            remNL = (uint64_t) totalPayout.map[CURRENCY_NETHERLANDS] % newReceiverCount.map[CURRENCY_NETHERLANDS];
+        }
+        payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_NETHERLANDS, divNL));
+        payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_NETHERLANDS, remNL));
     }
 }
 
