@@ -1155,7 +1155,9 @@ void BlockHelper::calculatePayout(Block* block, BlockHeader* previousBlockHeader
             remHK = (uint64_t) totalPayout.map[CURRENCY_HONG_KONG] % newReceiverCount.map[CURRENCY_HONG_KONG];
         }
         payout.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_HONG_KONG, divHK));
-        payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_HONG_KONG, remHK));
+        if(block->getHeader()->getBlockHeight() >= NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT) {
+            payoutRemainder.map.insert(std::pair<uint8_t, CAmount>(CURRENCY_HONG_KONG, remHK));
+        }
     }
 
     if(block->getHeader()->getBlockHeight() >= SPAIN_ACTIVATION_BLOCK_HEIGHT) {
