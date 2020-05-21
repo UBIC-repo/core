@@ -20,6 +20,8 @@ private:
     uint32_t timestamp;
     UAmount payout;
     UAmount payoutRemainder;
+    UAmount32 payout32;
+    UAmount32 payoutRemainder32;
     UAmount32 ubiReceiverCount;
     std::vector<Transaction> votes;
     std::vector<unsigned char> issuerPubKey;
@@ -66,8 +68,24 @@ public:
         READWRITE(merkleRootHash);
         READWRITE(blockHeight);
         READWRITE(timestamp);
-        READWRITE(payout);
-        READWRITE(payoutRemainder);
+        if(version == 1) {
+            READWRITE(payout);
+            READWRITE(payoutRemainder);
+        } else { // Version 2 or later
+            // we do the 32 bit <> 64 bit conversions
+            if (std::is_same<Operation, CSerActionSerialize>::value) {
+                payout32 = UAmountHelper::UAmount64toUAmount32(payout);
+                payoutRemainder32 = UAmountHelper::UAmount64toUAmount32(payoutRemainder);
+                READWRITE(payout32);
+                READWRITE(payoutRemainder32);
+            } else if(std::is_same<Operation, CSerActionUnserialize>::value) {
+                READWRITE(payout32);
+                READWRITE(payoutRemainder32);
+                payout = UAmountHelper::UAmount32toUAmount64(payout32);
+                payoutRemainder = UAmountHelper::UAmount32toUAmount64(payoutRemainder32);
+            }
+
+        }
         READWRITE(ubiReceiverCount);
         READWRITE(votes);
         READWRITE(issuerPubKey);
