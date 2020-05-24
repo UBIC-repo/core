@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <mutex>
 #include "Transaction/Transaction.h"
 #include "Block/Block.h"
 #include "Transaction/TransactionError.h"
@@ -21,6 +22,8 @@ public:
         static TxPool instance;
         return instance;
     }
+
+    static std::mutex transactionListLock;
 
     std::unordered_map<std::string, TransactionForNetwork> getTransactionList();
     void setTransactionList(std::unordered_map<std::string, TransactionForNetwork> transactionList);
