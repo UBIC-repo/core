@@ -10,14 +10,18 @@
 #include "Transaction/TransactionVerify.h"
 
 std::mutex TxPool::transactionListLock;
+std::mutex TxPool::txInputsLock;
 
 bool TxPool::isTxInputPresent(TxIn txIn) {
     if(txIn.getInAddress().empty()) {
         return false;
     }
 
+    txInputsLock.lock();
     std::unordered_map<std::string, TxIn>::iterator txInIt = this->txInputs.find(Hexdump::vectorToHexString(txIn.getInAddress()));
-    return txInIt != this->txInputs.end();
+    bool result = txInIt != this->txInputs.end();
+    txInputsLock.unlock();
+    return result;
 }
 
 bool TxPool::isTxInputPresent(TransactionForNetwork* transactionForNetwork) {
@@ -28,8 +32,11 @@ bool TxPool::isTxInputPresent(TransactionForNetwork* transactionForNetwork) {
         std::vector<unsigned char> passportHash = TransactionHelper::getPassportHash(&transaction, x509);
         X509_free(x509);
 
+        txInputsLock.lock();
         std::unordered_map<std::string, TxIn>::iterator txInIt = this->txInputs.find(Hexdump::vectorToHexString(passportHash));
-        return txInIt != this->txInputs.end();
+        bool result = txInIt != this->txInputs.end();
+        txInputsLock.unlock();
+        return result;
     } else {
         for (TxIn txIn: transaction.getTxIns()) {
             if (this->isTxInputPresent(txIn)) {
@@ -62,16 +69,20 @@ void TxPool::popTransaction(std::vector<unsigned char> txId) {
         if(TransactionHelper::isRegisterPassport(&transaction)) {
             std::vector<unsigned char> passportHash = TransactionHelper::getPassportHash(&transaction, X509Helper::vectorToCert(txForNetworkIt->second.getAdditionalPayload()));
 
+            txInputsLock.lock();
             auto found = this->txInputs.find(Hexdump::vectorToHexString(passportHash));
             if (found != this->txInputs.end()) {
                 this->txInputs.erase(found);
             }
+            txInputsLock.unlock();
         } else {
             for (TxIn txIn: transaction.getTxIns()) {
+                txInputsLock.lock();
                 auto found = this->txInputs.find(Hexdump::vectorToHexString(txIn.getInAddress()));
                 if (found != this->txInputs.end()) {
                     this->txInputs.erase(found);
                 }
+                txInputsLock.unlock();
             }
         }
 
@@ -118,10 +129,14 @@ bool TxPool::appendTransaction(TransactionForNetwork transactionForNetwork, bool
         std::vector<unsigned char> passportHash = TransactionHelper::getPassportHash(&transaction, x509);
         X509_free(x509);
 
+        txInputsLock.lock();
         this->txInputs.insert(std::make_pair(Hexdump::vectorToHexString(passportHash), transaction.getTxIns().front()));
+        txInputsLock.unlock();
     } else {
         for (TxIn txIn: transaction.getTxIns()) {
+            txInputsLock.lock();
             this->txInputs.insert(std::make_pair(Hexdump::vectorToHexString(txIn.getInAddress()), txIn));
+            txInputsLock.unlock();
         }
     }
 
@@ -170,10 +185,14 @@ TransactionForNetwork* TxPool::popTransaction() {
     if(TransactionHelper::isRegisterPassport(&transaction)) {
         std::vector<unsigned char> passportHash = TransactionHelper::getPassportHash(&transaction, X509Helper::vectorToCert(rval->getAdditionalPayload()));
 
+        txInputsLock.lock();
         this->txInputs.erase(Hexdump::vectorToHexString(passportHash));
+        txInputsLock.unlock();
     } else {
         for (TxIn txIn: rval->getTransaction().getTxIns()) {
+            txInputsLock.lock();
             this->txInputs.erase(Hexdump::vectorToHexString(txIn.getInAddress()));
+            txInputsLock.unlock();
         }
     }
 
