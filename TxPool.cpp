@@ -9,6 +9,8 @@
 #include "Crypto/X509Helper.h"
 #include "Transaction/TransactionVerify.h"
 
+std::mutex TxPool::transactionListLock;
+
 bool TxPool::isTxInputPresent(TxIn txIn) {
     if(txIn.getInAddress().empty()) {
         return false;
@@ -40,14 +42,20 @@ bool TxPool::isTxInputPresent(TransactionForNetwork* transactionForNetwork) {
 }
 
 std::unordered_map<std::string, TransactionForNetwork> TxPool::getTransactionList() {
-    return this->transactionList;
+    transactionListLock.lock();
+    std::unordered_map<std::string, TransactionForNetwork> transactionListCopy(this->transactionList);
+    transactionListLock.unlock();
+    return transactionListCopy;
 }
 
 void TxPool::setTransactionList(std::unordered_map<std::string, TransactionForNetwork> transactionList) {
+    transactionListLock.lock();
     this->transactionList = transactionList;
+    transactionListLock.unlock();
 }
 
 void TxPool::popTransaction(std::vector<unsigned char> txId) {
+    transactionListLock.lock();
     std::unordered_map<std::string, TransactionForNetwork>::iterator txForNetworkIt = this->transactionList.find(Hexdump::vectorToHexString(txId));
     if(txForNetworkIt != this->transactionList.end()) {
         Transaction transaction = txForNetworkIt->second.getTransaction();
@@ -71,6 +79,7 @@ void TxPool::popTransaction(std::vector<unsigned char> txId) {
     } else {
         Log(LOG_LEVEL_INFO) << "popTransaction txId:" << txId << " not found";
     }
+    transactionListLock.unlock();
 }
 
 bool TxPool::appendTransaction(TransactionForNetwork transactionForNetwork, bool broadcast, TransactionError *transactionError) {
@@ -95,12 +104,14 @@ bool TxPool::appendTransaction(TransactionForNetwork transactionForNetwork, bool
     transaction.setTimestamp(Time::getCurrentTimestamp());
     transactionForNetwork.setTransaction(transaction);
 
+    transactionListLock.lock();
     this->transactionList.insert(
             std::pair<std::string, TransactionForNetwork>(
                     Hexdump::vectorToHexString(TransactionHelper::getTxId(&transaction)),
                     transactionForNetwork
             )
     );
+    transactionListLock.unlock();
 
     if (TransactionHelper::isRegisterPassport(&transaction)) {
         X509* x509 = X509Helper::vectorToCert(transactionForNetwork.getAdditionalPayload());
@@ -137,17 +148,24 @@ void TxPool::appendTransactionsFromBlock(Block* block) {
 }
 
 uint32_t TxPool::getTxCount() {
-    return (uint32_t)this->transactionList.size();
+    transactionListLock.lock();
+    uint32_t txCount = (uint32_t)this->transactionList.size();
+    transactionListLock.unlock();
+
+    return txCount;
 }
 
 TransactionForNetwork* TxPool::popTransaction() {
     if(getTxCount() == 0) {
         return nullptr;
     }
+    transactionListLock.lock();
     auto tb = this->transactionList.begin();
     TransactionForNetwork* rval = new TransactionForNetwork();
     *rval = tb->second;
     this->transactionList.erase(tb->first);
+    transactionListLock.unlock();
+
     Transaction transaction = rval->getTransaction();
     if(TransactionHelper::isRegisterPassport(&transaction)) {
         std::vector<unsigned char> passportHash = TransactionHelper::getPassportHash(&transaction, X509Helper::vectorToCert(rval->getAdditionalPayload()));
