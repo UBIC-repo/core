@@ -24,6 +24,7 @@ public:
     }
 
     static std::mutex transactionListLock;
+    static std::mutex txInputsLock;
 
     std::unordered_map<std::string, TransactionForNetwork> getTransactionList();
     void setTransactionList(std::unordered_map<std::string, TransactionForNetwork> transactionList);
