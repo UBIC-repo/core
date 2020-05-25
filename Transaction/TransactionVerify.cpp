@@ -583,7 +583,7 @@ bool TransactionVerify::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
             case SCRIPT_PKH: {
                 if(header->getBlockHeight() > ENFORCE_PKH_LENGTH_BLOCK_HEIGHT) {
                     if(txOut->getScript().getScript().size() != 20) {
-                        Log(LOG_LEVEL_ERROR) << "Invalid PKH script size, expected 20, got " << txOut->getScript().getScript().size();
+                        Log(LOG_LEVEL_ERROR) << "Invalid PKH script size, expected 20, got " << (uint32_t)txOut->getScript().getScript().size();
                         return false;
                     }
                 }
