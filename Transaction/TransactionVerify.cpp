@@ -138,7 +138,7 @@ bool TransactionVerify::verifyRegisterPassportTx(Transaction* tx, uint32_t block
         em2.insert(em2.end(), em.begin(), em.end());
 
         std::string asn1RSAWITHSHA256hex;
-        asn1RSAWITHSHA256hex = "3031300d060960864801650304020105000420"; // only fits fo signatures on SHA256
+        asn1RSAWITHSHA256hex = "3031300d060960864801650304020105000420"; // only fits for signatures on SHA256
 
         std::vector<unsigned char> asn1RSAWITHSHA256;
         asn1RSAWITHSHA256 = Hexdump::hexStringToVector(asn1RSAWITHSHA256hex);
