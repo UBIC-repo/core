@@ -4,7 +4,7 @@
 #include <iostream>
 
 /**
- * A is signature, X is the signed message hash
+ * A is the signature, X is the signed message hash
  * A^e = X
  *
  * e is the RSA exponent, typically 2^16 + 1
