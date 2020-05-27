@@ -8,6 +8,7 @@
 
 class NtpRskSignatureRequestObject {
 private:
+    uint8_t version = 4;
     const BIGNUM* e;
     const BIGNUM* n;
     BIGNUM* signature;
@@ -18,6 +19,14 @@ private:
     uint16_t mdAlg;
     std::vector<unsigned char> signedPayload;
 public:
+    uint8_t getVersion() const {
+        return version;
+    }
+
+    void setVersion(uint8_t version) {
+        NtpRskSignatureRequestObject::version = version;
+    }
+
     const BIGNUM *getE() const {
         return this->e;
     }
