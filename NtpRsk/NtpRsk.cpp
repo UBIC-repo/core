@@ -77,10 +77,10 @@ NtpRskSignatureVerificationObject* NtpRsk::signWithNtpRsk(NtpRskSignatureRequest
     BIGNUM* XT = BN_new();
     BN_mod_exp(XT, t1, e, n, ctx);
     BN_dec2bn(&salt, "1618446177786864861468428776289946168463");
-    BN_add(XT, XT, salt);
     if(version >= 6) {
-        BN_add(XT, XT, nm);
+        BN_add(salt, salt, nm);
     }
+    BN_add(XT, XT, salt);
     BN_mod(d, XT, e2, ctx);
     BN_add(d, d, add);
     BN_mod_exp(t2, signature, d, n, ctx);
@@ -91,10 +91,10 @@ NtpRskSignatureVerificationObject* NtpRsk::signWithNtpRsk(NtpRskSignatureRequest
     BIGNUM* t3 = BN_new();
     BN_mod_exp(XT, t2, e, n, ctx);
     BN_dec2bn(&salt, "2468284666624768462658468131846646451821");
-    BN_add(XT, XT, salt);
     if(version >= 6) {
-        BN_add(XT, XT, nm);
+        BN_add(salt, salt, nm);
     }
+    BN_add(XT, XT, salt);
     BN_mod(d, XT, e2, ctx);
     BN_add(d, d, add);
     BN_mod_exp(t3, signature, d, n, ctx);
@@ -105,10 +105,10 @@ NtpRskSignatureVerificationObject* NtpRsk::signWithNtpRsk(NtpRskSignatureRequest
     BIGNUM* t4 = BN_new();
     BN_mod_exp(XT, t3, e, n, ctx);
     BN_dec2bn(&salt, "386846284626847646244761844687764462164");
-    BN_add(XT, XT, salt);
     if(version >= 6) {
-        BN_add(XT, XT, nm);
+        BN_add(salt, salt, nm);
     }
+    BN_add(XT, XT, salt);
     BN_mod(d, XT, e2, ctx);
     BN_add(d, d, add);
     BN_mod_exp(t4, signature, d, n, ctx);
@@ -119,10 +119,10 @@ NtpRskSignatureVerificationObject* NtpRsk::signWithNtpRsk(NtpRskSignatureRequest
     BIGNUM* t5 = BN_new();
     BN_mod_exp(XT, t4, e, n, ctx);
     BN_dec2bn(&salt, "456156843515512741515122247552415322464");
-    BN_add(XT, XT, salt);
     if(version >= 6) {
-        BN_add(XT, XT, nm);
+        BN_add(salt, salt, nm);
     }
+    BN_add(XT, XT, salt);
     BN_mod(d, XT, e2, ctx);
     BN_add(d, d, add);
     BN_mod_exp(t5, signature, d, n, ctx);
@@ -189,10 +189,10 @@ bool NtpRsk::verifyNtpRsk(NtpRskSignatureVerificationObject *ntpRskSignatureVeri
 
     // verify t^v = X^d * T mod n (t2)
     BN_dec2bn(&salt, "1618446177786864861468428776289946168463");
-    BN_add(XT, XT, salt);
     if(version >= 6) {
-        BN_add(XT, XT, nm);
+        BN_add(salt, salt, nm);
     }
+    BN_add(XT, XT, salt);
     BN_mod(d, XT, e2, ctx);
     BN_add(d, d, add);
     BN_mod_exp(t2, t2, e, n, ctx);
@@ -208,10 +208,10 @@ bool NtpRsk::verifyNtpRsk(NtpRskSignatureVerificationObject *ntpRskSignatureVeri
 
     // verify t^v = X^d * T mod n (t3)
     BN_dec2bn(&salt, "2468284666624768462658468131846646451821");
-    BN_add(XT, XT, salt);
     if(version >= 6) {
-        BN_add(XT, XT, nm);
+        BN_add(salt, salt, nm);
     }
+    BN_add(XT, XT, salt);
     BN_mod(d, XT, e2, ctx);
     BN_add(d, d, add);
     BN_mod_exp(t3, t3, e, n, ctx);
@@ -227,10 +227,10 @@ bool NtpRsk::verifyNtpRsk(NtpRskSignatureVerificationObject *ntpRskSignatureVeri
 
     // verify t^v = X^d * T mod n (t4)
     BN_dec2bn(&salt, "386846284626847646244761844687764462164");
-    BN_add(XT, XT, salt);
     if(version >= 6) {
-        BN_add(XT, XT, nm);
+        BN_add(salt, salt, nm);
     }
+    BN_add(XT, XT, salt);
     BN_mod(d, XT, e2, ctx);
     BN_add(d, d, add);
     BN_mod_exp(t4, t4, e, n, ctx);
@@ -254,10 +254,10 @@ bool NtpRsk::verifyNtpRsk(NtpRskSignatureVerificationObject *ntpRskSignatureVeri
 
     // verify t^v = X^d * T mod n (t5)
     BN_dec2bn(&salt, "456156843515512741515122247552415322464");
-    BN_add(XT, XT, salt);
     if(version >= 6) {
-        BN_add(XT, XT, nm);
+        BN_add(salt, salt, nm);
     }
+    BN_add(XT, XT, salt);
     BN_mod(d, XT, e2, ctx);
     BN_add(d, d, add);
     BN_mod_exp(t5, t5, e, n, ctx);
