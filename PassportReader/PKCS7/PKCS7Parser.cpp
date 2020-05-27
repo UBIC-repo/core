@@ -103,7 +103,8 @@ bool PKCS7Parser::isECDSA() {
 
     int signatureNid = X509_get_signature_nid(getDscCertificate());
 
-    if (signatureNid == NID_ecdsa_with_SHA224 ||
+    if (signatureNid == NID_ecdsa_with_SHA1 ||
+        signatureNid == NID_ecdsa_with_SHA224 ||
         signatureNid == NID_ecdsa_with_SHA256 ||
         signatureNid == NID_ecdsa_with_SHA384 ||
         signatureNid == NID_ecdsa_with_SHA512) {
