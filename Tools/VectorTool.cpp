@@ -30,17 +30,17 @@ std::vector<unsigned char> VectorTool::prepend(unsigned char charElement, int to
 }
 
 std::vector<unsigned char> VectorTool::prependToCorrectSize(std::vector<unsigned char> vectorElement) {
-    if (vectorElement.size() == 20 ||
-        vectorElement.size() == 28 ||
-        vectorElement.size() == 32 ||
-        vectorElement.size() == 64 ||
-        vectorElement.size() == 128 ||
-        vectorElement.size() == 256 ||
-        vectorElement.size() == 512) {
+    int vectorSize = (int)vectorElement.size();
+
+    if (vectorSize == 20 ||
+        vectorSize == 28 ||
+        vectorSize == 32 ||
+        vectorSize == 64 ||
+        vectorSize == 128 ||
+        vectorSize == 256 ||
+        vectorSize == 512) {
         return vectorElement;
     }
-
-    size_t vectorSize = vectorElement.size();
 
     if(vectorSize < 20) {
         return prepend((unsigned char)0x00, 20, vectorElement);
