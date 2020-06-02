@@ -172,8 +172,9 @@ public:
     bool isBlockInCache(hash_t headerHash) {
         cacheMutex.lock();
         auto found = this->cache.find(headerHash);
+        bool result = found != this->cache.end();
         cacheMutex.unlock();
-        return found != this->cache.end();
+        return result;
     }
 
     bool hasWork(ip_t ip) {
