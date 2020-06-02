@@ -4,9 +4,9 @@
 #define UBICD_HELPER_H
 
 
-#include <bio.h>
+#include <openssl/bio.h>
+#include <openssl/err.h>
 #include <string>
-#include <err.h>
 
 class Helper {
 public:
