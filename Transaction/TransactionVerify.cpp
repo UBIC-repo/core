@@ -237,7 +237,7 @@ bool TransactionVerify::verifyRegisterPassportTx(Transaction* tx, uint32_t block
             mVector = VectorTool::prependToCorrectSize(mVector);
             Log(LOG_LEVEL_INFO) << "mVector: " << mVector;
 
-            if (RSA_verify_PKCS1_PSS(rsa, mVector.data(), EVP_sha256(), em.data(), RSA_PSS_SALTLEN_AUTO) == 1) {
+            if (RSA_verify_PKCS1_PSS(rsa, mVector.data(), EVP_sha256(), em.data(), -2) == 1) { // -2 = RSA_PSS_SALTLEN_AUTO
                 Log(LOG_LEVEL_INFO) << "Register passport: PKCS1_PSS verified with SHA256";
                 verifiedPadding = true;
             }
