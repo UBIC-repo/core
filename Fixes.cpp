@@ -1381,3 +1381,33 @@ uint8_t Fixes::fixCertificateCurrencyID(std::vector<unsigned char> certificateID
 
     return 0;
 }
+
+bool Fixes::ignorePaddingForThisPassport(const std::vector<unsigned char> passportHash) {
+    if(passportHash == Hexdump::hexStringToVector("d089088168f9f614f241fb9204148889208648f3b4e6d093c9fa4cb5")
+       || passportHash == Hexdump::hexStringToVector("86ed5c0820fa80e0e3fa371ce8bdd5c254f8358dd69c865ce21d5dd2346edb4f81983f12f035be6fe0e80e505a87c4ad28d720652543a169ed4eb32fa34e9ec1")
+       || passportHash == Hexdump::hexStringToVector("28440b10ef2c3c529220b205f11021db4a1c325ab48a9548d3f7e56f14f37174")
+       || passportHash == Hexdump::hexStringToVector("d7ae8dd423984bcef931bc839503f5dcfb13c4d23fa8fbb2122347eaaae6e3fe")
+       || passportHash == Hexdump::hexStringToVector("549c4af82e2e223a9e96b7bf3e3262168a4856555dc4dc96bd8d83b541ca2d5e")
+       || passportHash == Hexdump::hexStringToVector("a047f2409fc751e652609d23da25e2692ab993cc2ac9ca125b70239b22911fd3")
+       || passportHash == Hexdump::hexStringToVector("c6c9a5f39c7033b8de1b98f52e4e615b1de8638cb5d832522f2948c7133803af")
+       || passportHash == Hexdump::hexStringToVector("52bec672c175fd3f8e88f3303dcc6c4bd7fe19b7b4f1b56a4c6f870bfcab956f")
+       || passportHash == Hexdump::hexStringToVector("bf7cf45ee861d72019bc5540eaa364dab710158b8ba1ea9708ecf45a431db278")
+       || passportHash == Hexdump::hexStringToVector("54b5472136bafee9a8f05a2d40f8b44d6938b2318bb0d14a38af9f0b7deb2489")
+       || passportHash == Hexdump::hexStringToVector("0f77c13fd5592c1aa305bbc0d4503d2b4f37ae98643c4a91ed8adf763cc01891")
+       || passportHash == Hexdump::hexStringToVector("b183d504b4d740f0df5428f992bacfff09810805c49d02f5eb797c6bc3f258dc")
+       || passportHash == Hexdump::hexStringToVector("a60977804bf12dc0bc127edbcd0423ac54c51ca73f9a5eac54fcc1f0c83be0c6")
+       || passportHash == Hexdump::hexStringToVector("f6911a44adde4055e57591933b08f6f071c2cc612e710d1125da86e046b91e3d")
+       || passportHash == Hexdump::hexStringToVector("5fd0eb8aae21e63ae0ec9e6ce7496d0e57570006ca90ac8f913235994152ae98")
+       || passportHash == Hexdump::hexStringToVector("e939705ba30c254923951302725c1e2f57558f954fa9e74ab5065a5005babc9a")
+       || passportHash == Hexdump::hexStringToVector("0b433060a2189c5dcc5c02d690f9cfd1a3046dd4c6bdf861f7a50fd1e32930e8")
+       || passportHash == Hexdump::hexStringToVector("0d7405a214271918dad99983f0513b24cb1993e4d5a209560953fe1962c9441a")
+       || passportHash == Hexdump::hexStringToVector("3a68b1b67e63ef733b4a469b3c7bde03c9bcabac964ab529dc08dee5e5e049ea")
+       || passportHash == Hexdump::hexStringToVector("cc9350e52ec941dc6ed2ec6dbac76a1dca361844410991132aaedc995edccf5c")
+       || passportHash == Hexdump::hexStringToVector("b0bf139f6c30a377fc9cb820139a02b01f4847293a8568657cacfb7df508d061")
+       || passportHash == Hexdump::hexStringToVector("e00c20ce59679653fa88310519a9d1781d7568cb9cbbad4084843ab626dadea4")
+       || passportHash == Hexdump::hexStringToVector("f0428ffec0bd082eda4c5d5a0a2975c229f833dfa1b94763ae89678cd33c26e7")) {
+        // skip this passports for later verification, (those passport's padding doesn't verify anymore after the latest update)
+        return true;
+    }
+    return false;
+}
