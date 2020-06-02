@@ -58,8 +58,16 @@ set(SOURCE_FILES
 
         Tools/Hexdump.cpp
         Tools/Hexdump.h
+	Tools/Log.cpp
         Tools/Log.h
-		Tools/Helper.h
+	Tools/Helper.h
+	Tools/Base64.cpp
+	Tools/Base64.h
+	Tools/Time.h
+	Tools/VectorTool.cpp
+	Tools/VectorTool.h
+	Tools/Base58.h
+	Tools/Base58.cpp
 
         NtpEsk/NtpEsk.cpp
         NtpEsk/NtpEsk.h
@@ -79,30 +87,30 @@ set(SOURCE_FILES
         Crypto/Hash256.h
         Crypto/PassportCrypto.cpp
         Crypto/PassportCrypto.h
-		Crypto/X509Helper.cpp
-		Crypto/X509Helper.h
+	Crypto/X509Helper.cpp
+	Crypto/X509Helper.h
 	
         CertStore/Cert.cpp
         CertStore/Cert.h
         CertStore/CertStore.cpp
         CertStore/CertStore.h
-		CertStore/CertHelper.cpp
+	CertStore/CertHelper.cpp
         CertStore/CertHelper.h
 
-		Serialization/support/allocators/zeroafterfree.h
-		Serialization/support/cleanse.h
-		Serialization/support/clease.cpp
-		Serialization/endian.h
-		Serialization/serialize.h
-		Serialization/prevector.h
-		Serialization/streams.h
+	Serialization/support/allocators/zeroafterfree.h
+	Serialization/support/cleanse.h
+	Serialization/support/clease.cpp
+	Serialization/endian.h
+	Serialization/serialize.h
+	Serialization/prevector.h
+	Serialization/streams.h
 
         PathSum/PathSum.cpp
         PathSum/PathSum.h
 
         PassportReader/LDS/LDSParser.cpp
         PassportReader/LDS/LDSParser.h
-		PassportReader/LDS/Iso19794Parser.cpp
+	PassportReader/LDS/Iso19794Parser.cpp
         PassportReader/LDS/Iso19794Parser.h
         PassportReader/PKCS7/PKCS7Parser.cpp
         PassportReader/PKCS7/PKCS7Parser.h
@@ -122,16 +130,14 @@ set(SOURCE_FILES
         Transaction/TxOut.cpp
         Transaction/TxOut.h
 
-		Tools/Base58.h
-		Tools/Base58.cpp
         AddressStore.cpp
         AddressStore.h
         main.cpp
-		Block/Block.h
+	Block/Block.h
         Chain.cpp
         Chain.h
-		Block/BlockHeader.cpp
-		Block/BlockHeader.h
+	Block/BlockHeader.cpp
+	Block/BlockHeader.h
         Address.cpp
         Address.h
         UAmount.h
@@ -147,8 +153,8 @@ set(SOURCE_FILES
         FS/FS.h
         Test/Test.cpp
         Test/Test.h
-		Block/BlockStore.cpp
-		Block/BlockStore.h
+	Block/BlockStore.cpp
+	Block/BlockStore.h
         BlockCreator/Mint.cpp
         BlockCreator/Mint.h
         UBICalculator.cpp
@@ -174,10 +180,10 @@ set(SOURCE_FILES
         DB/DB.h
 
         AddressHelper.h
-		API/Api.cpp
-		API/Api.h
-		API/ApiServer.cpp
-		API/ApiServer.h
+	API/Api.cpp
+	API/Api.h
+	API/ApiServer.cpp
+	API/ApiServer.h
         Network/Server.h
 
         Network/Peers.cpp
@@ -193,20 +199,16 @@ set(SOURCE_FILES
         Transaction/TransactionVerify.h
         Transaction/TransactionApply.cpp
         Transaction/TransactionApply.h
-		Tools/Time.h
+
         WebInterface/WebInterface.cpp
         WebInterface/WebInterface.h
         Config.cpp
         Config.h
-        Tools/Log.cpp
-
-		Tools/Base64.cpp
-		Tools/Base64.h
 	
-		Fixes.cpp
+	Fixes.cpp
         Fixes.h
 	
-		Scripts/UScript.h
+	Scripts/UScript.h
         Scripts/AddCertificateScript.h
         Scripts/NtpskAlreadyUsedScript.h
         Scripts/KycRequestScript.h
