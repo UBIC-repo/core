@@ -1,6 +1,6 @@
 
 #include "VectorTool.h"
-
+#include <cstring>
 
 std::vector<unsigned char> VectorTool::concatCharVector(std::vector<unsigned char> elem1, std::vector<unsigned char> elem2) {
     elem1.insert(elem1.end(), elem2.begin(), elem2.end());
