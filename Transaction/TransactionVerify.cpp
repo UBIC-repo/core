@@ -9,11 +9,14 @@
 #include "../AddressStore.h"
 #include "../AddressHelper.h"
 #include "../Tools/Time.h"
+#include "../Tools/Helper.h"
 #include "../CertStore/CertHelper.h"
 #include "../Scripts/AddCertificateScript.h"
 #include "../Consensus/VoteStore.h"
 #include "../Wallet.h"
 #include "../Scripts/PkhInScript.h"
+#include "../Tools/VectorTool.h"
+#include "../Fixes.h"
 
 bool TransactionVerify::verifyRegisterPassportTx(Transaction* tx, uint32_t blockHeight, Cert* cert, TransactionError* transactionError) {
 
@@ -126,40 +129,123 @@ bool TransactionVerify::verifyRegisterPassportTx(Transaction* tx, uint32_t block
         Log(LOG_LEVEL_INFO) << "going to verify padding on: " << em;
 
         //
-        //
-        // Begin of padding verification hack
-        //
+        // Begin of padding verification
         //
 
-        bool verifiedPadding = false;
+        // skip this passports for later verification, (those passport's padding doesn't verify anymore after the latest update)
+        bool verifiedPadding = Fixes::ignorePaddingForThisPassport(ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM()));
+
+        int rsaLen = RSA_size(rsa);
 
         std::vector<unsigned char> em2;
         em2.emplace_back((unsigned char) 0x00);
         em2.insert(em2.end(), em.begin(), em.end());
 
-        std::string asn1RSAWITHSHA256hex;
-        asn1RSAWITHSHA256hex = "3031300d060960864801650304020105000420"; // only fits for signatures on SHA256
+        //
+        // RSA_padding_check_PKCS1_type_1
+        //
+        auto recoveredFromPadding = (unsigned char*)malloc(128);
+        int recoveredFromPaddingLength = RSA_padding_check_PKCS1_type_1(recoveredFromPadding, (uint32_t) 128, em2.data(),
+                                       (uint32_t) em2.size(), rsaLen);
 
-        std::vector<unsigned char> asn1RSAWITHSHA256;
-        asn1RSAWITHSHA256 = Hexdump::hexStringToVector(asn1RSAWITHSHA256hex);
+        if(recoveredFromPaddingLength <= 0) {
+            recoveredFromPaddingLength = RSA_padding_check_PKCS1_type_2(recoveredFromPadding, (uint32_t) 128, em.data(),
+                                                                        (uint32_t) em.size(), rsaLen);
+        }
+        Log(LOG_LEVEL_INFO) << "OpenSSL error: " << Helper::getOpenSSLError();
 
-        asn1RSAWITHSHA256.insert(asn1RSAWITHSHA256.end(), txId.begin(), txId.end());
+        /*
+        if(recoveredFromPaddingLength <= 0) {
+            recoveredFromPaddingLength = RSA_padding_check_SSLv23(recoveredFromPadding, (uint32_t) 128, em.data(),
+                                                                 (uint32_t) em.size(), rsaLen);
+        }
+        Log(LOG_LEVEL_INFO) << "OpenSSL error: " << Helper::getOpenSSLError();
 
-        if (RSA_padding_check_PKCS1_type_1(asn1RSAWITHSHA256.data(), (uint32_t) asn1RSAWITHSHA256.size(), em2.data(),
-                                           (uint32_t) em2.size(), (uint32_t) em2.size()) >= 0) {
-            Log(LOG_LEVEL_INFO) << "Register passport: PKCS1_type_1 verified with SHA256 ASN1";
+        if(recoveredFromPaddingLength <= 0) {
+            recoveredFromPaddingLength = RSA_padding_check_PKCS1_OAEP(
+                    recoveredFromPadding, 128,
+                    em.data(), (int) em.size(),
+                    rsaLen,
+                    NULL, 0
+            );
+        }
+        Log(LOG_LEVEL_INFO) << "OpenSSL error: " << Helper::getOpenSSLError();
+
+        if(recoveredFromPaddingLength <= 0) {
+            recoveredFromPaddingLength = RSA_padding_check_X931(recoveredFromPadding, (uint32_t) 128, em.data(),
+                                                                 (uint32_t) em.size(), rsaLen);
+        }
+        Log(LOG_LEVEL_INFO) << "OpenSSL error: " << Helper::getOpenSSLError();
+        */
+
+        std::vector<unsigned char> recoveredHashVector;
+        if (recoveredFromPaddingLength > 0 && !verifiedPadding) {
+
+            //
+            // Begin of trying to parse the ASN1 object if it is one
+            //
+            if(recoveredFromPaddingLength > 32) {
+                Log(LOG_LEVEL_INFO) << "recoveredFromPadding: "
+                                    << Hexdump::ucharToHexString(recoveredFromPadding, recoveredFromPaddingLength);
+                STACK_OF(ASN1_TYPE) *asn1Sequence = NULL;
+                asn1Sequence = d2i_ASN1_SEQUENCE_ANY(NULL, const_cast<const unsigned char**>(&recoveredFromPadding), recoveredFromPaddingLength);
+                if (asn1Sequence != NULL) {
+                    if (sk_ASN1_TYPE_num(asn1Sequence) >= 2) {
+                        ASN1_TYPE* asn1Hash = sk_ASN1_TYPE_value(asn1Sequence, 1);
+                        unsigned char asn1PassportHash[64];
+                        int asn1PassportHashLength = ASN1_TYPE_get_octetstring(asn1Hash, asn1PassportHash, 64);
+                        recoveredHashVector = std::vector<unsigned char>(asn1PassportHash, asn1PassportHash + asn1PassportHashLength);
+                    }
+                }
+            } else {
+                recoveredHashVector = std::vector<unsigned char>(recoveredFromPadding, recoveredFromPadding + recoveredFromPaddingLength);
+            }
+            //
+            // End of trying to parse the ASN1 object if it is one
+            //
+
+            if(BN_cmp(ntpRskSignatureVerificationObject->getM(), ECCtools::vectorToBn(recoveredHashVector)) != 0) {
+                Log(LOG_LEVEL_INFO) << "passport hash: "
+                                    << ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM());
+                Log(LOG_LEVEL_INFO) << "recovered hash: "
+                                    << recoveredHashVector;
+                Log(LOG_LEVEL_INFO) << "Payload: "
+                                    << Hexdump::vectorToHexString(ntpRskSignatureVerificationObject->getSignedPayload());
+                Log(LOG_LEVEL_INFO) << "Recovered hash mismatch";
+
+                if (transactionError != nullptr) {
+                    transactionError->setErrorCode(1197);
+                    transactionError->setErrorMessage("Recovered hash mismatch");
+                }
+                return false;
+            }
+            Log(LOG_LEVEL_INFO) << "Register passport: Padding verified";
             verifiedPadding = true;
         }
 
+        Log(LOG_LEVEL_INFO) << "passport hash: " << ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM());
+        Log(LOG_LEVEL_INFO) << "recovered hash: " << recoveredHashVector;
+        Log(LOG_LEVEL_INFO) << "Payload: " << Hexdump::vectorToHexString(ntpRskSignatureVerificationObject->getSignedPayload());
+
+        //
+        // RSA_verify_PKCS1_PSS
+        //
         if (!verifiedPadding) {
-            if (RSA_verify_PKCS1_PSS(rsa, asn1RSAWITHSHA256.data(), EVP_sha256(), em2.data(), (uint32_t) em2.size()) >=
-                0) {
-                Log(LOG_LEVEL_INFO) << "Register passport: PKCS1_PSS verified with SHA256 ASN1";
+            //@TODO if the hash starts with 00 this will fail
+            em = VectorTool::prependToCorrectSize(em);
+            std::vector<unsigned char> mVector = ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM());
+            mVector = VectorTool::prependToCorrectSize(mVector);
+            Log(LOG_LEVEL_INFO) << "mVector: " << mVector;
+
+            if (RSA_verify_PKCS1_PSS(rsa, mVector.data(), EVP_sha256(), em.data(), RSA_PSS_SALTLEN_AUTO) == 1) {
+                Log(LOG_LEVEL_INFO) << "Register passport: PKCS1_PSS verified with SHA256";
                 verifiedPadding = true;
             }
+            Log(LOG_LEVEL_INFO) << "OpenSSL error: " << Helper::getOpenSSLError();
+
         }
 
-        //@TODO SHA512 padding
+        //@TODO SHA512 and SHA1 padding
 
         if (!verifiedPadding) {
             Log(LOG_LEVEL_ERROR) << "Failed to verify padding";
@@ -175,9 +261,7 @@ bool TransactionVerify::verifyRegisterPassportTx(Transaction* tx, uint32_t block
         }
 
         //
-        //
-        // end of padding verification hack
-        //
+        // end of padding verification
         //
 
         // verify signed payload
