@@ -13,6 +13,7 @@ public:
     // fixes certificates with wrong currency ID
     static uint8_t fixCertificateCurrencyID(std::vector<unsigned char> certificateID, uint8_t currencyID);
     static bool ignorePaddingForThisPassport(std::vector<unsigned char> passportHash);
+    static uint16_t fixWrongHashAlg(std::vector<unsigned char> passportHash, uint16_t mdAlg);
 };
 
 
