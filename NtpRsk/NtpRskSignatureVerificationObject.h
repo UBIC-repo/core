@@ -1,6 +1,8 @@
 #include <vector>
 #include "../Crypto/ECCtools.h"
 #include "../Serialization/serialize.h"
+#include "../Fixes.h"
+#include <openssl/evp.h>
 
 #ifndef NTPESK_NTPRSKSIGNATUREVERIFICATIONOBJECT_H
 #define NTPESK_NTPRSKSIGNATUREVERIFICATIONOBJECT_H
@@ -9,20 +11,24 @@
 
 class NtpRskSignatureVerificationObject {
 private:
-    uint8_t version = 4;
+    uint8_t version = 6;
     const BIGNUM* e;
     const BIGNUM* n;
-    BIGNUM* T;
+    BIGNUM* T; // depreciated in version 6
     BIGNUM* t1;
     BIGNUM* t2;
     BIGNUM* t3;
     BIGNUM* t4;
     BIGNUM* t5;
+    BIGNUM* t6;
+    BIGNUM* t7;
+    BIGNUM* t8;
     BIGNUM* m;
     BIGNUM* paddedM;
     BIGNUM* nm;
     uint16_t mdAlg;
     std::vector<unsigned char> signedPayload;
+    std::vector<unsigned char> mVector;
 public:
     const BIGNUM *getE() const {
         return this->e;
@@ -136,46 +142,92 @@ public:
         NtpRskSignatureVerificationObject::signedPayload = signedPayload;
     }
 
+    const std::vector<unsigned char> &getMVector() const {
+        return mVector;
+    }
+
+    void setMVector(const std::vector<unsigned char> &mVector) {
+        NtpRskSignatureVerificationObject::mVector = mVector;
+    }
+
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
-        std::vector<unsigned char> TVector, t1Vector, t2Vector, t3Vector, t4Vector, t5Vector, mVector, paddedMVector, nmVector;
+        std::vector<unsigned char> TVector, t1Vector, t2Vector, t3Vector, t4Vector, t5Vector, t6Vector, t7Vector, t8Vector, paddedMVector, nmVector;
         if (std::is_same<Operation, CSerActionSerialize>::value) {
-            TVector = ECCtools::bnToVector(T);
+            if (version < 6) {
+                TVector = ECCtools::bnToVector(T); // depreciated in version 6
+            }
             t1Vector = ECCtools::bnToVector(t1);
             t2Vector = ECCtools::bnToVector(t2);
             t3Vector = ECCtools::bnToVector(t3);
             t4Vector = ECCtools::bnToVector(t4);
             t5Vector = ECCtools::bnToVector(t5);
-            mVector = ECCtools::bnToVector(m);
+            t6Vector = ECCtools::bnToVector(t6);
+            t7Vector = ECCtools::bnToVector(t7);
+            t8Vector = ECCtools::bnToVector(t8);
             paddedMVector = ECCtools::bnToVector(paddedM);
             nmVector = ECCtools::bnToVector(nm);
         }
 
         READWRITE(version);
-        READWRITE(TVector);
+        if (version < 6) {
+            READWRITE(TVector); // depreciated in version 6
+        }
         READWRITE(t1Vector);
         READWRITE(t2Vector);
         READWRITE(t3Vector);
         READWRITE(t4Vector);
         READWRITE(t5Vector);
-        READWRITE(mVector);
+
+        if (version >= 6) { // new in version 6
+            READWRITE(t6Vector);
+            READWRITE(t7Vector);
+            READWRITE(t8Vector);
+        }
+
+        if (version < 6) {
+            READWRITE(mVector); // depreciated in version 6
+        }
+
         READWRITE(paddedMVector);
         READWRITE(nmVector);
         
-        if(version >= 3) {
+        if(version >= 4) { // new in version 4
             READWRITE(mdAlg);
             READWRITE(signedPayload);
+
+            // we calculate the the message Hash (m) from the payload
+
+            unsigned char digest[128];
+            unsigned int digestLength;
+            EVP_MD_CTX *mdctx;
+            mdctx = EVP_MD_CTX_create();
+
+            EVP_DigestInit_ex(mdctx, EVP_get_digestbynid(
+                    Fixes::fixWrongHashAlg(mVector, mdAlg)
+                    ), NULL);
+            EVP_DigestUpdate(mdctx, signedPayload.data(),
+                             signedPayload.size());
+            EVP_DigestFinal_ex(mdctx, digest, &digestLength);
+
+            EVP_MD_CTX_destroy(mdctx);
+            mVector = std::vector<unsigned char>(digest, digest + digestLength);
         }
 
         if (std::is_same<Operation, CSerActionUnserialize>::value) {
-            this->T = ECCtools::vectorToBn(TVector);
+            if (version < 6) {
+                this->T = ECCtools::vectorToBn(TVector);
+            }
             this->t1 = ECCtools::vectorToBn(t1Vector);
             this->t2 = ECCtools::vectorToBn(t2Vector);
             this->t3 = ECCtools::vectorToBn(t3Vector);
             this->t4 = ECCtools::vectorToBn(t4Vector);
             this->t5 = ECCtools::vectorToBn(t5Vector);
+            this->t6 = ECCtools::vectorToBn(t6Vector);
+            this->t7 = ECCtools::vectorToBn(t7Vector);
+            this->t8 = ECCtools::vectorToBn(t8Vector);
             this->m = ECCtools::vectorToBn(mVector);
             this->paddedM = ECCtools::vectorToBn(paddedMVector);
             this->nm = ECCtools::vectorToBn(nmVector);
