@@ -95,6 +95,11 @@ bool TransactionVerify::verifyRegisterPassportTx(Transaction* tx, uint32_t block
         return false;
     }
 
+    if(ntpskVersion > 4) {
+        Log(LOG_LEVEL_ERROR) << "Unsuported ntpskVersion: " << ntpskVersion;
+        return false;
+    }
+
     if(ntpskVersion % 2 == 0) {
         // is NtpRsk
 
@@ -119,6 +124,8 @@ bool TransactionVerify::verifyRegisterPassportTx(Transaction* tx, uint32_t block
             delete ntpRskSignatureVerificationObject;
             return false;
         }
+
+        std::vector<unsigned char> passportHash = ntpRskSignatureVerificationObject->getMVector();
 
         ntpRskSignatureVerificationObject->setN(n);
         ntpRskSignatureVerificationObject->setE(e);
@@ -154,30 +161,6 @@ bool TransactionVerify::verifyRegisterPassportTx(Transaction* tx, uint32_t block
         }
         Log(LOG_LEVEL_INFO) << "OpenSSL error: " << Helper::getOpenSSLError();
 
-        /*
-        if(recoveredFromPaddingLength <= 0) {
-            recoveredFromPaddingLength = RSA_padding_check_SSLv23(recoveredFromPadding, (uint32_t) 128, em.data(),
-                                                                 (uint32_t) em.size(), rsaLen);
-        }
-        Log(LOG_LEVEL_INFO) << "OpenSSL error: " << Helper::getOpenSSLError();
-
-        if(recoveredFromPaddingLength <= 0) {
-            recoveredFromPaddingLength = RSA_padding_check_PKCS1_OAEP(
-                    recoveredFromPadding, 128,
-                    em.data(), (int) em.size(),
-                    rsaLen,
-                    NULL, 0
-            );
-        }
-        Log(LOG_LEVEL_INFO) << "OpenSSL error: " << Helper::getOpenSSLError();
-
-        if(recoveredFromPaddingLength <= 0) {
-            recoveredFromPaddingLength = RSA_padding_check_X931(recoveredFromPadding, (uint32_t) 128, em.data(),
-                                                                 (uint32_t) em.size(), rsaLen);
-        }
-        Log(LOG_LEVEL_INFO) << "OpenSSL error: " << Helper::getOpenSSLError();
-        */
-
         std::vector<unsigned char> recoveredHashVector;
         if (recoveredFromPaddingLength > 0 && !verifiedPadding) {
 
@@ -204,9 +187,9 @@ bool TransactionVerify::verifyRegisterPassportTx(Transaction* tx, uint32_t block
             // End of trying to parse the ASN1 object if it is one
             //
 
-            if(BN_cmp(ntpRskSignatureVerificationObject->getM(), ECCtools::vectorToBn(recoveredHashVector)) != 0) {
+            if(passportHash != recoveredHashVector) {
                 Log(LOG_LEVEL_INFO) << "passport hash: "
-                                    << ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM());
+                                    << passportHash;
                 Log(LOG_LEVEL_INFO) << "recovered hash: "
                                     << recoveredHashVector;
                 Log(LOG_LEVEL_INFO) << "Payload: "
@@ -233,16 +216,12 @@ bool TransactionVerify::verifyRegisterPassportTx(Transaction* tx, uint32_t block
         if (!verifiedPadding) {
             //@TODO if the hash starts with 00 this will fail
             em = VectorTool::prependToCorrectSize(em);
-            std::vector<unsigned char> mVector = ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM());
-            mVector = VectorTool::prependToCorrectSize(mVector);
-            Log(LOG_LEVEL_INFO) << "mVector: " << mVector;
 
-            if (RSA_verify_PKCS1_PSS(rsa, mVector.data(), EVP_sha256(), em.data(), -2) == 1) { // -2 = RSA_PSS_SALTLEN_AUTO
+            if (RSA_verify_PKCS1_PSS(rsa, passportHash.data(), EVP_sha256(), em.data(), RSA_PSS_SALTLEN_AUTO) == 1) {
                 Log(LOG_LEVEL_INFO) << "Register passport: PKCS1_PSS verified with SHA256";
                 verifiedPadding = true;
             }
             Log(LOG_LEVEL_INFO) << "OpenSSL error: " << Helper::getOpenSSLError();
-
         }
 
         //@TODO SHA512 and SHA1 padding
@@ -263,33 +242,6 @@ bool TransactionVerify::verifyRegisterPassportTx(Transaction* tx, uint32_t block
         //
         // end of padding verification
         //
-
-        // verify signed payload
-        if (ntpskVersion >= 3) {
-            unsigned char digest[128];
-            unsigned int digestLength;
-            EVP_MD_CTX *mdctx;
-            mdctx = EVP_MD_CTX_create();
-
-            EVP_DigestInit_ex(mdctx, EVP_get_digestbynid(ntpRskSignatureVerificationObject->getMdAlg()), NULL);
-            EVP_DigestUpdate(mdctx, ntpRskSignatureVerificationObject->getSignedPayload().data(),
-                             ntpRskSignatureVerificationObject->getSignedPayload().size());
-            EVP_DigestFinal_ex(mdctx, digest, &digestLength);
-
-            EVP_MD_CTX_destroy(mdctx);
-            std::vector<unsigned char> passportHash = ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM());
-            if (memcmp(digest, passportHash.data(), digestLength) != 0) {
-                Log(LOG_LEVEL_ERROR) << "Signed payload hash mismatch";
-
-
-                if(transactionError != nullptr) {
-                    transactionError->setErrorCode(1108);
-                    transactionError->setErrorMessage("Signed payload hash mismatch");
-                }
-                delete ntpRskSignatureVerificationObject;
-                return false;
-            }
-        }
 
         // verify proof not already used
         DB& db = DB::Instance();
