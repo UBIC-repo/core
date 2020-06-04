@@ -1,4 +1,5 @@
 
+#include <openssl/obj_mac.h>
 #include "Fixes.h"
 #include "Tools/Hexdump.h"
 
@@ -1384,9 +1385,6 @@ uint8_t Fixes::fixCertificateCurrencyID(std::vector<unsigned char> certificateID
 
 bool Fixes::ignorePaddingForThisPassport(const std::vector<unsigned char> passportHash) {
     if(passportHash == Hexdump::hexStringToVector("d089088168f9f614f241fb9204148889208648f3b4e6d093c9fa4cb5")
-       || passportHash == Hexdump::hexStringToVector("86ed5c0820fa80e0e3fa371ce8bdd5c254f8358dd69c865ce21d5dd2346edb4f81983f12f035be6fe0e80e505a87c4ad28d720652543a169ed4eb32fa34e9ec1")
-       || passportHash == Hexdump::hexStringToVector("0837da014685580e61cab695528c7a4f4cfd43761c29928e2edcc02e580539d9445ab4290a954503bb130d7baabfd4c31debc2dd135b08ef5e41ce9ee8ecb103")
-       || passportHash == Hexdump::hexStringToVector("512efa1403ea2ca383189723d643d71e4fac31b1b9ab8fa99b0af9a1d1dc0cf007277092e93e045e3c74a008713f9c0f3bdda4e2355709cb4ea3172c59601d57")
        || passportHash == Hexdump::hexStringToVector("28440b10ef2c3c529220b205f11021db4a1c325ab48a9548d3f7e56f14f37174")
        || passportHash == Hexdump::hexStringToVector("d7ae8dd423984bcef931bc839503f5dcfb13c4d23fa8fbb2122347eaaae6e3fe")
        || passportHash == Hexdump::hexStringToVector("549c4af82e2e223a9e96b7bf3e3262168a4856555dc4dc96bd8d83b541ca2d5e")
@@ -1412,4 +1410,15 @@ bool Fixes::ignorePaddingForThisPassport(const std::vector<unsigned char> passpo
         return true;
     }
     return false;
+}
+
+uint16_t Fixes::fixWrongHashAlg(std::vector<unsigned char> passportHash, uint16_t mdAlg) {
+
+    if(passportHash == Hexdump::hexStringToVector("86ed5c0820fa80e0e3fa371ce8bdd5c254f8358dd69c865ce21d5dd2346edb4f81983f12f035be6fe0e80e505a87c4ad28d720652543a169ed4eb32fa34e9ec1")
+    || passportHash == Hexdump::hexStringToVector("0837da014685580e61cab695528c7a4f4cfd43761c29928e2edcc02e580539d9445ab4290a954503bb130d7baabfd4c31debc2dd135b08ef5e41ce9ee8ecb103")
+    || passportHash == Hexdump::hexStringToVector("512efa1403ea2ca383189723d643d71e4fac31b1b9ab8fa99b0af9a1d1dc0cf007277092e93e045e3c74a008713f9c0f3bdda4e2355709cb4ea3172c59601d57")) {
+        return NID_sha256;
+    }
+
+    return mdAlg;
 }
