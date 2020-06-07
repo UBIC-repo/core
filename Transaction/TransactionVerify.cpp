@@ -95,7 +95,7 @@ bool TransactionVerify::verifyRegisterPassportTx(Transaction* tx, uint32_t block
         return false;
     }
 
-    if(ntpskVersion > 4) {
+    if(ntpskVersion > 6) {
         Log(LOG_LEVEL_ERROR) << "Unsuported ntpskVersion: " << ntpskVersion;
         return false;
     }
@@ -129,6 +129,7 @@ bool TransactionVerify::verifyRegisterPassportTx(Transaction* tx, uint32_t block
 
         ntpRskSignatureVerificationObject->setN(n);
         ntpRskSignatureVerificationObject->setE(e);
+        ntpRskSignatureVerificationObject->setNmVector(txId);
         ntpRskSignatureVerificationObject->setNm(ECCtools::vectorToBn(txId));
 
         std::vector<unsigned char> em = ECCtools::bnToVector(ntpRskSignatureVerificationObject->getPaddedM());
@@ -291,31 +292,6 @@ bool TransactionVerify::verifyRegisterPassportTx(Transaction* tx, uint32_t block
                 transactionError->setErrorMessage("Failed to deserialize SCRIPT_REGISTER_PASSPORT payload");
             }
             return false;
-        }
-
-        // verify signed payload
-        if (ntpskVersion >= 3) {
-            unsigned char digest[128];
-            unsigned int digestLength;
-            EVP_MD_CTX *mdctx;
-            mdctx = EVP_MD_CTX_create();
-
-            EVP_DigestInit_ex(mdctx, EVP_get_digestbynid(ntpEskSignatureVerificationObject->getMdAlg()), NULL);
-            EVP_DigestUpdate(mdctx, ntpEskSignatureVerificationObject->getSignedPayload().data(),
-                             ntpEskSignatureVerificationObject->getSignedPayload().size());
-            EVP_DigestFinal_ex(mdctx, digest, &digestLength);
-
-            EVP_MD_CTX_destroy(mdctx);
-            if (memcmp(digest, ntpEskSignatureVerificationObject->getMessageHash().data(), digestLength) != 0) {
-                Log(LOG_LEVEL_ERROR) << "Signed payload hash mismatch";
-
-                if(transactionError != nullptr) {
-                    transactionError->setErrorCode(1112);
-                    transactionError->setErrorMessage("Signed payload hash mismatch");
-                }
-                delete ntpEskSignatureVerificationObject;
-                return false;
-            }
         }
 
         // verify proof not already used
