@@ -26,9 +26,11 @@ private:
     BIGNUM* m;
     BIGNUM* paddedM;
     BIGNUM* nm;
+    std::vector<unsigned char> randomOracleHash;
     uint16_t mdAlg;
     std::vector<unsigned char> signedPayload;
     std::vector<unsigned char> mVector;
+    std::vector<unsigned char> nmVector;
 public:
     const BIGNUM *getE() const {
         return this->e;
@@ -94,6 +96,30 @@ public:
         this->t5 = t5;
     }
 
+    BIGNUM *getT6() const {
+        return t6;
+    }
+
+    void setT6(BIGNUM *t6) {
+        NtpRskSignatureVerificationObject::t6 = t6;
+    }
+
+    BIGNUM *getT7() const {
+        return t7;
+    }
+
+    void setT7(BIGNUM *t7) {
+        NtpRskSignatureVerificationObject::t7 = t7;
+    }
+
+    BIGNUM *getT8() const {
+        return t8;
+    }
+
+    void setT8(BIGNUM *t8) {
+        NtpRskSignatureVerificationObject::t8 = t8;
+    }
+
     BIGNUM *getPaddedM() {
         return paddedM;
     }
@@ -116,6 +142,14 @@ public:
 
     void setNm(BIGNUM *nm) {
         this->nm = nm;
+    }
+
+    const std::vector<unsigned char> &getRandomOracleHash() const {
+        return randomOracleHash;
+    }
+
+    void setRandomOracleHash(const std::vector<unsigned char> &randomOracleHash) {
+        NtpRskSignatureVerificationObject::randomOracleHash = randomOracleHash;
     }
 
     uint8_t getVersion() const {
@@ -148,6 +182,14 @@ public:
 
     void setMVector(const std::vector<unsigned char> &mVector) {
         NtpRskSignatureVerificationObject::mVector = mVector;
+    }
+
+    const std::vector<unsigned char> &getNmVector() const {
+        return nmVector;
+    }
+
+    void setNmVector(const std::vector<unsigned char> &nmVector) {
+        NtpRskSignatureVerificationObject::nmVector = nmVector;
     }
 
     ADD_SERIALIZE_METHODS;
@@ -185,6 +227,7 @@ public:
             READWRITE(t6Vector);
             READWRITE(t7Vector);
             READWRITE(t8Vector);
+            READWRITE(randomOracleHash);
         }
 
         if (version < 6) {
@@ -192,7 +235,9 @@ public:
         }
 
         READWRITE(paddedMVector);
-        READWRITE(nmVector);
+        if (version < 6) {
+            READWRITE(nmVector); // depreciated in version 6
+        }
         
         if(version >= 4) { // new in version 4
             READWRITE(mdAlg);
