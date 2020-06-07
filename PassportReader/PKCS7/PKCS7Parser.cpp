@@ -161,7 +161,7 @@ NtpRskSignatureRequestObject* PKCS7Parser::getNtpRsk() {
     ntpRskSignatureRequestObject->setE(e);
     ntpRskSignatureRequestObject->setSignature(signature);
 
-    ntpRskSignatureRequestObject->setM(ECCtools::vectorToBn(std::vector<unsigned char>(md_dat, md_dat +md_len)));
+    ntpRskSignatureRequestObject->setM(ECCtools::vectorToBn(std::vector<unsigned char>()));
     BIGNUM *m = BN_new();
     BN_mod_exp(m, signature, e , n, ctx);
     ntpRskSignatureRequestObject->setPaddedM(m);
@@ -170,15 +170,15 @@ NtpRskSignatureRequestObject* PKCS7Parser::getNtpRsk() {
     int signatureNid = X509_get_signature_nid(getDscCertificate());
     uint16_t mdAlg = this->getMdAlg();
 
-    if (signatureNid == NID_sha1WithRSA || NID_ecdsa_with_SHA1) {
+    if (signatureNid == NID_sha1WithRSA || signatureNid == NID_ecdsa_with_SHA1) {
         mdAlg = NID_sha1;
-    } else if (NID_ecdsa_with_SHA224) {
+    } else if (signatureNid == NID_ecdsa_with_SHA224) {
         mdAlg = NID_sha224;
-    } else if (NID_ecdsa_with_SHA256 || NID_ecdsa_with_SHA256) {
+    } else if (signatureNid == NID_sha256WithRSAEncryption || signatureNid == NID_ecdsa_with_SHA256) {
         mdAlg = NID_sha256;
-    } else if (NID_ecdsa_with_SHA384 || NID_ecdsa_with_SHA384) {
+    } else if (signatureNid == NID_sha384WithRSAEncryption || signatureNid == NID_ecdsa_with_SHA384) {
         mdAlg = NID_sha384;
-    } else if (NID_ecdsa_with_SHA512 || NID_ecdsa_with_SHA512) {
+    } else if (signatureNid == NID_sha512WithRSAEncryption || signatureNid == NID_ecdsa_with_SHA512) {
         mdAlg = NID_sha512;
     }
 
@@ -221,8 +221,25 @@ NtpEskSignatureRequestObject* PKCS7Parser::getNtpEsk() {
     ntpEskSignatureRequestObject->setCurveParams(EC_KEY_get0_group(ecKey));
     ntpEskSignatureRequestObject->setR(r);
     ntpEskSignatureRequestObject->setS(s);
-    ntpEskSignatureRequestObject->setMessageHash(std::vector<unsigned char>(md_dat, md_dat +md_len));
-    ntpEskSignatureRequestObject->setMdAlg((uint16_t)this->getMdAlg());
+    ntpEskSignatureRequestObject->setMessageHash(std::vector<unsigned char>());
+
+
+    int signatureNid = X509_get_signature_nid(getDscCertificate());
+    uint16_t mdAlg = this->getMdAlg();
+
+    if (signatureNid == NID_sha1WithRSA || signatureNid == NID_ecdsa_with_SHA1) {
+        mdAlg = NID_sha1;
+    } else if (signatureNid == NID_ecdsa_with_SHA224) {
+        mdAlg = NID_sha224;
+    } else if (signatureNid == NID_sha256WithRSAEncryption || signatureNid == NID_ecdsa_with_SHA256) {
+        mdAlg = NID_sha256;
+    } else if (signatureNid == NID_sha384WithRSAEncryption || signatureNid == NID_ecdsa_with_SHA384) {
+        mdAlg = NID_sha384;
+    } else if (signatureNid == NID_sha512WithRSAEncryption || signatureNid == NID_ecdsa_with_SHA512) {
+        mdAlg = NID_sha512;
+    }
+    
+    ntpEskSignatureRequestObject->setMdAlg(mdAlg);
     ntpEskSignatureRequestObject->setSignedPayload(this->getSignedPayload());
 
     return ntpEskSignatureRequestObject;
