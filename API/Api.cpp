@@ -791,7 +791,7 @@ std::string Api::readPassport(std::string json) {
             NtpRskSignatureRequestObject *ntpRskSignatureRequestObject = pkcs7Parser->getNtpRsk();
 
             // @TODO perhaps add padding to txId
-            ntpRskSignatureRequestObject->setNm(ECCtools::vectorToBn(txId));
+            ntpRskSignatureRequestObject->setNm(txId);
 
             NtpRskSignatureVerificationObject *ntpEskSignatureVerificationObject = NtpRsk::signWithNtpRsk(
                     ntpRskSignatureRequestObject
@@ -849,7 +849,7 @@ std::string Api::readPassport(std::string json) {
             }
 
             char response[1024];
-            sprintf(response, "{\"success\": false, \"errorCode\": %d, \"error\": \"%s\"}", transactionError.getErrorCode(), transactionError.getErrorMessage());
+            sprintf(response, "{\"success\": false, \"errorCode\": %d, \"error\": \"%s\"}", transactionError.getErrorCode(), transactionError.getErrorMessage().data());
             return std::string(response);
         }
 
@@ -1056,7 +1056,7 @@ std::string Api::doKYC(std::string json) {
             NtpRskSignatureRequestObject *ntpRskSignatureRequestObject = pkcs7Parser->getNtpRsk();
 
             // @TODO perhaps add padding to txId
-            ntpRskSignatureRequestObject->setNm(ECCtools::vectorToBn(txId));
+            ntpRskSignatureRequestObject->setNm(txId);
 
             NtpRskSignatureVerificationObject *ntpRskSignatureVerificationObject = NtpRsk::signWithNtpRsk(
                     ntpRskSignatureRequestObject
@@ -1471,7 +1471,7 @@ std::string Api::verifyKYC(std::string json) {
                     NtpEskSignatureVerificationObject *ntpEskSignatureVerificationObject = new NtpEskSignatureVerificationObject();
                     ntpEskSignatureVerificationObject->setPubKey(EC_KEY_get0_public_key(ecKey));
                     ntpEskSignatureVerificationObject->setCurveParams(EC_KEY_get0_group(ecKey));
-                    ntpEskSignatureVerificationObject->setNewMessageHash(txId);
+                    ntpEskSignatureVerificationObject->setNewMessageHash(std::vector<unsigned char>());
 
                     try {
                         srpScript >> *ntpEskSignatureVerificationObject;
