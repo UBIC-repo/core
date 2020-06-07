@@ -166,7 +166,23 @@ NtpRskSignatureRequestObject* PKCS7Parser::getNtpRsk() {
     BN_mod_exp(m, signature, e , n, ctx);
     ntpRskSignatureRequestObject->setPaddedM(m);
     ntpRskSignatureRequestObject->setRsa(rsa);
-    ntpRskSignatureRequestObject->setMdAlg((uint16_t)this->getMdAlg());
+
+    int signatureNid = X509_get_signature_nid(getDscCertificate());
+    uint16_t mdAlg = this->getMdAlg();
+
+    if (signatureNid == NID_sha1WithRSA || NID_ecdsa_with_SHA1) {
+        mdAlg = NID_sha1;
+    } else if (NID_ecdsa_with_SHA224) {
+        mdAlg = NID_sha224;
+    } else if (NID_ecdsa_with_SHA256 || NID_ecdsa_with_SHA256) {
+        mdAlg = NID_sha256;
+    } else if (NID_ecdsa_with_SHA384 || NID_ecdsa_with_SHA384) {
+        mdAlg = NID_sha384;
+    } else if (NID_ecdsa_with_SHA512 || NID_ecdsa_with_SHA512) {
+        mdAlg = NID_sha512;
+    }
+
+    ntpRskSignatureRequestObject->setMdAlg(mdAlg);
     ntpRskSignatureRequestObject->setSignedPayload(this->getSignedPayload());
 
     return ntpRskSignatureRequestObject;
