@@ -111,7 +111,9 @@ public:
         }
 
         READWRITE(version);
-        READWRITE(messageHash);
+        if(version <= 5) {
+            READWRITE(messageHash); // depreciated in version 5
+        }
         READWRITE(rVector);
         READWRITE(rpVector);
         READWRITE(spVector);
@@ -119,6 +121,18 @@ public:
         if(version >= 3) {
             READWRITE(mdAlg);
             READWRITE(signedPayload);
+
+            unsigned char digest[128];
+            unsigned int digestLength;
+            EVP_MD_CTX *mdctx;
+            mdctx = EVP_MD_CTX_create();
+
+            EVP_DigestInit_ex(mdctx, EVP_get_digestbynid(mdAlg), NULL);
+            EVP_DigestUpdate(mdctx, signedPayload.data(), signedPayload.size());
+            EVP_DigestFinal_ex(mdctx, digest, &digestLength);
+
+            EVP_MD_CTX_destroy(mdctx);
+            messageHash = std::vector<unsigned char>(digest, digest + digestLength);
         }
 
         if (std::is_same<Operation, CSerActionUnserialize>::value) {
