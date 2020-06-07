@@ -8,13 +8,13 @@
 
 class NtpRskSignatureRequestObject {
 private:
-    uint8_t version = 4;
+    uint8_t version = 6;
     const BIGNUM* e;
     const BIGNUM* n;
     BIGNUM* signature;
     BIGNUM* m;
     BIGNUM* paddedM;
-    BIGNUM* nm;
+    std::vector<unsigned char> nm;
     RSA* rsa;
     uint16_t mdAlg;
     std::vector<unsigned char> signedPayload;
@@ -67,11 +67,11 @@ public:
         this->m = m;
     }
 
-    BIGNUM *getNm() const {
+    std::vector<unsigned char> getNm() const {
         return this->nm;
     }
 
-    void setNm(BIGNUM *nm) {
+    void setNm(std::vector<unsigned char> nm) {
         this->nm = nm;
     }
 
