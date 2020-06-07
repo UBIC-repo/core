@@ -218,7 +218,7 @@ bool TransactionVerify::verifyRegisterPassportTx(Transaction* tx, uint32_t block
             //@TODO if the hash starts with 00 this will fail
             em = VectorTool::prependToCorrectSize(em);
 
-            if (RSA_verify_PKCS1_PSS(rsa, passportHash.data(), EVP_sha256(), em.data(), RSA_PSS_SALTLEN_AUTO) == 1) {
+            if (RSA_verify_PKCS1_PSS(rsa, passportHash.data(), EVP_sha256(), em.data(), -2) == 1) { // -2 = RSA_PSS_SALTLEN_AUTO
                 Log(LOG_LEVEL_INFO) << "Register passport: PKCS1_PSS verified with SHA256";
                 verifiedPadding = true;
             }
