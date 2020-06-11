@@ -44,6 +44,8 @@ private:
     Transaction transaction;
     uint8_t additionalPayloadType = 0;
     std::vector<unsigned char> additionalPayload = std::vector<unsigned char>(); // is intended to contain the DSC certificate for register passport transactions
+    uint64_t timestampReceived = 0;
+    uint64_t timestampLastBroadcasted = 0;
 public:
     void setTransaction(Transaction transaction) {
         this->transaction = transaction;
@@ -67,6 +69,22 @@ public:
 
     uint8_t getAdditionalPayloadType() {
         return this->additionalPayloadType;
+    }
+
+    uint64_t getTimestampReceived() const {
+        return timestampReceived;
+    }
+
+    void setTimestampReceived(uint64_t timestampReceived) {
+        TransactionForNetwork::timestampReceived = timestampReceived;
+    }
+
+    uint64_t getTimestampLastBroadcasted() const {
+        return timestampLastBroadcasted;
+    }
+
+    void setTimestampLastBroadcasted(uint64_t timestampLastBroadcasted) {
+        TransactionForNetwork::timestampLastBroadcasted = timestampLastBroadcasted;
     }
 
     ADD_SERIALIZE_METHODS;
