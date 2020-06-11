@@ -28,6 +28,8 @@ class DscToAddressLink {
 private:
     std::vector<unsigned char> dscCertificate;
     uint32_t DSCLinkedAtHeight = 0;
+    std::vector<unsigned char> passportHash;
+    uint32_t deactivatedAtHeight = 0;
 
 public:
     const std::vector<unsigned char> &getDscCertificate() const {
@@ -46,12 +48,30 @@ public:
         DscToAddressLink::DSCLinkedAtHeight = DSCLinkedAtHeight;
     }
 
+    const std::vector<unsigned char> &getPassportHash() const {
+        return passportHash;
+    }
+
+    void setPassportHash(const std::vector<unsigned char> &passportHash) {
+        DscToAddressLink::passportHash = passportHash;
+    }
+
+    uint32_t getDeactivatedAtHeight() const {
+        return deactivatedAtHeight;
+    }
+
+    void setDeactivatedAtHeight(uint32_t deactivatedAtHeight) {
+        DscToAddressLink::deactivatedAtHeight = deactivatedAtHeight;
+    }
+
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(dscCertificate);
         READWRITE(DSCLinkedAtHeight);
+        READWRITE(passportHash);
+        READWRITE(deactivatedAtHeight);
     }
 };
 
@@ -61,6 +81,8 @@ private:
     UAmount UBIdebit;
     UAmount amount;
     uint32_t nonce = 0;
+    uint8_t additionalPassportScans = 0;
+    uint64_t lockedUntil = 0;
 public:
 
     UAmount getAmount() {
@@ -95,6 +117,22 @@ public:
         AddressForStore::dscToAddressLinks = dscToAddressLinks;
     }
 
+    uint8_t getAdditionalPassportScans() const {
+        return additionalPassportScans;
+    }
+
+    void setAdditionalPassportScans(uint8_t additionalPassportScans) {
+        AddressForStore::additionalPassportScans = additionalPassportScans;
+    }
+
+    uint64_t getLockedUntil() const {
+        return lockedUntil;
+    }
+
+    void setLockedUntil(uint64_t lockedUntil) {
+        AddressForStore::lockedUntil = lockedUntil;
+    }
+
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
@@ -104,6 +142,8 @@ public:
         READWRITE(dscToAddressLinks);
         READWRITE(UBIdebit);
         READWRITE(amount);
+        READWRITE(additionalPassportScans);
+        READWRITE(lockedUntil); // Timestamp field untill when the coins on the address cannot be spent (Not implemented)
     }
 };
 
