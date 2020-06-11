@@ -24,6 +24,7 @@ bool TransactionApply::applyTransaction(Transaction* tx, BlockHeader* blockHeade
     std::vector<TxIn> txIns = tx->getTxIns();
     AddressStore& addressStore = AddressStore::Instance();
     Wallet& wallet = Wallet::Instance();
+    std::vector<unsigned char> passportHash = std::vector<unsigned char>();
     bool isRegisterPassportTx = false;
     bool isMine = false;
     for (std::vector<TxIn>::iterator txIn = txIns.begin(); txIn != txIns.end(); ++txIn) {
@@ -57,6 +58,7 @@ bool TransactionApply::applyTransaction(Transaction* tx, BlockHeader* blockHeade
 
                     db.putInDB(DB_NTPSK_ALREADY_USED, ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM()),
                                std::vector<unsigned char>(nauscript.data(), nauscript.data() + nauscript.size()));
+                    passportHash = ntpRskSignatureVerificationObject->getMVector();
                     delete ntpRskSignatureVerificationObject;
                 } else {
                     // is NtpEsk
@@ -69,6 +71,8 @@ bool TransactionApply::applyTransaction(Transaction* tx, BlockHeader* blockHeade
                     nauscript << ntpskAlreadyUsedScript;
                     db.putInDB(DB_NTPSK_ALREADY_USED, ntpEskSignatureVerificationObject->getMessageHash(),
                                std::vector<unsigned char>(nauscript.data(), nauscript.data() + nauscript.size()));
+                    passportHash = ntpEskSignatureVerificationObject->getMessageHash();
+                    delete ntpEskSignatureVerificationObject;
                 }
                 srpscript.clear();
 
@@ -153,6 +157,7 @@ bool TransactionApply::applyTransaction(Transaction* tx, BlockHeader* blockHeade
                     DscToAddressLink dscToAddressLink;
                     dscToAddressLink.setDscCertificate(txIns.begin()->getInAddress());
                     dscToAddressLink.setDSCLinkedAtHeight(blockHeader->getBlockHeight());
+                    dscToAddressLink.setPassportHash(passportHash);
                     dscToAddressLinks.push_back(dscToAddressLink);
 
                     address->setDscToAddressLinks(dscToAddressLinks);
@@ -232,6 +237,7 @@ bool TransactionApply::undoTransaction(Transaction* tx, BlockHeader* blockHeader
                     srpscript >> *ntpRskSignatureVerificationObject;
 
                     db.removeFromDB(DB_NTPSK_ALREADY_USED, ECCtools::bnToVector(ntpRskSignatureVerificationObject->getM()));
+                    delete ntpRskSignatureVerificationObject;
                 } else {
                     // is NtpEsk
                     Cert* cert = certStore.getDscCertWithCertId(txIn->getInAddress());
@@ -240,6 +246,7 @@ bool TransactionApply::undoTransaction(Transaction* tx, BlockHeader* blockHeader
                     ntpEskSignatureVerificationObject->setCurveParams(EC_KEY_get0_group(ecKey));
                     srpscript >> *ntpEskSignatureVerificationObject;
                     db.removeFromDB(DB_NTPSK_ALREADY_USED, ntpEskSignatureVerificationObject->getMessageHash());
+                    delete ntpEskSignatureVerificationObject;
                 }
                 srpscript.clear();
 
