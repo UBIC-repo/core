@@ -33,6 +33,7 @@ public:
     void appendTransactionsFromBlock(Block* block);
     uint32_t getTxCount();
     TransactionForNetwork* popTransaction();
+    void cleanTxPool();
 };
 
 
