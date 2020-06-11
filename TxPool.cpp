@@ -95,6 +95,10 @@ void TxPool::popTransaction(std::vector<unsigned char> txId) {
 
 bool TxPool::appendTransaction(TransactionForNetwork transactionForNetwork, bool broadcast, TransactionError *transactionError) {
     Chain &chain = Chain::Instance();
+
+    transactionForNetwork.setTimestampReceived(Time::getCurrentTimestamp());
+    transactionForNetwork.setTimestampLastBroadcasted(Time::getCurrentTimestamp());
+
     Transaction transaction = transactionForNetwork.getTransaction();
     if (!TransactionVerify::verifyNetworkTx(&transactionForNetwork, transactionError)) {
         Log(LOG_LEVEL_ERROR) << "cannot append transaction to txpool because it isn't valid";
@@ -197,4 +201,29 @@ TransactionForNetwork* TxPool::popTransaction() {
     }
 
     return rval;
+}
+
+// removes transactions that have become invalid,
+// re-broadcasts transactions after 10 minutes if they haven't been inserted into a block
+void TxPool::cleanTxPool() {
+    Log(LOG_LEVEL_INFO) << "Going to clean the transaction pool";
+    transactionListLock.lock();
+    for (std::unordered_map<std::string, TransactionForNetwork>::iterator transactionIt = this->transactionList.begin(); transactionIt != this->transactionList.end(); ++transactionIt)
+    {
+        // Transaction has become invalid so we remove it
+        if(!TransactionVerify::verifyNetworkTx(&transactionIt->second, nullptr)) {
+            Transaction transaction = transactionIt->second.getTransaction();
+            std::vector<unsigned char> txId = TransactionHelper::getTxId(&transaction);
+            popTransaction(txId);
+            continue;
+        }
+
+        // Rebroadcast the transaction
+        // This could be removed later when there will be more validators
+        if(transactionIt->second.getTimestampLastBroadcasted() > Time::getCurrentTimestamp() + 600) {
+            std::thread t1(&Network::broadCastTransaction, transactionIt->second);
+            t1.detach();
+        }
+    }
+    transactionListLock.unlock();
 }
