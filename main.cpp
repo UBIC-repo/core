@@ -23,6 +23,18 @@ void startSync() {
     network.syncBlockchain();
 }
 
+void cleanTransactionPool() {
+    TxPool& txPool = TxPool::Instance();
+    while(true) {
+        #if defined(_WIN32)
+                Sleep(300000);
+        #else
+                sleep(300);
+        #endif
+        txPool.cleanTxPool();
+    }
+}
+
 void startMinting() {
     Mint& mint = Mint::Instance();
     Config& config = Config::Instance();
@@ -210,12 +222,14 @@ int main() {
     std::thread t3(&startWebInterface);
     std::thread t4(&startMinting);
     std::thread t5(&startSync);
+    std::thread t6(&cleanTransactionPool);
     t0.join();
     t1.join();
     t2.join();
     t3.join();
     t4.join();
     t5.join();
+    t6.join();
 
     return 0;
 #endif
