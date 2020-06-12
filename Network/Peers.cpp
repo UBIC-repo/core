@@ -76,6 +76,7 @@ bool Peers::appendPeer(PeerInterfacePtr peer) {
 
 // we return only peers with a block height greater than zero
 std::vector<PeerInterfacePtr> Peers::getRandomPeers(uint16_t count) {
+    peersLock.lock();
     std::vector<PeerInterfacePtr> peerList;
 
     if(peers.size() <= count) {
@@ -93,11 +94,12 @@ std::vector<PeerInterfacePtr> Peers::getRandomPeers(uint16_t count) {
                 peerList.emplace_back(peer.second);
             }
             if(i >= count) {
+                peersLock.unlock();
                 return peerList;
             }
         }
     }
-
+    peersLock.unlock();
     return peerList;
 }
 
