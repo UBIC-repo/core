@@ -208,13 +208,14 @@ TransactionForNetwork* TxPool::popTransaction() {
 void TxPool::cleanTxPool() {
     Log(LOG_LEVEL_INFO) << "Going to clean the transaction pool";
     transactionListLock.lock();
+
+    std::vector<std::vector<unsigned char>> transactionsToRemoveIDs;
     for (std::unordered_map<std::string, TransactionForNetwork>::iterator transactionIt = this->transactionList.begin(); transactionIt != this->transactionList.end(); ++transactionIt)
     {
         // Transaction has become invalid so we remove it
         if(!TransactionVerify::verifyNetworkTx(&transactionIt->second, nullptr)) {
             Transaction transaction = transactionIt->second.getTransaction();
-            std::vector<unsigned char> txId = TransactionHelper::getTxId(&transaction);
-            popTransaction(txId);
+            transactionsToRemoveIDs.emplace_back(TransactionHelper::getTxId(&transaction));
             continue;
         }
 
@@ -226,4 +227,8 @@ void TxPool::cleanTxPool() {
         }
     }
     transactionListLock.unlock();
+
+    for(const std::vector<unsigned char>& txId : transactionsToRemoveIDs) {
+        popTransaction(txId);
+    }
 }
