@@ -883,8 +883,9 @@ std::string Api::readPassport(std::string json) {
                 x509Vector
         );
         if(txPool.appendTransaction(registerPassportTxForNetwork, BROADCAST_TRANSACTION, &transactionError)) {
-            Network &network = Network::Instance();
-            network.broadCastTransaction(registerPassportTxForNetwork);
+            std::thread t1(&Network::broadCastTransaction, registerPassportTxForNetwork);
+            t1.detach();
+
             return "{\"success\": true}";
         } else {
             char response[1024];
@@ -1215,8 +1216,8 @@ std::string Api::pay(std::string json) {
     TxPool &txPool = TxPool::Instance();
     TransactionError transactionError;
     if (txPool.appendTransaction(txForNetwork, BROADCAST_TRANSACTION, &transactionError)) {
-        Network &network = Network::Instance();
-        network.broadCastTransaction(txForNetwork);
+        std::thread t1(&Network::broadCastTransaction, txForNetwork);
+        t1.detach();
 
         return "{\"success\": true}";
     } else {
@@ -1827,7 +1828,8 @@ std::string Api::sendTransaction(std::string json) {
                     txForNetwork.setTransaction(tx);
                 } catch (const std::exception& e2) {
                     Log(LOG_LEVEL_ERROR) << "Cannot deserialize base64 encoded transaction";
-                    Log(LOG_LEVEL_ERROR) << "Exception: " << e2.what();
+                    Log(LOG_LEVEL_ERROR) << "Exception1: " << e.what();
+                    Log(LOG_LEVEL_ERROR) << "Exception2: " << e2.what();
                     return "{\"success\": false, \"error\":\"Cannot deserialize base64 encoded transaction\"}";
                 }
             }
@@ -1835,9 +1837,8 @@ std::string Api::sendTransaction(std::string json) {
             TxPool &txPool = TxPool::Instance();
             TransactionError transactionError;
             if (txPool.appendTransaction(txForNetwork, BROADCAST_TRANSACTION, &transactionError)) {
-
-                Network &network = Network::Instance();
-                network.broadCastTransaction(txForNetwork);
+                std::thread t1(&Network::broadCastTransaction, txForNetwork);
+                t1.detach();
 
                 return "{\"success\": true}";
             } else {
