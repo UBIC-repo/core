@@ -210,7 +210,9 @@ public:
             t7Vector = ECCtools::bnToVector(t7);
             t8Vector = ECCtools::bnToVector(t8);
             paddedMVector = ECCtools::bnToVector(paddedM);
-            nmVector = ECCtools::bnToVector(nm);
+            if (version < 6) {
+                nmVector = ECCtools::bnToVector(nm);
+            }
         }
 
         READWRITE(version);
