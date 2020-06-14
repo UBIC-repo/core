@@ -78,6 +78,8 @@ set(SOURCE_FILES
         NtpRsk/NtpRsk.h
         NtpRsk/NtpRskSignatureRequestObject.h
         NtpRsk/NtpRskSignatureVerificationObject.h
+	
+	NtpAA/NtpAAVerificationObject.h
 
         Crypto/Ripemd160.cpp
         Crypto/Ripemd160.h
