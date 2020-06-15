@@ -11,7 +11,7 @@
 
 class BlockHeader {
 private:
-    uint8_t version = 1;
+    uint8_t version = 2;
     bool isValid;
     std::vector<unsigned char> headerHash;
     std::vector<unsigned char> previousHeaderHash;
