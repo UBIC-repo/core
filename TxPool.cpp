@@ -221,7 +221,7 @@ void TxPool::cleanTxPool() {
 
         // Rebroadcast the transaction
         // This could be removed later when there will be more validators
-        if(transactionIt->second.getTimestampLastBroadcasted() > Time::getCurrentTimestamp() + 600) {
+        if(transactionIt->second.getTimestampLastBroadcasted() + 600 < Time::getCurrentTimestamp()) {
             std::thread t1(&Network::broadCastTransaction, transactionIt->second);
             t1.detach();
         }
