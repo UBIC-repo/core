@@ -36,7 +36,7 @@ public:
     std::map<ip_t, PeerInterfacePtr> getPeers();
     bool appendPeer(PeerInterfacePtr peer);
     bool isPeerAlreadyInList(ip_t ip);
-    std::vector<PeerInterfacePtr> getRandomPeers(uint16_t count);
+    std::vector<PeerInterfacePtr> getRandomPeers(uint16_t count, bool returnPeersWithZeroHeights);
 };
 
 
