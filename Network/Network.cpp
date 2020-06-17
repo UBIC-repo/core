@@ -323,7 +323,7 @@ void Network::getBlocks(uint32_t from, uint16_t count, bool &synced) {
 
         uint32_t unbusyPeerNbr = 0;
 
-        std::vector<PeerInterfacePtr> peerList = peers.getRandomPeers(6);
+        std::vector<PeerInterfacePtr> peerList = peers.getRandomPeers(6, false);
 
         if(peers.getPeers().size() == 0 && Time::getCurrentTimestamp() - lastPeerLookup > 5 ) {
             Log(LOG_LEVEL_INFO) << "Second look for peers";
@@ -492,7 +492,7 @@ void Network::broadCastNewBlockHeight(uint64_t height, std::vector<unsigned char
 
     Peers &peers = Peers::Instance();
 
-    std::vector<PeerInterfacePtr> peerList = peers.getRandomPeers(12);
+    std::vector<PeerInterfacePtr> peerList = peers.getRandomPeers(20, true);
     Log(LOG_LEVEL_INFO) << "peerList.size(): " << (uint64_t)peerList.size();
 
     for (auto &peer : peerList) {
@@ -509,7 +509,7 @@ void Network::broadCastTransaction(TransactionForNetwork tx) {
     transmitTransaction.transactions.emplace_back(tx);
 
     Peers &peers = Peers::Instance();
-    std::vector<PeerInterfacePtr> peerList = peers.getRandomPeers(10);
+    std::vector<PeerInterfacePtr> peerList = peers.getRandomPeers(10, false);
     for(auto &peer : peerList) {
         if(peer != nullptr) {
             peer->deliver(
