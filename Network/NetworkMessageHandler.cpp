@@ -332,7 +332,7 @@ void NetworkMessageHandler::handleAskForBlock(AskForBlock askForBlock, PeerInter
 void NetworkMessageHandler::handleAskForPeers(PeerInterfacePtr recipient) {
     Peers &peers = Peers::Instance();
     TransmitPeers transmitPeers;
-    auto randomPeers = peers.getRandomPeers(8);
+    auto randomPeers = peers.getRandomPeers(8, false);
     for(auto peer: randomPeers) {
         transmitPeers.ipList.emplace_back(peer->getIp());
     }
