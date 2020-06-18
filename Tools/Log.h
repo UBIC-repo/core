@@ -16,10 +16,10 @@
 #include "../UAmount.h"
 #include "../Serialization/streams.h"
 
-
 class Log {
 private:
     uint8_t logLevel = 0x00;
+    bool skip = false;
 public:
     static std::mutex logLock;
     std::ostream* currentStream;
