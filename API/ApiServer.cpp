@@ -57,12 +57,12 @@ std::string urlDecode(std::string str){
 }
 
 std::string getJsonPost(const std::string request) {
-    std::cout << "json request: " << request << '\n';
+    Log(LOG_LEVEL_INFO) << "json request: " << request << '\n';
     std::regex rgx(".*json=(.*)$");
     std::smatch match;
 
     if (std::regex_search(request.begin(), request.end(), match, rgx)) {
-        std::cout << "json match: " << urlDecode(match[1]) << '\n';
+        Log(LOG_LEVEL_INFO)  << "json match: " << urlDecode(match[1]) << '\n';
         return urlDecode(match[1]);
     }
 
@@ -139,13 +139,9 @@ std::string ApiServer::route(std::vector<std::string> urlParts, std::string json
             if(urlParts.size() == 2) {
                 if(urlParts.at(1) == "register-passport") {
                     return Api::readPassport(jsonPost);
-                }
-
-                if(urlParts.at(1) == "do-kyc") {
+                } else if(urlParts.at(1) == "do-kyc") {
                     return Api::doKYC(jsonPost);
-                }
-
-                if(urlParts.at(1) == "verify-kyc") {
+                } else if(urlParts.at(1) == "verify-kyc") {
                     return Api::verifyKYC(jsonPost);
                 }
             }
