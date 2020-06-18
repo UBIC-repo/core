@@ -238,7 +238,7 @@ void PeerServer::writeHandler(
         write_msgs_.pop_front();
         if (!write_msgs_.empty())
         {
-            std::cout << "Server write: " << std::endl;
+            Log(LOG_LEVEL_INFO) << "Server write:";
             do_write();
         }
     }
@@ -486,7 +486,7 @@ void PeerClient::writeHandler(
         write_msgs_.pop_front();
         if (!write_msgs_.empty())
         {
-            std::cout << "Server write: " << std::endl;
+            Log(LOG_LEVEL_INFO) << "Server write:";
             do_write();
         }
     }
