@@ -1,9 +1,16 @@
 #include "Log.h"
 #include "../FS/FS.h"
+#include "../Config.h"
 
 std::mutex Log::logLock;
 
 Log::Log(uint8_t level) {
+    Config& config = Config::Instance();
+    uint8_t configLogLevel = config.getLogLevel();
+    if(configLogLevel == LOG_LEVEL_ERROR && (level == LOG_LEVEL_INFO || level == LOG_LEVEL_WARNING)) {
+        this->skip = true;
+        return;
+    }
 
     char cPath[1024];
 
@@ -121,117 +128,143 @@ Log::Log(uint8_t level) {
 
 Log& Log::operator<<(CDataStream obj)
 {
-    std::cout << Hexdump::vectorToHexString(std::vector<unsigned char>(obj.data(), obj.data() + obj.size()));
-    *currentStream << Hexdump::vectorToHexString(std::vector<unsigned char>(obj.data(), obj.data() + obj.size()));
+    if(!this->skip) {
+        std::cout << Hexdump::vectorToHexString(std::vector<unsigned char>(obj.data(), obj.data() + obj.size()));
+        *currentStream << Hexdump::vectorToHexString(std::vector<unsigned char>(obj.data(), obj.data() + obj.size()));
+    }
     return *this;
 }
 
 Log& Log::operator<<(std::vector<unsigned char> obj)
 {
-    std::cout << Hexdump::vectorToHexString(obj);
-    *currentStream << Hexdump::vectorToHexString(obj);
+    if(!this->skip) {
+        std::cout << Hexdump::vectorToHexString(obj);
+        *currentStream << Hexdump::vectorToHexString(obj);
+    }
     return *this;
 }
 
 Log& Log::operator<<(const char* obj)
 {
-    if(obj == nullptr) {
-        std::cout << "(NULL)";
-        *currentStream << "(NULL)";
-        return *this;
+    if(!this->skip) {
+        if (obj == nullptr) {
+            std::cout << "(NULL)";
+            *currentStream << "(NULL)";
+            return *this;
+        }
+        std::cout << obj;
+        *currentStream << obj;
     }
-    std::cout << obj;
-    *currentStream << obj;
     return *this;
 }
 
 Log& Log::operator<<(const unsigned char* obj)
 {
-    if(obj == nullptr) {
-        std::cout << "(NULL)";
-        *currentStream << "(NULL)";
-        return *this;
+    if(!this->skip) {
+        if (obj == nullptr) {
+            std::cout << "(NULL)";
+            *currentStream << "(NULL)";
+            return *this;
+        }
+        std::cout << obj;
+        *currentStream << obj;
     }
-    std::cout << obj;
-    *currentStream << obj;
     return *this;
 }
 
 
 Log& Log::operator<<(std::string obj)
 {
-    std::cout << obj;
-    *currentStream << obj;
+    if(!this->skip) {
+        std::cout << obj;
+        *currentStream << obj;
+    }
     return *this;
 }
 
 Log& Log::operator<<(uint32_t obj)
 {
-    std::cout << obj;
-    *currentStream << obj;
+    if(!this->skip) {
+        std::cout << obj;
+        *currentStream << obj;
+    }
     return *this;
 }
 
 Log& Log::operator<<(uint64_t obj)
 {
-    std::cout << obj;
-    *currentStream << obj;
+    if(!this->skip) {
+        std::cout << obj;
+        *currentStream << obj;
+    }
     return *this;
 }
 
 Log& Log::operator<<(float obj)
 {
-    std::cout << obj;
-    *currentStream << obj;
+    if(!this->skip) {
+        std::cout << obj;
+        *currentStream << obj;
+    }
     return *this;
 }
 
 Log& Log::operator<<(int obj)
 {
-    std::cout << obj;
-    *currentStream << obj;
+    if(!this->skip) {
+        std::cout << obj;
+        *currentStream << obj;
+    }
     return *this;
 }
 
 Log& Log::operator<<(bool obj)
 {
-    if(obj) {
-        std::cout << "true";
-        *currentStream << "true";
-    } else {
-        std::cout << "false";
-        *currentStream << "false";
+    if(!this->skip) {
+        if (obj) {
+            std::cout << "true";
+            *currentStream << "true";
+        } else {
+            std::cout << "false";
+            *currentStream << "false";
+        }
     }
     return *this;
 }
 
 Log& Log::operator<<(UAmount obj)
 {
-    for (std::map<uint8_t, CAmount>::const_iterator it(obj.map.begin()); it != obj.map.end(); ++it) {
-        std::cout << "[" << (int)it->first << ":" << it->second << "]";
-        *currentStream << "[" << (int)it->first << ":" << it->second << "]";
+    if(!this->skip) {
+        for (std::map<uint8_t, CAmount>::const_iterator it(obj.map.begin()); it != obj.map.end(); ++it) {
+            std::cout << "[" << (int) it->first << ":" << it->second << "]";
+            *currentStream << "[" << (int) it->first << ":" << it->second << "]";
+        }
     }
     return *this;
 }
 
 Log& Log::operator<<(UAmount32 obj)
 {
-    for (std::map<uint8_t, CAmount32>::const_iterator it(obj.map.begin()); it != obj.map.end(); ++it) {
-        std::cout << "[" << (int)it->first << ":" << it->second << "]";
-        *currentStream << "[" << (int)it->first << ":" << it->second << "]";
+    if(!this->skip) {
+        for (std::map<uint8_t, CAmount32>::const_iterator it(obj.map.begin()); it != obj.map.end(); ++it) {
+            std::cout << "[" << (int) it->first << ":" << it->second << "]";
+            *currentStream << "[" << (int) it->first << ":" << it->second << "]";
+        }
     }
     return *this;
 }
 
 Log::~Log()
 {
-    logLock.lock();
-    std::cout << std::endl;
-    *currentStream << std::endl;
+    if(!this->skip) {
+        logLock.lock();
+        std::cout << std::endl;
+        *currentStream << std::endl;
 
-    fb.close();
+        fb.close();
 
-    currentStream->clear();
-    delete currentStream;
-    logLock.unlock();
+        currentStream->clear();
+        delete currentStream;
+        logLock.unlock();
+    }
 }
