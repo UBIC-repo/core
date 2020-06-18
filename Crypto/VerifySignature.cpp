@@ -3,18 +3,11 @@
 #include <openssl/ec.h>
 #include <openssl/err.h>
 #include "VerifySignature.h"
-#include "../Tools/Hexdump.h"
 #include "../Wallet.h"
 #include "ECCtools.h"
 
 bool VerifySignature::verify(unsigned char* msg, size_t mlen, unsigned char* sig, size_t slen, EVP_PKEY* pkey)
 {
-    printf("Signature:");
-    Hexdump::dump(sig, slen);
-
-    printf("id:");
-    Hexdump::dump(msg, mlen);
-
     EVP_MD_CTX *mdctx = EVP_MD_CTX_create();
     /* Initialize `key` with a public key */
     EVP_DigestVerifyInit(mdctx, NULL, EVP_sha256(), NULL, pkey);
@@ -24,7 +17,6 @@ bool VerifySignature::verify(unsigned char* msg, size_t mlen, unsigned char* sig
 
     if(1 == EVP_DigestVerifyFinal(mdctx, sig, slen))
     {
-        //printf("signature verified\n");
         EVP_MD_CTX_free(mdctx);
         return true;
     }
@@ -34,7 +26,6 @@ bool VerifySignature::verify(unsigned char* msg, size_t mlen, unsigned char* sig
         bio_out = BIO_new_fp(stdout, BIO_NOCLOSE);
         ERR_print_errors(bio_out);
         EVP_MD_CTX_free(mdctx);
-        //printf("signature not verified\n");
         return false;
     }
 }
