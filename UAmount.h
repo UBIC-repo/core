@@ -389,7 +389,10 @@ public:
                  it->first == CURRENCY_TURKEY ||
                  it->first == CURRENCY_ROMANIA ||
                  it->first == CURRENCY_POLAND ||
-                 it->first == CURRENCY_NETHERLANDS
+                 it->first == CURRENCY_NETHERLANDS ||
+                 it->first == CURRENCY_PHILIPPINES ||
+                 it->first == CURRENCY_ITALY ||
+                 it->first == CURRENCY_BRAZIL
                 )) {
                 return false;
             }
