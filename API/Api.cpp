@@ -2030,6 +2030,9 @@ std::string Api::getCurrencies() {
     currencyCodes.put(std::to_string(CURRENCY_ROMANIA), "URO");
     currencyCodes.put(std::to_string(CURRENCY_POLAND), "UPL");
     currencyCodes.put(std::to_string(CURRENCY_NETHERLANDS), "UNL");
+    currencyCodes.put(std::to_string(CURRENCY_PHILIPPINES), "UPH");
+    currencyCodes.put(std::to_string(CURRENCY_ITALY), "UIT");
+    currencyCodes.put(std::to_string(CURRENCY_BRAZIL), "UBR");
 
     baseTree.push_back(std::make_pair("currencyCodes", currencyCodes));
 
