@@ -217,6 +217,9 @@ uint64_t CertHelper::calculateDSCExpirationDateForCert(X509* x509) {
        currencyId == CURRENCY_RUSSIA ||
        currencyId == CURRENCY_ROMANIA ||
        currencyId == CURRENCY_NETHERLANDS ||
+       currencyId == CURRENCY_PHILIPPINES ||
+       currencyId == CURRENCY_ITALY ||
+       currencyId == CURRENCY_BRAZIL ||
        currencyId == CURRENCY_FRANCE) {
         maxValidity = tenYears;
     }
