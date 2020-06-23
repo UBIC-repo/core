@@ -118,6 +118,9 @@ background-color: #000;
             <a class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="#"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Advanced <span class="caret"></span></a>
           <ul class="dropdown-menu">
           <li class="nav-item">
+            <a class="nav-link" id="do-aa-link" href="#">Do AA</a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link" id="peers-link" href="#">Peers</a>
           </li>
 <!--
@@ -184,6 +187,13 @@ background-color: #000;
 
 	<div>
 		<button data-toggle="modal" class="btn btn-default" data-target="#verifyKycModal" type="button">verify KYC</button>
+	</div>
+</div>
+
+<div id="doaa" class="tab hidden">
+	<p>Do AA is still in development and will be used as a recertification mechanism</p>
+	<div>
+		<button data-toggle="modal" class="btn btn-default" data-target="#doaaModal" type="button">do AA</button>
 	</div>
 </div>
 
@@ -385,6 +395,49 @@ background-color: #000;
         <div class="modal-footer">
           <a href="#" data-dismiss="modal" class="btn">Close</a>
           <a href="#" class="btn btn-primary" id="verify-kyc-btn">Verify KYC</a>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal" id="doaaModal">
+	<div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <h4 class="modal-title">Do AA</h4>
+        </div>
+	<div class="modal-body">
+		<form id="doaaForm">
+			<div class="form-group">
+				<label for="do-aa-passport-nbr">Passport Nbr:</label>
+				<input id="do-aa-passport-nbr" data-error="Passport Nbr is 9 characters long and contains only numbers and upper case letters" class="form-control" type="text" pattern="^[0-9A-Z]{9}$" required>
+ 				<div class="help-block with-errors"></div>
+			</div>
+
+			<div class="form-group">
+				<label for="do-aa-date-of-birth">Date of birth:</label>
+				<div class="input-group date">
+				  <input placeholder="01.01.1990" id="do-aa-date-of-birth" type="text" class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label for="do-aa-date-of-expiry">Date of expiry:</label>
+				<div class="input-group date">
+				  <input placeholder="01.01.2020" type="text" id="do-aa-date-of-expiry" class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label for="doaa-address">Address to unlock:</label>
+				<input type="text" id="do-aa-address" class="form-control">
+			</div>
+		</form>
+	</div>
+        <div class="modal-footer">
+          <a href="#" data-dismiss="modal" class="btn">Close</a>
+          <a href="#" class="btn btn-primary" id="do-aa-btn">Do AA</a>
         </div>
       </div>
     </div>
@@ -1072,6 +1125,7 @@ $('#send-link').bind('click', function() { toggle('send'); return false; });
 $('#receive-link').bind('click', function() { updateWallet(); toggle('receive'); return false; });
 $('#transactions-link').bind('click', function() { updateTransactions(); toggle('transactions'); return false; });
 $('#peers-link').bind('click', function() { updatePeers(); toggle('peers'); return false; });
+$('#do-aa-link').bind('click', function() { toggle('doaa'); return false; });
 $('#bans-link').bind('click', function() { updateBans(); toggle('bans'); return false; });
 $('#certificates-link').bind('click', function() { toggle('certificates'); return false; });
 $('#status-link').bind('click', function() { toggle('status'); return false; });
@@ -1232,6 +1286,11 @@ $('#verify-kyc-btn').bind('click', function() {
 	return false;
 });
 
+$('#do-aa-btn').bind('click', function() {
+	$('#doaaForm').submit();
+	return false;
+});
+
 $('#register-passport-btn').bind('click', function() {
 	$('#passportForm').submit();
 	return false;
@@ -1301,6 +1360,59 @@ $('#passportForm').validator().on('submit', function (e) {
 	return false;
 });
 
+
+$('#doaaForm').validator().on('submit', function (e) {
+	var dateOfExpiry = $('#do-aa-date-of-expiry').val();
+	var dateOfBirth = $('#do-aa-date-of-birth').val();
+	console.log(dateOfExpiry);
+	console.log(dateOfExpiry.length);
+	if(dateOfExpiry.length != 10) {
+		return false;
+	}
+
+	if(dateOfBirth.length != 10) {
+		return false;
+	}
+
+	var dateOfExpirySplit = dateOfExpiry.split(".");
+	dateOfExpiry = dateOfExpirySplit[2].substr(2, 2) + dateOfExpirySplit[1] + dateOfExpirySplit[0];
+
+
+	var dateOfBirthSplit = dateOfBirth.split(".");
+	dateOfBirth = dateOfBirthSplit[2].substr(2, 2) + dateOfBirthSplit[1] + dateOfBirthSplit[0];
+
+	if (e.isDefaultPrevented()) {
+	} else {
+		NProgress.start();
+
+		$('#do-aa-btn').prop("disabled",true);
+		var payload = {}
+		payload['documentNumber'] = $('#do-aa-passport-nbr').val();
+		payload['dateOfBirth'] = dateOfBirth;
+		payload['dateOfExpiry'] = dateOfExpiry;
+		payload['address'] = $('#do-aa-address').val();
+
+		$.ajax( {type: "POST", url:protocol + host + "/ubi/do-aa", data:{"json": JSON.stringify(payload)}, headers: { 'apiKey': apiKey }} ).done(function(data) {
+			$('#do-aa-btn').prop("disabled", false);
+			NProgress.done();
+
+			if(typeof data['success'] != "undefined" && data['success']) {
+				displaySuccess("Authentication success");
+				$("#doKycResponseTextarea").val(data['base64']);
+				$('#doKycSuccessModal').modal('show');
+			} else {
+				displayError("Please try again, Reading failed with message:" + data['error']);
+			}
+			$('#doaaModal').modal('hide');
+		}).fail(function() {
+			displayError("Something went wrong please try again in a minute or two");
+		  	$('#do-kyc-btn').prop("disabled",false);
+			$('#doaaModal').modal('hide');
+			NProgress.done();
+		});
+	}
+	return false;
+});
 
 $('#kycForm').validator().on('submit', function (e) {
 	var dateOfExpiry = $('#kyc-date-of-expiry').val();
@@ -1468,6 +1580,21 @@ $(document).ready(function() {
 	});
 
 	$('#kycForm').validator();
+	
+	$('#do-aa-date-of-birth').datepicker({
+	    container:'#doaaModal',
+	    format: "dd.mm.yyyy",
+	    startView: 2,
+	    startDate: "01/01/1900",
+	    endDate: "01/01/2020"
+	});
+	$('#do-aa-date-of-expiry').datepicker({
+	    container:'#doaaModal',
+	    format: "dd.mm.yyyy",
+	    startView: 2,
+	    startDate: "01/01/2017",
+	    endDate: "01/01/2040"
+	});
 
 	$('#kyc-date-of-birth').datepicker({
 	    container:'#kycModal',
