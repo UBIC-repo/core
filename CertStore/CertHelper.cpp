@@ -160,6 +160,18 @@ uint8_t CertHelper::getCurrencyIdForCert(X509* x509) {
         currencyId = CURRENCY_NETHERLANDS;
     }
 
+    if(strcmp(iso2code, "PH") == 0 || strcmp(iso2code, "ph") == 0) {
+        currencyId = CURRENCY_PHILIPPINES;
+    }
+
+    if(strcmp(iso2code, "IT") == 0 || strcmp(iso2code, "it") == 0) {
+        currencyId = CURRENCY_ITALY;
+    }
+
+    if(strcmp(iso2code, "BR") == 0 || strcmp(iso2code, "br") == 0) {
+        currencyId = CURRENCY_BRAZIL;
+    }
+
     free(iso2code);
 
     return currencyId;
