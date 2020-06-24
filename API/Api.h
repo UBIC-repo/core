@@ -23,6 +23,7 @@ public:
     static std::string getBans();
     static std::string myTransactions();
     static std::string readPassport(std::string json);
+    static std::string getMetrics();
     static std::string doKYC(std::string json);
     static std::string verifyKYC(std::string json);
     static std::string pay(std::string json);
