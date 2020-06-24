@@ -68,6 +68,8 @@ set(SOURCE_FILES
 	Tools/VectorTool.h
 	Tools/Base58.h
 	Tools/Base58.cpp
+	Tools/MetricTool.cpp
+	Tools/MetricTool.h
 
         NtpEsk/NtpEsk.cpp
         NtpEsk/NtpEsk.h
