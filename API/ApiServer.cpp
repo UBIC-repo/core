@@ -227,6 +227,8 @@ std::string ApiServer::route(std::vector<std::string> urlParts, std::string json
             if(urlParts.size() == 1) {
                 return Api::getCurrencies();
             }
+        } else if(urlParts.at(0) == "metrics") {
+            return Api::getMetrics();
         }
     }
     return Api::getIndex();
