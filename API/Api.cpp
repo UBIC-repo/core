@@ -34,6 +34,7 @@
 #include "../Crypto/Hash256.h"
 #include "../Scripts/PkhInScript.h"
 #include "../Transaction/TransactionVerify.h"
+#include "../Tools/MetricTool.h"
 
 using boost::property_tree::ptree;
 
@@ -899,6 +900,27 @@ std::string Api::readPassport(std::string json) {
 
     return "{\"success\": false}";
 
+}
+
+std::string Api::getMetrics() {
+    ptree baseTree;
+    ptree currenciesTree;
+
+    for(int currencyId = 1; currencyId <= NUMBER_OF_CURRENCIES; currencyId++) {
+        ptree currencyTree;
+        currencyTree.put("currencyId", currencyId);
+        currencyTree.put("total_supply", MetricTool::getTotalSupply(currencyId));
+        currencyTree.put("passport_supply_for_1day", MetricTool::getPassportSupply1Day(currencyId));
+        currenciesTree.push_back(std::make_pair("", currencyTree));
+    }
+
+    baseTree.put("warning", "This feature is still experimental, total supply does not take into account burned coins");
+    baseTree.add_child("currencies", currenciesTree);
+
+    std::stringstream ss;
+    boost::property_tree::json_parser::write_json(ss, baseTree);
+
+    return ss.str();
 }
 
 std::string Api::doKYC(std::string json) {
