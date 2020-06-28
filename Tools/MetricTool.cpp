@@ -3,18 +3,42 @@
 #include "../ChainParams.h"
 #include "../Chain.h"
 
+uint64_t MetricTool::findFirstPassportBlockHeight(uint8_t currencyId) {
+    Chain &chain = Chain::Instance();
+    uint64_t pointer1 = 1;
+    uint64_t pointer2 = chain.getCurrentBlockchainHeight();
+
+    while(pointer1 + 1 < pointer2) {
+        uint64_t needle = pointer1 + (pointer2 - pointer1) / 2;
+        BlockHeader* header = chain.getBlockHeader(needle);
+        UAmount32 receiverCount = header->getUbiReceiverCount();
+        auto receiverCountFound = receiverCount.map.find(currencyId);
+
+        if(receiverCountFound == receiverCount.map.end()) {
+            pointer1 = needle;
+        } else if (receiverCountFound->second > 0) {
+            pointer2 = needle;
+        } else {
+            pointer1 = needle;
+        }
+    }
+
+    return pointer2;
+}
+
 uint64_t MetricTool::calculateTotalSupply(
         uint64_t emissionRate,
         uint64_t developmentEmission,
         uint64_t delegateEmission,
-        uint32_t startingBlockHeight
+        uint32_t startingBlockHeight,
+        uint8_t currencyId
 ) {
     Chain &chain = Chain::Instance();
     uint32_t currentBlockchainHeight = chain.getCurrentBlockchainHeight();
 
     uint64_t total = 0;
     if(currentBlockchainHeight > startingBlockHeight) {
-        total += (emissionRate * (currentBlockchainHeight - startingBlockHeight));
+        total += (emissionRate * (currentBlockchainHeight - findFirstPassportBlockHeight(currencyId)));
         total += (delegateEmission * (currentBlockchainHeight - startingBlockHeight));
 
         uint64_t halvingFactor = 1;
@@ -54,7 +78,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_SWITZERLAND_EMISSION_RATE,
                 CURRENCY_SWITZERLAND_DEVELOPMENT_PAYOUT,
                 CURRENCY_SWITZERLAND_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_SWITZERLAND
         );
     }
 
@@ -63,7 +88,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_GERMANY_EMISSION_RATE,
                 CURRENCY_GERMANY_DEVELOPMENT_PAYOUT,
                 CURRENCY_GERMANY_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_GERMANY
         );
     }
 
@@ -72,7 +98,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_AUSTRIA_EMISSION_RATE,
                 CURRENCY_AUSTRIA_DEVELOPMENT_PAYOUT,
                 CURRENCY_AUSTRIA_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_AUSTRIA
         );
     }
 
@@ -81,7 +108,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_UNITED_KINGDOM_EMISSION_RATE,
                 CURRENCY_UNITED_KINGDOM_DEVELOPMENT_PAYOUT,
                 CURRENCY_UNITED_KINGDOM_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_UNITED_KINGDOM
         );
     }
 
@@ -90,7 +118,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_IRELAND_EMISSION_RATE,
                 CURRENCY_IRELAND_DEVELOPMENT_PAYOUT,
                 CURRENCY_IRELAND_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_IRELAND
         );
     }
 
@@ -99,7 +128,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_USA_EMISSION_RATE,
                 CURRENCY_USA_DEVELOPMENT_PAYOUT,
                 CURRENCY_USA_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_USA
         );
     }
 
@@ -108,7 +138,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_AUSTRALIA_EMISSION_RATE,
                 CURRENCY_AUSTRALIA_DEVELOPMENT_PAYOUT,
                 CURRENCY_AUSTRALIA_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_AUSTRALIA
         );
     }
 
@@ -117,7 +148,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_CHINA_EMISSION_RATE,
                 CURRENCY_CHINA_DEVELOPMENT_PAYOUT,
                 CURRENCY_CHINA_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_CHINA
         );
     }
 
@@ -126,7 +158,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_SWEDEN_EMISSION_RATE,
                 CURRENCY_SWEDEN_DEVELOPMENT_PAYOUT,
                 CURRENCY_SWEDEN_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_SWEDEN
         );
     }
 
@@ -135,7 +168,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_FRANCE_EMISSION_RATE,
                 CURRENCY_FRANCE_DEVELOPMENT_PAYOUT,
                 CURRENCY_FRANCE_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_FRANCE
         );
     }
 
@@ -144,7 +178,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_CANADA_EMISSION_RATE,
                 CURRENCY_CANADA_DEVELOPMENT_PAYOUT,
                 CURRENCY_CANADA_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_CANADA
         );
     }
 
@@ -153,7 +188,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_JAPAN_EMISSION_RATE,
                 CURRENCY_JAPAN_DEVELOPMENT_PAYOUT,
                 CURRENCY_JAPAN_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_JAPAN
         );
     }
 
@@ -162,7 +198,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_THAILAND_EMISSION_RATE,
                 CURRENCY_THAILAND_DEVELOPMENT_PAYOUT,
                 CURRENCY_THAILAND_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_THAILAND
         );
     }
 
@@ -171,7 +208,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_NEW_ZEALAND_EMISSION_RATE,
                 CURRENCY_NEW_ZEALAND_DEVELOPMENT_PAYOUT,
                 CURRENCY_NEW_ZEALAND_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_NEW_ZEALAND
         );
     }
 
@@ -180,7 +218,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_UNITED_ARAB_EMIRATES_EMISSION_RATE,
                 CURRENCY_UNITED_ARAB_EMIRATES_DEVELOPMENT_PAYOUT,
                 CURRENCY_UNITED_ARAB_EMIRATES_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_UNITED_ARAB_EMIRATES
         );
     }
 
@@ -189,7 +228,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_FINLAND_EMISSION_RATE,
                 CURRENCY_FINLAND_DEVELOPMENT_PAYOUT,
                 CURRENCY_FINLAND_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_FINLAND
         );
     }
 
@@ -198,7 +238,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_LUXEMBOURG_EMISSION_RATE,
                 CURRENCY_LUXEMBOURG_DEVELOPMENT_PAYOUT,
                 CURRENCY_LUXEMBOURG_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_LUXEMBOURG
         );
     }
 
@@ -207,7 +248,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_SINGAPORE_EMISSION_RATE,
                 CURRENCY_SINGAPORE_DEVELOPMENT_PAYOUT,
                 CURRENCY_SINGAPORE_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_SINGAPORE
         );
     }
 
@@ -216,7 +258,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_HUNGARY_EMISSION_RATE,
                 CURRENCY_HUNGARY_DEVELOPMENT_PAYOUT,
                 CURRENCY_HUNGARY_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_HUNGARY
         );
     }
 
@@ -225,7 +268,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_CZECH_REPUBLIC_EMISSION_RATE,
                 CURRENCY_CZECH_REPUBLIC_DEVELOPMENT_PAYOUT,
                 CURRENCY_CZECH_REPUBLIC_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_CZECH_REPUBLIC
         );
     }
 
@@ -234,7 +278,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_MALAYSIA_EMISSION_RATE,
                 CURRENCY_MALAYSIA_DEVELOPMENT_PAYOUT,
                 CURRENCY_MALAYSIA_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_MALAYSIA
         );
     }
 
@@ -243,7 +288,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_UKRAINE_EMISSION_RATE,
                 CURRENCY_UKRAINE_DEVELOPMENT_PAYOUT,
                 CURRENCY_UKRAINE_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_UKRAINE
         );
     }
 
@@ -252,7 +298,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_ESTONIA_EMISSION_RATE,
                 CURRENCY_ESTONIA_DEVELOPMENT_PAYOUT,
                 CURRENCY_ESTONIA_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_ESTONIA
         );
     }
 
@@ -261,7 +308,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_MONACO_EMISSION_RATE,
                 CURRENCY_MONACO_DEVELOPMENT_PAYOUT,
                 CURRENCY_MONACO_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_MONACO
         );
     }
 
@@ -270,7 +318,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_LIECHTENSTEIN_EMISSION_RATE,
                 CURRENCY_LIECHTENSTEIN_DEVELOPMENT_PAYOUT,
                 CURRENCY_LIECHTENSTEIN_DELEGATE_PAYOUT,
-                0
+                0,
+                CURRENCY_LIECHTENSTEIN
         );
     }
 
@@ -279,7 +328,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_ICELAND_EMISSION_RATE,
                 CURRENCY_ICELAND_DEVELOPMENT_PAYOUT,
                 CURRENCY_ICELAND_DELEGATE_PAYOUT,
-                ICELAND_ACTIVATION_BLOCK_HEIGHT
+                ICELAND_ACTIVATION_BLOCK_HEIGHT,
+                CURRENCY_ICELAND
         );
     }
 
@@ -288,7 +338,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_SPAIN_EMISSION_RATE,
                 CURRENCY_SPAIN_DEVELOPMENT_PAYOUT,
                 CURRENCY_SPAIN_DELEGATE_PAYOUT,
-                SPAIN_ACTIVATION_BLOCK_HEIGHT
+                SPAIN_ACTIVATION_BLOCK_HEIGHT,
+                CURRENCY_SPAIN
         );
     }
 
@@ -297,7 +348,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_RUSSIA_EMISSION_RATE,
                 CURRENCY_RUSSIA_DEVELOPMENT_PAYOUT,
                 CURRENCY_RUSSIA_DELEGATE_PAYOUT,
-                NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT
+                NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT,
+                CURRENCY_RUSSIA
         );
     }
 
@@ -306,7 +358,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_ISRAEL_EMISSION_RATE,
                 CURRENCY_ISRAEL_DEVELOPMENT_PAYOUT,
                 CURRENCY_ISRAEL_DELEGATE_PAYOUT,
-                NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT
+                NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT,
+                CURRENCY_ISRAEL
         );
     }
 
@@ -315,7 +368,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_PORTUGAL_EMISSION_RATE,
                 CURRENCY_PORTUGAL_DEVELOPMENT_PAYOUT,
                 CURRENCY_PORTUGAL_DELEGATE_PAYOUT,
-                NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT
+                NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT,
+                CURRENCY_PORTUGAL
         );
     }
 
@@ -324,7 +378,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_DENMARK_EMISSION_RATE,
                 CURRENCY_DENMARK_DEVELOPMENT_PAYOUT,
                 CURRENCY_DENMARK_DELEGATE_PAYOUT,
-                NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT
+                NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT,
+                CURRENCY_DENMARK
         );
     }
 
@@ -333,7 +388,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_TURKEY_EMISSION_RATE,
                 CURRENCY_TURKEY_DEVELOPMENT_PAYOUT,
                 CURRENCY_TURKEY_DELEGATE_PAYOUT,
-                NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT
+                NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT,
+                CURRENCY_TURKEY
         );
     }
 
@@ -342,7 +398,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_ROMANIA_EMISSION_RATE,
                 CURRENCY_ROMANIA_DEVELOPMENT_PAYOUT,
                 CURRENCY_ROMANIA_DELEGATE_PAYOUT,
-                NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT
+                NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT,
+                CURRENCY_ROMANIA
         );
     }
 
@@ -351,7 +408,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_POLAND_EMISSION_RATE,
                 CURRENCY_POLAND_DEVELOPMENT_PAYOUT,
                 CURRENCY_POLAND_DELEGATE_PAYOUT,
-                NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT
+                NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT,
+                CURRENCY_POLAND
         );
     }
 
@@ -360,7 +418,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_NETHERLANDS_EMISSION_RATE,
                 CURRENCY_NETHERLANDS_DEVELOPMENT_PAYOUT,
                 CURRENCY_NETHERLANDS_DELEGATE_PAYOUT,
-                NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT
+                NEW_COUNTRIES_BATCH_0_ACTIVATION_BLOCK_HEIGHT,
+                CURRENCY_NETHERLANDS
         );
     }
 
@@ -369,7 +428,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_PHILIPPINES_EMISSION_RATE,
                 CURRENCY_PHILIPPINES_DEVELOPMENT_PAYOUT,
                 CURRENCY_PHILIPPINES_DELEGATE_PAYOUT,
-                NEW_COUNTRIES_BATCH_1_ACTIVATION_BLOCK_HEIGHT
+                NEW_COUNTRIES_BATCH_1_ACTIVATION_BLOCK_HEIGHT,
+                CURRENCY_PHILIPPINES
         );
     }
 
@@ -378,7 +438,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_ITALY_EMISSION_RATE,
                 CURRENCY_ITALY_DEVELOPMENT_PAYOUT,
                 CURRENCY_ITALY_DELEGATE_PAYOUT,
-                NEW_COUNTRIES_BATCH_1_ACTIVATION_BLOCK_HEIGHT
+                NEW_COUNTRIES_BATCH_1_ACTIVATION_BLOCK_HEIGHT,
+                CURRENCY_ITALY
         );
     }
 
@@ -387,7 +448,8 @@ uint64_t MetricTool::getTotalSupply(uint8_t currencyId) {
                 CURRENCY_BRAZIL_EMISSION_RATE,
                 CURRENCY_BRAZIL_DEVELOPMENT_PAYOUT,
                 CURRENCY_BRAZIL_DELEGATE_PAYOUT,
-                NEW_COUNTRIES_BATCH_1_ACTIVATION_BLOCK_HEIGHT
+                NEW_COUNTRIES_BATCH_1_ACTIVATION_BLOCK_HEIGHT,
+                CURRENCY_BRAZIL
         );
     }
 
