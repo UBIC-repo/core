@@ -95,6 +95,18 @@ bool TransactionVerify::verifyRegisterPassportTx(Transaction* tx, uint32_t block
         return false;
     }
 
+    if(blockHeight >= ENFORCE_NTPRSK_VERSION_6_BLOCK_HEIGHT && ntpskVersion == 4) {
+        Log(LOG_LEVEL_ERROR) << "After block "
+                             << ENFORCE_NTPRSK_VERSION_6_BLOCK_HEIGHT
+                             << " only ntprsk proofs with version numbers superior or equal to 6 are accepted";
+
+        if(transactionError != nullptr) {
+            transactionError->setErrorCode(1115);
+            transactionError->setErrorMessage("Only ntprsk proofs with version numbers superior to 6 are accepted, please upgrade your software");
+        }
+        return false;
+    }
+
     if(ntpskVersion > 6) {
         Log(LOG_LEVEL_ERROR) << "Unsuported ntpskVersion: " << ntpskVersion;
         return false;
