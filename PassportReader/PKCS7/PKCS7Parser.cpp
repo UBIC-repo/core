@@ -167,20 +167,7 @@ NtpRskSignatureRequestObject* PKCS7Parser::getNtpRsk() {
     ntpRskSignatureRequestObject->setPaddedM(m);
     ntpRskSignatureRequestObject->setRsa(rsa);
 
-    int signatureNid = X509_get_signature_nid(getDscCertificate());
-    uint16_t mdAlg = this->getMdAlg();
-
-    if (signatureNid == NID_sha1WithRSA || signatureNid == NID_ecdsa_with_SHA1) {
-        mdAlg = NID_sha1;
-    } else if (signatureNid == NID_ecdsa_with_SHA224) {
-        mdAlg = NID_sha224;
-    } else if (signatureNid == NID_sha256WithRSAEncryption || signatureNid == NID_ecdsa_with_SHA256) {
-        mdAlg = NID_sha256;
-    } else if (signatureNid == NID_sha384WithRSAEncryption || signatureNid == NID_ecdsa_with_SHA384) {
-        mdAlg = NID_sha384;
-    } else if (signatureNid == NID_sha512WithRSAEncryption || signatureNid == NID_ecdsa_with_SHA512) {
-        mdAlg = NID_sha512;
-    }
+    uint16_t mdAlg = OBJ_obj2nid(si->digest_alg->algorithm);
 
     ntpRskSignatureRequestObject->setMdAlg(mdAlg);
     ntpRskSignatureRequestObject->setSignedPayload(this->getSignedPayload());
@@ -221,24 +208,10 @@ NtpEskSignatureRequestObject* PKCS7Parser::getNtpEsk() {
     ntpEskSignatureRequestObject->setCurveParams(EC_KEY_get0_group(ecKey));
     ntpEskSignatureRequestObject->setR(r);
     ntpEskSignatureRequestObject->setS(s);
-    ntpEskSignatureRequestObject->setMessageHash(std::vector<unsigned char>());
+    ntpEskSignatureRequestObject->setMessageHash(std::vector<unsigned char>(md_dat, md_dat +md_len));
 
+    uint16_t mdAlg = OBJ_obj2nid(si->digest_alg->algorithm);
 
-    int signatureNid = X509_get_signature_nid(getDscCertificate());
-    uint16_t mdAlg = this->getMdAlg();
-
-    if (signatureNid == NID_sha1WithRSA || signatureNid == NID_ecdsa_with_SHA1) {
-        mdAlg = NID_sha1;
-    } else if (signatureNid == NID_ecdsa_with_SHA224) {
-        mdAlg = NID_sha224;
-    } else if (signatureNid == NID_sha256WithRSAEncryption || signatureNid == NID_ecdsa_with_SHA256) {
-        mdAlg = NID_sha256;
-    } else if (signatureNid == NID_sha384WithRSAEncryption || signatureNid == NID_ecdsa_with_SHA384) {
-        mdAlg = NID_sha384;
-    } else if (signatureNid == NID_sha512WithRSAEncryption || signatureNid == NID_ecdsa_with_SHA512) {
-        mdAlg = NID_sha512;
-    }
-    
     ntpEskSignatureRequestObject->setMdAlg(mdAlg);
     ntpEskSignatureRequestObject->setSignedPayload(this->getSignedPayload());
 
