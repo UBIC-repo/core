@@ -241,8 +241,7 @@ void PeerServer::writeHandler(
             Log(LOG_LEVEL_INFO) << "Server write:";
             do_write();
         }
-    }
-    else {
+    } else {
         Log(LOG_LEVEL_ERROR) << "PeerServer::do_write() " << ip << " terminated with error: " << error.message();
         Peers &peers = Peers::Instance();
         peers.disconnect(ip);
@@ -386,11 +385,8 @@ void PeerClient::do_read_header()
                                 {
                                     Log(LOG_LEVEL_ERROR) << "PeerClient::do_read_header() " << ip
                                                          << " terminated with error: " << ec.message();
-                                    if(ec == boost::asio::error::eof) {
-                                        do_connect();
-                                    } else {
-                                        this->disconnect();
-                                    }
+                                    Peers &peers = Peers::Instance();
+                                    peers.disconnect(ip);
                                 }
                             });
 }
