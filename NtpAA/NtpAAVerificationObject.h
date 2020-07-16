@@ -17,9 +17,9 @@ private:
     std::vector<unsigned char> blockHash; // block hash that we prove the knowledge of, it has to be issued at least 2 weeks after the initial verification
     uint16_t passportHashAlgorithm;
     std::vector<unsigned char> signedPayload;
-    std::vector<unsigned char> signedPayload2; // contains the datagroup hashes
+    std::vector<unsigned char> ldsPayload; // contains the datagroup hashes
     std::vector<unsigned char> dg15; // contains the public key
-    std::vector<unsigned char> aaSignature;
+    std::vector<unsigned char> aaSignature; // aa signature is on transactionId || blockHash
     std::vector<unsigned char> transactionHash;
 public:
     uint8_t getVersion() const {
@@ -54,12 +54,12 @@ public:
         NtpAAVerificationObject::signedPayload = signedPayload;
     }
 
-    const std::vector<unsigned char> &getSignedPayload2() const {
-        return signedPayload2;
+    const std::vector<unsigned char> &getLdsPayload() const {
+        return ldsPayload;
     }
 
-    void setSignedPayload2(const std::vector<unsigned char> &signedPayload2) {
-        NtpAAVerificationObject::signedPayload2 = signedPayload2;
+    void setLdsPayload(const std::vector<unsigned char> &ldsPayload) {
+        NtpAAVerificationObject::ldsPayload = ldsPayload;
     }
 
     const std::vector<unsigned char> &getDg15() const {
@@ -94,7 +94,7 @@ public:
         READWRITE(blockHash);
         READWRITE(passportHashAlgorithm);
         READWRITE(signedPayload);
-        READWRITE(signedPayload2); // contains the datagroup hashes
+        READWRITE(ldsPayload); // contains the datagroup hashes
         READWRITE(dg15); // contains the public key
         READWRITE(aaSignature);
     }
