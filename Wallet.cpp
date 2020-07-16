@@ -351,7 +351,6 @@ Transaction* Wallet::payToTxOutputsWithoutFees(std::vector<TxOut> txOutputs) {
     Transaction* transaction = new Transaction();
     transaction->setTxOuts(txOutputs);
     transaction->setTxIns(txInputs);
-    transaction->setNetwork(NET_CURRENT);
 
     transaction = this->signTransaction(transaction);
 
