@@ -159,7 +159,6 @@ void Test::importCACerts() {
             TxPool& txPool = TxPool::Instance();
 
             Transaction* tx = new Transaction();
-            tx->setNetwork(NET_CURRENT);
             tx->setTxIns(txIns);
 
             TransactionForNetwork transactionForNetwork;
@@ -282,7 +281,6 @@ void Test::importDSCCerts() {
             TxPool& txPool = TxPool::Instance();
 
             Transaction* tx = new Transaction();
-            tx->setNetwork(NET_CURRENT);
             tx->setTxIns(txIns);
 
             TransactionForNetwork transactionForNetwork;
