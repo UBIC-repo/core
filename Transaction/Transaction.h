@@ -13,7 +13,7 @@
 
 class Transaction {
 private:
-    uint8_t network; // To avoid a transaction from the testnet being broadcasted on the main net
+    uint8_t network = NET_CURRENT; // To avoid a transaction from the testnet being broadcasted on the main net
     std::vector<TxIn> txIns;
     std::vector<TxOut> txOuts;
     uint32_t timestamp = 0; // only used within the transaction pool
