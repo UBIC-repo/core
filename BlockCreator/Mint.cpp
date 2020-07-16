@@ -151,7 +151,6 @@ Block Mint::mintBlock() {
                 txIns.emplace_back(*txIn);
 
                 Transaction* addDscCertificateTransaction = new Transaction();
-                addDscCertificateTransaction->setNetwork(NET_CURRENT);
                 addDscCertificateTransaction->setTxIns(txIns);
 
                 transactionList.emplace_back(*addDscCertificateTransaction);
