@@ -16,7 +16,8 @@
 #include "../Wallet.h"
 #include "../Scripts/PkhInScript.h"
 #include "../Tools/VectorTool.h"
-#include "../Fixes.h"
+#include "../NtpAA/NtpAAVerificationObject.h"
+#include "../PassportReader/LDS/LDSParser.h"
 
 bool TransactionVerify::verifyRegisterPassportTx(Transaction* tx, uint32_t blockHeight, Cert* cert, TransactionError* transactionError) {
 
@@ -1056,6 +1057,265 @@ bool TransactionVerify::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                 needToPayFee = false;
 
                 break;
+            }
+            case SCRIPT_AA: {
+                return false; // not active yet
+                if(txIn->getNonce() != 0) {
+                    Log(LOG_LEVEL_ERROR) << "Nonce must always be 0 for SCRIPT_AA inputs";
+
+                    if(transactionError != nullptr) {
+                        transactionError->setErrorCode(941);
+                        transactionError->setErrorMessage("Nonce must always be 0 for SCRIPT_AA inputs");
+                    }
+                    return false;
+                }
+
+                if(txIns.size() != 1) {
+                    Log(LOG_LEVEL_ERROR) << "SCRIPT_AA transactions can only have one input";
+
+                    if(transactionError != nullptr) {
+                        transactionError->setErrorCode(943);
+                        transactionError->setErrorMessage("SCRIPT_AA transactions can only have one input");
+                    }
+                    return false;
+                }
+
+                if(txOuts.size() != 1) {
+                    Log(LOG_LEVEL_ERROR) << "SCRIPT_AA transactions must have one output";
+
+                    if(transactionError != nullptr) {
+                        transactionError->setErrorCode(944);
+                        transactionError->setErrorMessage("SCRIPT_AA transactions must have one output");
+                    }
+                    return false;
+                }
+
+                TxOut txOut = txOuts.front();
+                if(txOut.getScript().getScriptType() != SCRIPT_PKH) {
+                    Log(LOG_LEVEL_ERROR) << "SCRIPT_AA transactions must have one output of type SCRIPT_PKH";
+
+                    if(transactionError != nullptr) {
+                        transactionError->setErrorCode(944);
+                        transactionError->setErrorMessage("SCRIPT_AA transactions must have one output of type SCRIPT_PKH");
+                    }
+
+                    return false;
+                }
+
+                NtpAAVerificationObject ntpAaVerificationObject;
+
+                try {
+                    CDataStream aaScript(SER_DISK, 1);
+                    aaScript.write((char *) script.getScript().data(), script.getScript().size());
+                    aaScript >> ntpAaVerificationObject;
+                    aaScript.clear();
+                } catch (const std::exception& e) {
+                    Log(LOG_LEVEL_ERROR) << "Failed to deserialize SCRIPT_AA payload";
+
+                    if(transactionError != nullptr) {
+                        transactionError->setErrorCode(945);
+                        transactionError->setErrorMessage("Failed to deserialize SCRIPT_AA payload");
+                    }
+                    return false;
+                }
+
+                // we first get the Address from the store to verify that the passport hash matches
+                std::vector<unsigned char> addressKey = AddressHelper::addressLinkFromScript(txOut.getScript());
+                AddressForStore addressForStore = addressStore.getAddressFromStore(addressKey);
+                std::vector<DscToAddressLink> dscLinks = addressForStore.getDscToAddressLinks();
+
+                unsigned char digest[128];
+                unsigned int digestLength;
+                EVP_MD_CTX *mdctx;
+                mdctx = EVP_MD_CTX_create();
+
+                EVP_DigestInit_ex(mdctx, EVP_get_digestbynid(ntpAaVerificationObject.getPassportHashAlgorithm()), NULL);
+                EVP_DigestUpdate(mdctx, ntpAaVerificationObject.getSignedPayload().data(), ntpAaVerificationObject.getSignedPayload().size());
+                EVP_DigestFinal_ex(mdctx, digest, &digestLength);
+
+                std::vector<unsigned char> recoveredHash = std::vector<unsigned char>(digest, digest + digestLength);
+
+                bool foundPassportHash = false;
+                for(DscToAddressLink dscLink: dscLinks) {
+
+                    Log(LOG_LEVEL_INFO) << "recoveredHash: " << recoveredHash;
+                    Log(LOG_LEVEL_INFO) << "dscLink.getPassportHash(): " << dscLink.getPassportHash();
+                    if(recoveredHash == dscLink.getPassportHash()) {
+                        foundPassportHash = true;
+                    }
+                }
+
+                if(!foundPassportHash) {
+                    Log(LOG_LEVEL_ERROR) << "Passport hash mismatch, the passport and the address don't match";
+
+                    if(transactionError != nullptr) {
+                        transactionError->setErrorCode(946);
+                        transactionError->setErrorMessage("Passport hash mismatch, the passport and the address don't match");
+                    }
+
+                    return false;
+                }
+
+                // verify that the signed Payload contains the hash of the LDS Payload
+                Log(LOG_LEVEL_INFO) << "ntpAaVerificationObject.getSignedPayload(): " << ntpAaVerificationObject.getSignedPayload();
+
+                std::vector<unsigned char> signedPayloadVector = ntpAaVerificationObject.getSignedPayload();
+                unsigned char* signedPayload = signedPayloadVector.data();
+                STACK_OF(ASN1_TYPE) *sequenceSet = d2i_ASN1_SET_ANY(NULL, const_cast<const unsigned char**>(&signedPayload), signedPayloadVector.size());
+                std::vector<unsigned char> ldsHash = std::vector<unsigned char>();
+
+                if(sequenceSet != NULL) {
+                    int setSize = sk_ASN1_TYPE_num(sequenceSet);
+                    for(int i = 0; i < setSize; i++) {
+                        ASN1_TYPE* asn1Sequence = sk_ASN1_TYPE_value(sequenceSet, i);
+
+                        if (asn1Sequence->type == V_ASN1_SEQUENCE) {
+                            const ASN1_ITEM *item = ASN1_ITEM_rptr(X509_ATTRIBUTE);
+                            X509_ATTRIBUTE* unpack_result = static_cast<X509_ATTRIBUTE *>(ASN1_TYPE_unpack_sequence(item, asn1Sequence));
+                            if(unpack_result != NULL) {
+                                ASN1_OBJECT *obj = X509_ATTRIBUTE_get0_object(unpack_result);
+                                if (OBJ_obj2nid(obj) == NID_pkcs9_messageDigest) {
+                                    ASN1_PRINTABLESTRING *astring = (ASN1_PRINTABLESTRING *)X509_ATTRIBUTE_get0_data(unpack_result, 0, ASN1_TYPE_get(X509_ATTRIBUTE_get0_type(unpack_result,0)), NULL);
+
+                                    if(astring != nullptr && astring->length < 512) {
+                                        ldsHash = std::vector<unsigned char>(astring->data, astring->data + astring->length);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if(ldsHash.empty()) {
+                    Log(LOG_LEVEL_ERROR) << "Could not recover ldsHash hash";
+
+                    if(transactionError != nullptr) {
+                        transactionError->setErrorCode(947);
+                        transactionError->setErrorMessage("Could not recover ldsHash hash");
+                    }
+
+                    return false;
+                }
+
+                unsigned char digest2[128];
+                unsigned int digestLength2;
+                mdctx = EVP_MD_CTX_create();
+
+                EVP_DigestInit_ex(mdctx, EVP_get_digestbynid(ntpAaVerificationObject.getPassportHashAlgorithm()), NULL);
+                EVP_DigestUpdate(mdctx, ntpAaVerificationObject.getLdsPayload().data(), ntpAaVerificationObject.getLdsPayload().size());
+                EVP_DigestFinal_ex(mdctx, digest2, &digestLength2);
+
+                std::vector<unsigned char> recoveredHash2 = std::vector<unsigned char>(digest2, digest2 + digestLength2);
+
+                if(ldsHash != recoveredHash2) {
+                    Log(LOG_LEVEL_ERROR) << "ldsHash doesn't match the recovored hash";
+
+                    if(transactionError != nullptr) {
+                        transactionError->setErrorCode(948);
+                        transactionError->setErrorMessage("ldsHash doesn't match the recovored hash");
+                    }
+
+                    return false;
+                }
+
+
+                // verify that the DG15 is part of the LDS payload
+                LDSParser *ldsParser = new LDSParser(ntpAaVerificationObject.getLdsPayload());
+                Log(LOG_LEVEL_INFO) << "ntpAaVerificationObject.getLdsPayload(): " << ntpAaVerificationObject.getLdsPayload();
+
+                std::vector<LDSParser> sequence1 = ldsParser->getSequence();
+
+                if (sequence1.size() < 2) {
+                    Log(LOG_LEVEL_ERROR) << "sequence1.size() < 2";
+
+                    if(transactionError != nullptr) {
+                        transactionError->setErrorCode(949);
+                        transactionError->setErrorMessage("sequence1.size() < 2");
+                    }
+
+                    return false;
+                }
+
+                LDSParser algoLDS = sequence1.at(1);
+                std::vector<LDSParser> algoSequence = algoLDS.getSequence();
+                if (algoSequence.size() < 1) {
+                    Log(LOG_LEVEL_ERROR) << "algoSequence.size() < 1";
+
+                    if(transactionError != nullptr) {
+                        transactionError->setErrorCode(950);
+                        transactionError->setErrorMessage("algoSequence.size() < 1");
+                    }
+
+                    return false;
+                }
+
+                unsigned char *content = (unsigned char *) malloc(256);
+                unsigned int contentLength = 0;
+                algoSequence.at(0).getContent(content, &contentLength);
+                ASN1_OBJECT *o = d2i_ASN1_OBJECT(nullptr, (const unsigned char **) &content, contentLength);
+                int nid = OBJ_obj2nid(o);
+                const EVP_MD *digestAlgo = EVP_get_digestbynid(nid);
+
+                LDSParser hashListLDS = sequence1.at(2);
+                std::vector<LDSParser> hashListSequence = hashListLDS.getSequence();
+
+                unsigned char digestDG15[128];
+                unsigned int digestDG15Length;
+
+
+                EVP_DigestInit_ex(mdctx, digestAlgo, NULL);
+                EVP_DigestUpdate(mdctx, ntpAaVerificationObject.getDg15().data(), ntpAaVerificationObject.getDg15().size());
+                EVP_DigestFinal_ex(mdctx, digestDG15, &digestDG15Length);
+
+                EVP_MD_CTX_destroy(mdctx);
+
+                bool dg15Match = false;
+
+                for(int i=0; i < hashListSequence.size(); i++) {
+                    std::vector<LDSParser> innerSeq = hashListSequence.at((unsigned long)i).getSequence();
+
+                    if (innerSeq.size() < 2) {
+                        Log(LOG_LEVEL_ERROR) << "innerSeq.size() < 2";
+
+                        if(transactionError != nullptr) {
+                            transactionError->setErrorCode(951);
+                            transactionError->setErrorMessage("innerSeq.size() < 2");
+                        }
+
+                        return false;
+                    }
+
+                    LDSParser* tag04 = innerSeq.at(1).getTag((unsigned char*)"\x04");
+
+                    if(tag04 == nullptr) {
+                        Log(LOG_LEVEL_ERROR) << "tag04 == nullptr";
+
+                        if(transactionError != nullptr) {
+                            transactionError->setErrorCode(952);
+                            transactionError->setErrorMessage("tag04 == nullptr");
+                        }
+
+                        return false;
+                    }
+
+                    if(memcmp(tag04->getContent().data(), digestDG15, digestDG15Length) == 0) {
+                        dg15Match = true;
+                    }
+                }
+
+                if(!dg15Match) {
+                    Log(LOG_LEVEL_ERROR) << "no match found for dg15Match";
+
+                    if(transactionError != nullptr) {
+                        transactionError->setErrorCode(953);
+                        transactionError->setErrorMessage("no match found for dg15Match");
+                    }
+
+                    return false;
+                }
+
+
+
             }
             default: {
                 Log(LOG_LEVEL_CRITICAL_ERROR) << "unknown script type " << script.getScriptType();
