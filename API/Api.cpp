@@ -34,7 +34,10 @@
 #include "../Crypto/Hash256.h"
 #include "../Scripts/PkhInScript.h"
 #include "../Transaction/TransactionVerify.h"
+#include "../Crypto/PassportCrypto.h"
 #include "../Tools/MetricTool.h"
+#include "../NtpAA/NtpAAVerificationObject.h"
+#include "../Tools/VectorTool.h"
 
 using boost::property_tree::ptree;
 
@@ -189,8 +192,6 @@ std::string Api::vote(std::string json) {
             txOuts.push_back(*txOut);
 
             transaction->setTxOuts(txOuts);
-
-            transaction->setNetwork(NET_CURRENT);
 
             UScript inScript;
             inScript.setScriptType(SCRIPT_VOTE);
@@ -921,6 +922,178 @@ std::string Api::getMetrics() {
     boost::property_tree::json_parser::write_json(ss, baseTree);
 
     return ss.str();
+}
+
+std::string Api::doAA(std::string json) {
+
+    Wallet &wallet = Wallet::Instance();
+
+    if(json.empty()) {
+        return "{\"success\": false, \"error\": \"empty json\"}";
+    }
+
+    std::stringstream ss(json);
+    boost::property_tree::ptree pt;
+    boost::property_tree::read_json(ss, pt);
+
+    std::string documentNumber;
+    std::string dateOfBirth;
+    std::string dateOfExpiry;
+    std::string addressToUnlock;
+
+    for (boost::property_tree::ptree::value_type &v : pt)
+    {
+        if(strcmp(v.first.data(), "documentNumber") == 0) {
+            documentNumber = v.second.data();
+            if(documentNumber.size() != 9) {
+                return "{\"success\": false, \"error\" : \"documentNumber should be of length 9\"}";
+            }
+        }
+        if(strcmp(v.first.data(), "dateOfBirth") == 0) {
+            dateOfBirth = v.second.data();
+            if(dateOfBirth.size() != 6) {
+                return "{\"success\": false, \"error\" : \"dateOfBirth should be of length 6\"}";
+            }
+        }
+        if(strcmp(v.first.data(), "dateOfExpiry") == 0) {
+            dateOfExpiry = v.second.data();
+            if(dateOfExpiry.size() != 6) {
+                return "{\"success\": false, \"error\" : \"dateOfExpiry should be of length 6\"}";
+            }
+        }
+        if(strcmp(v.first.data(), "address") == 0) {
+            addressToUnlock = v.second.data();
+            if(addressToUnlock.size() < 10) {
+                return "{\"success\": false, \"error\" : \"Invalid address\"}";
+            }
+        }
+    }
+
+    BacKeys* bacKeys = new BacKeys();
+    bacKeys->setDateOfBirth(dateOfBirth);
+    bacKeys->setDateOfExpiry(dateOfExpiry);
+    bacKeys->setDocumentNumber(documentNumber);
+
+    SessionKeys *sessionKeys = new SessionKeys;
+
+    Transaction transaction;
+    TxOut txOut;
+    txOut.setAmount(*(new UAmount()));
+
+    std::vector<unsigned char> vectorAddress = Wallet::readableAddressToVectorAddress(addressToUnlock);
+    Address address;
+    CDataStream s(SER_DISK, 1);
+    s.write((char *) vectorAddress.data(), vectorAddress.size());
+    s >> address;
+    txOut.setScript(address.getScript());
+
+    transaction.addTxOut(txOut);
+
+    TxIn txIn;
+    txIn.setAmount(*(new UAmount()));
+
+    UScript emptyScript;
+
+    emptyScript.setScriptType(SCRIPT_EMPTY);
+    emptyScript.setScript(std::vector<unsigned char>());
+    txIn.setScript(emptyScript);
+
+    transaction.addTxIn(txIn);
+
+    Reader* reader = new Reader();
+    if(reader->initConnection(bacKeys, sessionKeys))
+    {
+        unsigned char sodFile[64000];
+        unsigned int sodFileSize;
+        unsigned char sodFileId[3] = {'\x01', '\x1D', '\0'}; // SOD
+
+        if(!reader->readFile(sodFileId, sodFile, &sodFileSize, sessionKeys)) {
+            reader->close();
+            return "{\"success\": false, \"error\" : \"failed to read SOD file\"}";
+        }
+
+        unsigned char dg15File[64000];
+        unsigned int dg15FileSize;
+        unsigned char dg15FileId[3] = {'\x01', '\x0F', '\0'}; // DG15
+
+        if(!reader->readFile(dg15FileId, dg15File, &dg15FileSize, sessionKeys)) {
+            reader->close();
+            return "{\"success\": false, \"error\" : \"failed to read DG15 file\"}";
+        }
+
+        Chain& chain = Chain::Instance();
+        BlockHeader* bestHeader = chain.getBestBlockHeader();
+        if(bestHeader == nullptr) {
+            return "{\"success\": false, \"error\" : \"bestHeader is a null pointer\"}";
+        }
+
+        unsigned char sod[32000];
+        unsigned int sodSize = 0;
+
+        LDSParser* ldsParser = new LDSParser(sodFile, sodFileSize);
+        ldsParser->getTag((unsigned char*)"\x77")
+                ->getContent(sod, &sodSize);
+
+        PKCS7Parser* pkcs7Parser = new PKCS7Parser((char*)sod, sodSize);
+        std::vector<unsigned char> bestHeaderHash = bestHeader->getHeaderHash();
+
+        NtpAAVerificationObject ntpAaVerificationObject;
+        ntpAaVerificationObject.setBlockHash(bestHeaderHash);
+        ntpAaVerificationObject.setPassportHashAlgorithm(pkcs7Parser->getSignatureMdAlg());
+        ntpAaVerificationObject.setDg15(std::vector<unsigned char>(dg15File, dg15File + dg15FileSize));
+        ntpAaVerificationObject.setSignedPayload(pkcs7Parser->getSignedPayload());
+        ntpAaVerificationObject.setLdsPayload(pkcs7Parser->getLDSPayload());
+
+        char challenge[8];
+        unsigned char signature[512];
+        unsigned int signatureLength = 0;
+
+        // calculate the challenge
+        std::vector<unsigned char> hash256 = Hash256::hash256(VectorTool::concatCharVector(TransactionHelper::getTxId(&transaction), bestHeaderHash));
+        memcpy(challenge, hash256.data(), 8);
+
+        reader->doAA((unsigned char*)challenge, signature, &signatureLength, sessionKeys);
+        Log(LOG_LEVEL_INFO) << "Hexdump::dump(signature, signatureLength):";
+        Hexdump::dump(signature, signatureLength);
+
+        ntpAaVerificationObject.setAaSignature(std::vector<unsigned char>(signature, signature + signatureLength));
+
+        CDataStream sntpAaVerificationObject(SER_DISK, 1);
+        sntpAaVerificationObject << ntpAaVerificationObject;
+
+        UScript aaScript;
+        aaScript.setScriptType(SCRIPT_AA);
+        aaScript.setScript(std::vector<unsigned char>(sntpAaVerificationObject.data(), sntpAaVerificationObject.data() + sntpAaVerificationObject.size()));
+
+        TxIn aaInput;
+        aaInput.setScript(aaScript);
+        std::vector<TxIn> txIns;
+        txIns.emplace_back(aaInput);
+        transaction.setTxIns(txIns);
+
+        CDataStream stransaction(SER_DISK, 1);
+        stransaction << transaction;
+
+        std::string t64 = base64_encode((unsigned char*)stransaction.str().data(), (uint32_t)stransaction.str().size());
+
+        ptree baseTree;
+
+        baseTree.put("success", true);
+        baseTree.put("base64", t64);
+
+        std::stringstream ss2;
+        boost::property_tree::json_parser::write_json(ss2, baseTree);
+
+        return ss2.str();
+
+        reader->close();
+
+    } else {
+        return "{\"success\": false, \"error\" : \"couldn't read NFC chip\"}";
+    }
+
+    return "{\"success\": false}";
+
 }
 
 std::string Api::doKYC(std::string json) {
