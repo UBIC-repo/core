@@ -143,6 +143,8 @@ std::string ApiServer::route(std::vector<std::string> urlParts, std::string json
                     return Api::doKYC(jsonPost);
                 } else if(urlParts.at(1) == "verify-kyc") {
                     return Api::verifyKYC(jsonPost);
+                } else if(urlParts.at(1) == "do-aa") {
+                    return Api::doAA(jsonPost);
                 }
             }
             return Api::getUbi();
