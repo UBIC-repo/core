@@ -89,6 +89,8 @@ set(SOURCE_FILES
         Crypto/Hash160.h
         Crypto/Hash256.cpp
         Crypto/Hash256.h
+	Crypto/Sha1.cpp
+	Crypto/Sha1.h
         Crypto/PassportCrypto.cpp
         Crypto/PassportCrypto.h
 	Crypto/X509Helper.cpp
