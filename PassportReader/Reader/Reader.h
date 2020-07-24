@@ -13,6 +13,7 @@ public:
     bool initConnection(BacKeys* bacKeys, SessionKeys *sessionKeys);
     bool getRND(uint8_t* rndic);
     bool getSessionKeys(BacKeys* bacKeys, uint8_t* rndic, SessionKeys* sessionKeys);
+    bool doAA(unsigned char* challenge, unsigned char* signature, unsigned int* signatureLength, SessionKeys* sessionKeys);
     bool readFile(unsigned char* fileId, unsigned char* file, unsigned int* fileSize, SessionKeys* sessionKeys);
     bool readFilePart(unsigned char* content, unsigned int offset, int length, SessionKeys* sessionKeys);
     bool selectFile(unsigned char* fileId, SessionKeys* sessionKeys);
