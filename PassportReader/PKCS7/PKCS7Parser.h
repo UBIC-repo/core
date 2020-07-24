@@ -33,6 +33,7 @@ public:
     NtpRskSignatureRequestObject* getNtpRsk();
     NtpEskSignatureRequestObject* getNtpEsk();
     int getMdAlg();
+    int getSignatureMdAlg();
 };
 
 #endif //PASSPORTREADER_PKCS7PARSER_H
