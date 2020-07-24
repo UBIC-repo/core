@@ -18,6 +18,8 @@
 #include "../Tools/VectorTool.h"
 #include "../NtpAA/NtpAAVerificationObject.h"
 #include "../PassportReader/LDS/LDSParser.h"
+#include "../Crypto/Hash256.h"
+#include "../Crypto/Sha1.h"
 
 bool TransactionVerify::verifyRegisterPassportTx(Transaction* tx, uint32_t blockHeight, Cert* cert, TransactionError* transactionError) {
 
@@ -1059,7 +1061,7 @@ bool TransactionVerify::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                 break;
             }
             case SCRIPT_AA: {
-                return false; // not active yet
+
                 if(txIn->getNonce() != 0) {
                     Log(LOG_LEVEL_ERROR) << "Nonce must always be 0 for SCRIPT_AA inputs";
 
@@ -1136,12 +1138,14 @@ bool TransactionVerify::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                 std::vector<unsigned char> recoveredHash = std::vector<unsigned char>(digest, digest + digestLength);
 
                 bool foundPassportHash = false;
+                uint32_t dscLinkedAtHeight = 0;
                 for(DscToAddressLink dscLink: dscLinks) {
 
                     Log(LOG_LEVEL_INFO) << "recoveredHash: " << recoveredHash;
                     Log(LOG_LEVEL_INFO) << "dscLink.getPassportHash(): " << dscLink.getPassportHash();
                     if(recoveredHash == dscLink.getPassportHash()) {
                         foundPassportHash = true;
+                        dscLinkedAtHeight = dscLink.getDSCLinkedAtHeight();
                     }
                 }
 
@@ -1314,7 +1318,143 @@ bool TransactionVerify::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                     return false;
                 }
 
+                // calculate the challenge
+                char challenge[8];
+                std::vector<unsigned char> hash256 = Hash256::hash256(VectorTool::concatCharVector(txId, ntpAaVerificationObject.getBlockHash()));
+                memcpy(challenge, hash256.data(), 8);
 
+                // verify that the challenge was signed by the passport chip
+                Log(LOG_LEVEL_ERROR) << "DG15:" << ntpAaVerificationObject.getDg15();
+                Log(LOG_LEVEL_ERROR) << "Signature:" << ntpAaVerificationObject.getAaSignature();
+                Log(LOG_LEVEL_ERROR) << "Challenge:" << std::vector<unsigned char> (challenge, challenge + 8);
+
+
+                LDSParser app15 = LDSParser(ntpAaVerificationObject.getDg15());
+                LDSParser* tag15 = app15.getTag((unsigned char *) "\x6f");
+                std::vector<unsigned char> tag15Vector = tag15->getContent();
+
+                unsigned char *tag15Content = (unsigned char *) malloc(256);
+
+                if(tag15Content == nullptr) {
+                    Log(LOG_LEVEL_ERROR) << "tag15Content == nullptr";
+
+                    if(transactionError != nullptr) {
+                        transactionError->setErrorCode(954);
+                        transactionError->setErrorMessage("tag15Content == nullptr");
+                    }
+
+                    return false;
+                }
+
+                memcpy(tag15Content, tag15Vector.data(), tag15Vector.size());
+                EVP_PKEY *pubKey = d2i_PUBKEY(nullptr, (const unsigned char **) &tag15Content, tag15Vector.size());
+
+                if(pubKey == nullptr) {
+                    Log(LOG_LEVEL_ERROR) << "pubKey == nullptr";
+
+                    if(transactionError != nullptr) {
+                        transactionError->setErrorCode(955);
+                        transactionError->setErrorMessage("pubKey == nullptr");
+                    }
+
+                    return false;
+                }
+
+                if(EVP_PKEY_id(pubKey) == NID_rsaEncryption) {
+                    RSA* rsaPubKey = EVP_PKEY_get1_RSA(pubKey);
+                    int rsaSize = RSA_size(rsaPubKey);
+
+                    unsigned char decryptedSignature[rsaSize];
+                    RSA_public_decrypt(rsaSize, ntpAaVerificationObject.getAaSignature().data(),
+                                       decryptedSignature, rsaPubKey, RSA_NO_PADDING);
+
+                    Log(LOG_LEVEL_INFO) << "Decrypted:" <<  Hexdump::ucharToHexString(decryptedSignature, RSA_size(rsaPubKey));
+
+                    unsigned char trailerT = decryptedSignature[rsaSize - 1];
+                    Log(LOG_LEVEL_INFO) << "trailerT:" << trailerT;
+
+                    if(trailerT != 0xBC) {
+                        Log(LOG_LEVEL_ERROR) << "Unknown trailing T";
+
+                        if(transactionError != nullptr) {
+                            transactionError->setErrorCode(956);
+                            transactionError->setErrorMessage("Unknown trailing T");
+                        }
+
+                        return false;
+                    }
+
+                    unsigned char extractedDigest[rsaSize];
+                    memcpy(extractedDigest, decryptedSignature + (rsaSize - 21), 20);
+
+                    Log(LOG_LEVEL_INFO) << "aaDigest:" <<  Hexdump::ucharToHexString(extractedDigest, 20);
+
+                    unsigned char m[rsaSize];
+                    memcpy(m, decryptedSignature + 1, (rsaSize - 22));
+
+                    std::vector<unsigned char> mp = VectorTool::concatCharVector(std::vector<unsigned char>(m, m + (rsaSize - 22)), std::vector<unsigned char> (challenge, challenge + 8));
+                    std::vector<unsigned char> calculatedHash = Sha1::sha1(mp);
+
+                    if(calculatedHash != std::vector<unsigned char>(extractedDigest, extractedDigest + 20)) {
+                        Log(LOG_LEVEL_ERROR) << "calculatedHash != extractedDigest";
+
+                        if(transactionError != nullptr) {
+                            transactionError->setErrorCode(957);
+                            transactionError->setErrorMessage("calculatedHash != extractedDigest");
+                        }
+
+                        return false;
+                    }
+
+                }
+
+
+                // Verify that the passport rescan occurs at least 15 days later
+                BlockHeader* witnessHeader = chain.getBlockHeader(ntpAaVerificationObject.getBlockHash());
+                BlockHeader* registrationHeader = chain.getBlockHeader((uint64_t)dscLinkedAtHeight);
+
+                if(witnessHeader == nullptr) {
+                    Log(LOG_LEVEL_ERROR) << "witnessHeader not found";
+
+                    if(transactionError != nullptr) {
+                        transactionError->setErrorCode(958);
+                        transactionError->setErrorMessage("witnessHeader not found");
+                    }
+
+                    return false;
+                }
+
+                if(registrationHeader == nullptr) {
+                    Log(LOG_LEVEL_ERROR) << "registrationHeader not found";
+
+                    if(transactionError != nullptr) {
+                        transactionError->setErrorCode(959);
+                        transactionError->setErrorMessage("registrationHeader not found");
+                    }
+
+                    return false;
+                }
+
+                if(registrationHeader->getTimestamp() - witnessHeader->getTimestamp() < RECERTIFICATION_TIMESPAN) {
+                    Log(LOG_LEVEL_ERROR) << "Recertification is only available after 15 days";
+
+                    if(transactionError != nullptr) {
+                        transactionError->setErrorCode(960);
+                        transactionError->setErrorMessage("Recertification is only available after 15 days");
+                    }
+
+                    return false;
+                }
+
+
+                Log(LOG_LEVEL_ERROR) << "Not supported yet";
+
+                if(transactionError != nullptr) {
+                    transactionError->setErrorCode(9999);
+                    transactionError->setErrorMessage("Not supported yet");
+                }
+
+                return false;
 
             }
             default: {
