@@ -68,6 +68,31 @@ bool Reader::getRND(uint8_t* rndic) {
     return true;
 }
 
+bool Reader::doAA(unsigned char* challenge, unsigned char* signature, unsigned int* signatureLength, SessionKeys* sessionKeys) {
+
+    unsigned char command[14];
+    memcpy(command, "\x00", 1);
+    memcpy(command+1, "\x88", 1);
+    memcpy(command+2, "\x00", 1);
+    memcpy(command+3, "\x00", 1);
+    memcpy(command+4, "\x08", 1);
+    memcpy(command+5, challenge, 8);
+    memcpy(command+13, "\x00", 1);
+
+    unsigned char rapdu[512];
+    size_t rapduLength = 512;
+
+    if (!NFC::transmit((uint8_t*)command, (size_t)14, rapdu, &rapduLength))
+        return false;
+    if (rapduLength < 2 || rapdu[rapduLength-2] != 0x90 || rapdu[rapduLength-1] != 0x00)
+        return false;
+
+    *signatureLength = rapduLength - 2;
+    memcpy(signature, rapdu, rapduLength);
+
+    return true;
+}
+
 bool Reader::readFile(unsigned char* fileId, unsigned char* file, unsigned int* fileSize, SessionKeys* sessionKeys)
 {
     if(!selectFile(fileId, sessionKeys)) {
@@ -116,6 +141,8 @@ bool Reader::readFile(unsigned char* fileId, unsigned char* file, unsigned int* 
         *fileSize = fileLength;
         memcpy(file, fileContent, fileLength);
     }
+
+
 
 
     return true;
