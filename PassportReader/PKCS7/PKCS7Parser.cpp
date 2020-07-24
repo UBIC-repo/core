@@ -224,3 +224,12 @@ int PKCS7Parser::getMdAlg() {
 
     return OBJ_obj2nid(md_alg->algorithm);
 }
+
+int PKCS7Parser::getSignatureMdAlg() {
+    STACK_OF(PKCS7_SIGNER_INFO) *siStack;
+    PKCS7_SIGNER_INFO *si;
+    siStack = PKCS7_get_signer_info(p7);
+    si = sk_PKCS7_SIGNER_INFO_value(siStack, 0);
+
+    return OBJ_obj2nid(si->digest_alg->algorithm);
+}
