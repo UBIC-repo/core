@@ -244,6 +244,8 @@
 #define MAXIMUM_PASSPORTS_PER_ADDRESS 1
 #define MAXIMUM_PASSPORTS_PER_ADDRESS_ACTIVATION_HEIGHT 289870
 
+#define RECERTIFICATION_TIMESPAN (15*24*3600) /* 15 days */
+
 #if defined(__APPLE__)
     #ifdef TEST_MODE
         #define BASE_PATH "/Applications/UBIC-test/"
