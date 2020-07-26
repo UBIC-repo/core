@@ -26,6 +26,7 @@ bool TransactionApply::applyTransaction(Transaction* tx, BlockHeader* blockHeade
     Wallet& wallet = Wallet::Instance();
     std::vector<unsigned char> passportHash = std::vector<unsigned char>();
     bool isRegisterPassportTx = false;
+    bool isAATransaction = false;
     bool isMine = false;
     for (std::vector<TxIn>::iterator txIn = txIns.begin(); txIn != txIns.end(); ++txIn) {
         if(wallet.isMine(txIn->getInAddress())) {
@@ -36,6 +37,7 @@ bool TransactionApply::applyTransaction(Transaction* tx, BlockHeader* blockHeade
                 addressStore.debitAddressToStore(txIn->getInAddress(), txIn->getAmount(), blockHeader, false);
                 break;
             }
+
             case SCRIPT_REGISTER_PASSPORT: {
                 UScript passportScript = txIn->getScript();
 
@@ -81,6 +83,11 @@ bool TransactionApply::applyTransaction(Transaction* tx, BlockHeader* blockHeade
                 break;
             }
 
+            case SCRIPT_AA: {
+                isAATransaction = true;
+                break;
+            }
+
             case SCRIPT_ADD_CERTIFICATE: {
                 AddCertificateScript addCertificateScript;
                 CDataStream s(SER_DISK, 1);
@@ -114,6 +121,7 @@ bool TransactionApply::applyTransaction(Transaction* tx, BlockHeader* blockHeade
 
                 break;
             }
+
             case SCRIPT_DEACTIVATE_CERTIFICATE: {
                 CertStore &certStore = CertStore::Instance();
 
@@ -163,6 +171,10 @@ bool TransactionApply::applyTransaction(Transaction* tx, BlockHeader* blockHeade
                     address->setDscToAddressLinks(dscToAddressLinks);
                 }
 
+                if(isAATransaction) {
+                    address->setAdditionalPassportScans(address->getAdditionalPassportScans() + 1);
+                }
+
                 addressStore.creditAddressToStore(address, false);
                 delete address;
                 break;
@@ -208,6 +220,7 @@ bool TransactionApply::undoTransaction(Transaction* tx, BlockHeader* blockHeader
     AddressStore& addressStore = AddressStore::Instance();
     Wallet& wallet = Wallet::Instance();
     bool isRegisterPassportTx = false;
+    bool isAATransaction = false;
     for (std::vector<TxIn>::iterator txIn = txIns.begin(); txIn != txIns.end(); ++txIn) {
         switch(txIn->getScript().getScriptType()) {
             case SCRIPT_PKH: {
@@ -222,6 +235,7 @@ bool TransactionApply::undoTransaction(Transaction* tx, BlockHeader* blockHeader
                 addressStore.creditAddressToStore(address, true);
                 break;
             }
+
             case SCRIPT_REGISTER_PASSPORT: {
                 UScript passportScript = txIn->getScript();
 
@@ -252,6 +266,11 @@ bool TransactionApply::undoTransaction(Transaction* tx, BlockHeader* blockHeader
 
                 DSCAttachedPassportCounter::decrement(txIn->getInAddress());
                 isRegisterPassportTx = true;
+                break;
+            }
+
+            case SCRIPT_AA: {
+                isAATransaction = true;
                 break;
             }
 
@@ -338,6 +357,10 @@ bool TransactionApply::undoTransaction(Transaction* tx, BlockHeader* blockHeader
                     }
 
                     address.setDscToAddressLinks(dscToAddressLinks);
+                }
+
+                if(isAATransaction) {
+                    address.setAdditionalPassportScans(address.getAdditionalPassportScans() + 1);
                 }
 
                 addressStore.debitAddressToStore(
