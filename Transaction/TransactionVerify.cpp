@@ -1123,7 +1123,19 @@ bool TransactionVerify::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
 
                 // we first get the Address from the store to verify that the passport hash matches
                 std::vector<unsigned char> addressKey = AddressHelper::addressLinkFromScript(txOut.getScript());
-                AddressForStore addressForStore = addressStore.getAddressFromStore(addressKey);
+                AddressForStore addressForStore = AddressStore::getAddressFromStore(addressKey);
+
+                if(addressForStore.getAdditionalPassportScans() > 0) {
+                    Log(LOG_LEVEL_ERROR) << "Address is already unlocked";
+
+                    if(transactionError != nullptr) {
+                        transactionError->setErrorCode(9946);
+                        transactionError->setErrorMessage("Address is already unlocked");
+                    }
+
+                    return false;
+                }
+
                 std::vector<DscToAddressLink> dscLinks = addressForStore.getDscToAddressLinks();
 
                 unsigned char digest[128];
