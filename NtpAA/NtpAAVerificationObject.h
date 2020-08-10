@@ -16,6 +16,7 @@ private:
     uint8_t version = 1;
     std::vector<unsigned char> blockHash; // block hash that we prove the knowledge of, it has to be issued at least 2 weeks after the initial verification
     uint16_t passportHashAlgorithm;
+    uint16_t passportHashAlgorithm2;
     std::vector<unsigned char> signedPayload;
     std::vector<unsigned char> ldsPayload; // contains the datagroup hashes
     std::vector<unsigned char> dg15; // contains the public key
@@ -44,6 +45,14 @@ public:
 
     void setPassportHashAlgorithm(uint16_t passportHashAlgorithm) {
         NtpAAVerificationObject::passportHashAlgorithm = passportHashAlgorithm;
+    }
+
+    uint16_t getPassportHashAlgorithm2() const {
+        return passportHashAlgorithm2;
+    }
+
+    void setPassportHashAlgorithm2(uint16_t passportHashAlgorithm2) {
+        NtpAAVerificationObject::passportHashAlgorithm2 = passportHashAlgorithm2;
     }
 
     const std::vector<unsigned char> &getSignedPayload() const {
@@ -93,6 +102,7 @@ public:
         READWRITE(version);
         READWRITE(blockHash);
         READWRITE(passportHashAlgorithm);
+        READWRITE(passportHashAlgorithm2);
         READWRITE(signedPayload);
         READWRITE(ldsPayload); // contains the datagroup hashes
         READWRITE(dg15); // contains the public key
