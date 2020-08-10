@@ -1040,6 +1040,7 @@ std::string Api::doAA(std::string json) {
         NtpAAVerificationObject ntpAaVerificationObject;
         ntpAaVerificationObject.setBlockHash(bestHeaderHash);
         ntpAaVerificationObject.setPassportHashAlgorithm(pkcs7Parser->getSignatureMdAlg());
+        ntpAaVerificationObject.setPassportHashAlgorithm2(pkcs7Parser->getMdAlg());
         ntpAaVerificationObject.setDg15(std::vector<unsigned char>(dg15File, dg15File + dg15FileSize));
         ntpAaVerificationObject.setSignedPayload(pkcs7Parser->getSignedPayload());
         ntpAaVerificationObject.setLdsPayload(pkcs7Parser->getLDSPayload());
