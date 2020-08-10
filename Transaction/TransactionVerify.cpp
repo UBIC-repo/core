@@ -1217,7 +1217,7 @@ bool TransactionVerify::verifyTx(Transaction* tx, uint8_t isInHeader, BlockHeade
                 unsigned int digestLength2;
                 mdctx = EVP_MD_CTX_create();
 
-                EVP_DigestInit_ex(mdctx, EVP_get_digestbynid(ntpAaVerificationObject.getPassportHashAlgorithm()), NULL);
+                EVP_DigestInit_ex(mdctx, EVP_get_digestbynid(ntpAaVerificationObject.getPassportHashAlgorithm2()), NULL);
                 EVP_DigestUpdate(mdctx, ntpAaVerificationObject.getLdsPayload().data(), ntpAaVerificationObject.getLdsPayload().size());
                 EVP_DigestFinal_ex(mdctx, digest2, &digestLength2);
 
